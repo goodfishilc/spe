@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>看圖選詞小遊戲</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #333; }
+        .menu-container {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        select {
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .game-box {
+            background-color: white;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .image-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fafafa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .btn-option {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #e1f5fe;
+            border: 2px solid #0288d1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-option:hover {
+            background-color: #b3e5fc;
+        }
+        /* 答對與答錯的樣式 */
+        .btn-correct {
+            background-color: #c8e6c9 !important;
+            border-color: #388e3c !important;
+            color: #2e7d32;
+        }
+        .btn-wrong {
+            background-color: #ffcdd2 !important;
+            border-color: #d32f2f !important;
+            color: #c62828;
+            opacity: 0.6;
+        }
+        .score-board {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #555;
+        }
+        .next-btn {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎯 看圖選詞大挑戰</h1>
+
+    <div class="menu-container">
+        <label for="lesson-select">請選擇課數：</label>
+        <select id="lesson-select" onchange="changeLesson()">
+            </select>
+    </div>
+
+    <div class="game-box">
+        <div class="image-container">
+            <img id="question-image" src="" alt="題目圖片">
+        </div>
+
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <div class="score-board" id="feedback">請擴充詞庫並準備好圖片喔！</div>
+        <button class="next-btn" id="next-button" onclick="nextQuestion()">下一題 ➡️</button>
+    </div>
+
+<script>
+// ==================== 🎯 核心詞庫設定區 ====================
+// 老師您好，您可以在這裡自由修改、增加課數與題目。
+// image: 請填入圖片的網址，或者是您電腦裡的圖片檔名（例如 'apple.jpg'）
+// answer: 正確答案
+const wordBank = {
+    "第一課：認識水果": [
+        { image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400", answer: "蘋果" },
+        { image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400", answer: "香蕉" },
+        { image: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=400", answer: "葡萄" }
+    ],
+    "第二課：可愛動物": [
+        { image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400", answer: "小狗" },
+        { image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400", answer: "貓咪" },
+        { image: "https://images.unsplash.com/photo-1522005220032-1f094133498e?w=400", answer: "兔子" }
+    ]
+};
+
+// 所有詞庫中出現過的詞彙，用來當作「錯誤選項」的機率庫
+const allWords = Object.values(wordBank).flat().map(item => item.answer);
+
+// ==================== ⚙️ 遊戲邏輯控制區 ====================
+let currentLesson = "";
+let currentQuestions = [];
+let currentIndex = 0;
+let currentCorrectAnswer = "";
+let hasAnswered = false;
+
+// 初始化：建立課數選單
+const lessonSelect = document.getElementById("lesson-select");
+Object.keys(wordBank).forEach(lesson => {
+    let option = document.createElement("option");
+    option.value = lesson;
+    option.textContent = lesson;
+    lessonSelect.appendChild(option);
+});
+
+// 切換課數
+function changeLesson() {
+    currentLesson = lessonSelect.value;
+    // 複製該課題目，並打亂順序（洗牌）
+    currentQuestions = [...wordBank[currentLesson]].sort(() => Math.random() - 0.5);
+    currentIndex = 0;
+    loadQuestion();
+}
+
+// 載入題目
+function loadQuestion() {
+    hasAnswered = false;
+    document.getElementById("next-button").style.display = "none";
+    document.getElementById("feedback").textContent = `目前進度：${currentIndex + 1} / ${currentQuestions.length}`;
+
+    let currentQ = currentQuestions[currentIndex];
+    currentCorrectAnswer = currentQ.answer;
+
+    // 顯示圖片
+    document.getElementById("question-image").src = currentQ.image;
+
+    // 產生選項（1個對的 + 3個從詞庫隨取錯的）
+    let options = [currentCorrectAnswer];
+    
+    // 篩選出非正確答案的其他詞彙
+    let wrongPool = allWords.filter(word => word !== currentCorrectAnswer);
+    // 打亂錯誤詞彙庫
+    wrongPool.sort(() => Math.random() - 0.5);
+    
+    // 取前三個錯誤詞彙（如果詞庫不夠，會重複取）
+    for(let i=0; i<3; i++) {
+        if(wrongPool[i]) {
+            options.push(wrongPool[i]);
+        } else {
+            options.push("備用選項" + (i+1)); // 防呆機制
+        }
+    }
+
+    // 再次打亂四個選項的順序
+    options.sort(() => Math.random() - 0.5);
+
+    // 渲染按鈕到網頁上
+    const container = document.getElementById("options-container");
+    container.innerHTML = ""; // 清空舊按鈕
+
+    options.forEach(word => {
+        let btn = document.createElement("button");
+        btn.className = "btn-option";
+        btn.textContent = word;
+        btn.onclick = () => checkAnswer(btn, word);
+        container.appendChild(btn);
+    });
+}
+
+// 檢查答案
+function checkAnswer(selectedBtn, selectedWord) {
+    if (hasAnswered) return; // 答過就不能再點
+    hasAnswered = true;
+
+    const buttons = document.querySelectorAll(".btn-option");
+    
+    if (selectedWord === currentCorrectAnswer) {
+        selectedBtn.classList.add("btn-correct");
+        document.getElementById("feedback").textContent = "⭕ 太棒了！答對了！";
+    } else {
+        selectedBtn.classList.add("btn-wrong");
+        document.getElementById("feedback").textContent = "❌ 沒關係，再試試看！";
+        // 偷偷把正確的框出來給學生看
+        buttons.forEach(btn => {
+            if(btn.textContent === currentCorrectAnswer) {
+                btn.classList.add("btn-correct");
+            }
+        });
+    }
+
+    // 顯示下一題按鈕
+    document.getElementById("next-button").style.display = "inline-block";
+}
+
+// 下一題
+function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < currentQuestions.length) {
+        loadQuestion();
+    } else {
+        document.getElementById("options-container").innerHTML = "";
+        document.getElementById("question-image").src = "";
+        document.getElementById("feedback").textContent = "🎉 本課挑戰完成！請選擇其他課數繼續練習。";
+        document.getElementById("next-button").style.display = "none";
+    }
+}
+
+// 網頁載入時自動執行第一課
+changeLesson();
+</script>
+
+</body>
+</html>
