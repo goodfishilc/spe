@@ -109,7 +109,7 @@
     <!-- 遊戲主區塊 -->
     <div class="game-box">
         <div class="image-container">
-            <img id="question-image" src="" alt="題目圖片">
+            <img id="question-image" src="" alt="題目圖片資料載入中...">
         </div>
 
         <div class="options-grid" id="options-container">
@@ -122,32 +122,27 @@
 
 <script>
 // ==================== 🎯 核心詞庫設定區 ====================
-// 已經幫老師加入第十一課，圖片預設為「語詞名稱.jpg」
+// 圖片皆採用 Unsplash 線上高解析度公開圖片網址
 const wordBank = {
     "第十一課：小讀者樂園": [
-        { image: "圖書館.jpg", answer: "圖書館" },
-        { image: "參加.jpg", answer: "參加" },
-        { image: "主題.jpg", answer: "主題" },
-        { image: "大力士.jpg", answer: "大力士" },
-        { image: "主講人.jpg", answer: "主講人" },
-        { image: "甲蟲.jpg", answer: "甲蟲" },
-        { image: "外形.jpg", answer: "外形" },
-        { image: "志工.jpg", answer: "志工" },
-        { image: "約會.jpg", answer: "約會" },
-        { image: "數學.jpg", answer: "數學" },
-        { image: "歡迎.jpg", answer: "歡迎" },
-        { image: "交流.jpg", answer: "交流" },
-        { image: "令牌.jpg", answer: "令牌" },
-        { image: "世界.jpg", answer: "世界" },
-        { image: "冒險.jpg", answer: "冒險" },
-        { image: "寶庫.jpg", answer: "寶庫" },
-        { image: "探索.jpg", answer: "探索" },
-        { image: "奥秘.jpg", answer: "奥秘" }
-    ],
-    "第一課：範例水果（測試用）": [
-        { image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400", answer: "蘋果" },
-        { image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400", answer: "香蕉" },
-        { image: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=400", answer: "葡萄" }
+        { image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=500", answer: "圖書館" },
+        { image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=500", answer: "參加" },
+        { image: "https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?w=500", answer: "主題" },
+        { image: "https://images.unsplash.com/photo-1471286174574-e966433a8a40?w=500", answer: "大力士" },
+        { image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500", answer: "主講人" },
+        { image: "https://images.unsplash.com/photo-1576014131795-d440191a8e8b?w=500", answer: "甲蟲" },
+        { image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500", answer: "外形" },
+        { image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=500", answer: "志工" },
+        { image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500", answer: "約會" },
+        { image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500", answer: "數學" },
+        { image: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=500", answer: "歡迎" },
+        { image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=500", answer: "交流" },
+        { image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500", answer: "令牌" },
+        { image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500", answer: "世界" }, // 象徵宏觀意境
+        { image: "https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=500", answer: "冒險" },
+        { image: "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=500", answer: "寶庫" },
+        { image: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=500", answer: "探索" },
+        { image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500", answer: "奥秘" }
     ]
 };
 
@@ -173,7 +168,7 @@ Object.keys(wordBank).forEach(lesson => {
 // 切換課數
 function changeLesson() {
     currentLesson = lessonSelect.value;
-    // 複製該課題目，並打亂順序（洗牌機制，讓每次玩順序都不同）
+    // 複製該課題目並隨機打亂
     currentQuestions = [...wordBank[currentLesson]].sort(() => Math.random() - 0.5);
     currentIndex = 0;
     loadQuestion();
@@ -191,12 +186,11 @@ function loadQuestion() {
     // 顯示圖片
     document.getElementById("question-image").src = currentQ.image;
 
-    // 產生選項（1個對的 + 3個從詞庫隨取錯的）
+    // 產生選項（1個對的 + 3個隨機錯的）
     let options = [currentCorrectAnswer];
     
     // 篩選出非正確答案的其他詞彙
     let wrongPool = allWords.filter(word => word !== currentCorrectAnswer);
-    // 打亂錯誤詞彙庫
     wrongPool.sort(() => Math.random() - 0.5);
     
     // 取前三個錯誤詞彙
@@ -204,14 +198,14 @@ function loadQuestion() {
         if(wrongPool[i]) {
             options.push(wrongPool[i]);
         } else {
-            options.push("其他詞彙" + (i+1));
+            options.push("備用詞彙" + (i+1));
         }
     }
 
-    // 再次打亂四個選項的順序，不讓正確答案固定在某個位置
+    // 打亂四個選項的順序
     options.sort(() => Math.random() - 0.5);
 
-    // 渲染按鈕到網頁上
+    // 渲染按鈕
     const container = document.getElementById("options-container");
     container.innerHTML = ""; 
 
@@ -237,7 +231,6 @@ function checkAnswer(selectedBtn, selectedWord) {
     } else {
         selectedBtn.classList.add("btn-wrong");
         document.getElementById("feedback").textContent = "❌ 沒關係，再試試看！";
-        // 自動把正確的框出來給學生看（加強視覺回饋）
         buttons.forEach(btn => {
             if(btn.textContent === currentCorrectAnswer) {
                 btn.classList.add("btn-correct");
@@ -261,7 +254,7 @@ function nextQuestion() {
     }
 }
 
-// 網頁載入時自動執行
+// 自動執行
 changeLesson();
 </script>
 
