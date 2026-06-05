@@ -64,7 +64,6 @@
         .btn-option:hover {
             background-color: #b3e5fc;
         }
-        /* 答對與答錯的樣式 */
         .btn-correct {
             background-color: #c8e6c9 !important;
             border-color: #388e3c !important;
@@ -99,39 +98,56 @@
 
     <h1>🎯 看圖選詞大挑戰</h1>
 
+    <!-- 課數選擇選單 -->
     <div class="menu-container">
         <label for="lesson-select">請選擇課數：</label>
         <select id="lesson-select" onchange="changeLesson()">
-            </select>
+            <!-- 選項會由 JavaScript 自動生成 -->
+        </select>
     </div>
 
+    <!-- 遊戲主區塊 -->
     <div class="game-box">
         <div class="image-container">
             <img id="question-image" src="" alt="題目圖片">
         </div>
 
         <div class="options-grid" id="options-container">
-            </div>
+            <!-- 四個選項按鈕會在這裡動態產生 -->
+        </div>
 
-        <div class="score-board" id="feedback">請擴充詞庫並準備好圖片喔！</div>
+        <div class="score-board" id="feedback">載入中...</div>
         <button class="next-btn" id="next-button" onclick="nextQuestion()">下一題 ➡️</button>
     </div>
 
 <script>
 // ==================== 🎯 核心詞庫設定區 ====================
-// 老師您好，您可以在這裡自由修改、增加課數與題目。
-// image: 請填入圖片的網址，或者是您電腦裡的圖片檔名（例如 'apple.jpg'）
-// answer: 正確答案
+// 已經幫老師加入第十一課，圖片預設為「語詞名稱.jpg」
 const wordBank = {
-    "第一課：認識水果": [
+    "第十一課：小讀者樂園": [
+        { image: "圖書館.jpg", answer: "圖書館" },
+        { image: "參加.jpg", answer: "參加" },
+        { image: "主題.jpg", answer: "主題" },
+        { image: "大力士.jpg", answer: "大力士" },
+        { image: "主講人.jpg", answer: "主講人" },
+        { image: "甲蟲.jpg", answer: "甲蟲" },
+        { image: "外形.jpg", answer: "外形" },
+        { image: "志工.jpg", answer: "志工" },
+        { image: "約會.jpg", answer: "約會" },
+        { image: "數學.jpg", answer: "數學" },
+        { image: "歡迎.jpg", answer: "歡迎" },
+        { image: "交流.jpg", answer: "交流" },
+        { image: "令牌.jpg", answer: "令牌" },
+        { image: "世界.jpg", answer: "世界" },
+        { image: "冒險.jpg", answer: "冒險" },
+        { image: "寶庫.jpg", answer: "寶庫" },
+        { image: "探索.jpg", answer: "探索" },
+        { image: "奥秘.jpg", answer: "奥秘" }
+    ],
+    "第一課：範例水果（測試用）": [
         { image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400", answer: "蘋果" },
         { image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400", answer: "香蕉" },
         { image: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=400", answer: "葡萄" }
-    ],
-    "第二課：可愛動物": [
-        { image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400", answer: "小狗" },
-        { image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400", answer: "貓咪" },
-        { image: "https://images.unsplash.com/photo-1522005220032-1f094133498e?w=400", answer: "兔子" }
     ]
 };
 
@@ -157,7 +173,7 @@ Object.keys(wordBank).forEach(lesson => {
 // 切換課數
 function changeLesson() {
     currentLesson = lessonSelect.value;
-    // 複製該課題目，並打亂順序（洗牌）
+    // 複製該課題目，並打亂順序（洗牌機制，讓每次玩順序都不同）
     currentQuestions = [...wordBank[currentLesson]].sort(() => Math.random() - 0.5);
     currentIndex = 0;
     loadQuestion();
@@ -183,21 +199,21 @@ function loadQuestion() {
     // 打亂錯誤詞彙庫
     wrongPool.sort(() => Math.random() - 0.5);
     
-    // 取前三個錯誤詞彙（如果詞庫不夠，會重複取）
+    // 取前三個錯誤詞彙
     for(let i=0; i<3; i++) {
         if(wrongPool[i]) {
             options.push(wrongPool[i]);
         } else {
-            options.push("備用選項" + (i+1)); // 防呆機制
+            options.push("其他詞彙" + (i+1));
         }
     }
 
-    // 再次打亂四個選項的順序
+    // 再次打亂四個選項的順序，不讓正確答案固定在某個位置
     options.sort(() => Math.random() - 0.5);
 
     // 渲染按鈕到網頁上
     const container = document.getElementById("options-container");
-    container.innerHTML = ""; // 清空舊按鈕
+    container.innerHTML = ""; 
 
     options.forEach(word => {
         let btn = document.createElement("button");
@@ -210,7 +226,7 @@ function loadQuestion() {
 
 // 檢查答案
 function checkAnswer(selectedBtn, selectedWord) {
-    if (hasAnswered) return; // 答過就不能再點
+    if (hasAnswered) return; 
     hasAnswered = true;
 
     const buttons = document.querySelectorAll(".btn-option");
@@ -221,7 +237,7 @@ function checkAnswer(selectedBtn, selectedWord) {
     } else {
         selectedBtn.classList.add("btn-wrong");
         document.getElementById("feedback").textContent = "❌ 沒關係，再試試看！";
-        // 偷偷把正確的框出來給學生看
+        // 自動把正確的框出來給學生看（加強視覺回饋）
         buttons.forEach(btn => {
             if(btn.textContent === currentCorrectAnswer) {
                 btn.classList.add("btn-correct");
@@ -229,7 +245,6 @@ function checkAnswer(selectedBtn, selectedWord) {
         });
     }
 
-    // 顯示下一題按鈕
     document.getElementById("next-button").style.display = "inline-block";
 }
 
@@ -241,12 +256,12 @@ function nextQuestion() {
     } else {
         document.getElementById("options-container").innerHTML = "";
         document.getElementById("question-image").src = "";
-        document.getElementById("feedback").textContent = "🎉 本課挑戰完成！請選擇其他課數繼續練習。";
+        document.getElementById("feedback").textContent = "🎉 本課挑戰完成！您太厲害了！";
         document.getElementById("next-button").style.display = "none";
     }
 }
 
-// 網頁載入時自動執行第一課
+// 網頁載入時自動執行
 changeLesson();
 </script>
 
