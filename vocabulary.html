@@ -182,6 +182,25 @@ const wordBank = {
         { image: "https://goodfishilc.github.io/spe/11奥妙.png", answer: "奧妙", sentence: "星空裡有許多奧妙。" }, 
         { image: "https://goodfishilc.github.io/spe/11危險.png", answer: "危險", sentence: "馬路上玩球很危險。" }, 
         { image: "https://goodfishilc.github.io/spe/11車庫.png", answer: "車庫", sentence: "爸爸把車子開進車庫。" } 
+    ],
+    "第十二課：巨人山": [
+        { image: "https://goodfishilc.github.io/spe/12底下.png", answer: "底下", sentence: "桌子底下藏著一顆球。" },
+        { image: "https://goodfishilc.github.io/spe/12頭髮.png", answer: "頭髮", sentence: "妹妹把頭髮梳得很整齊。" },
+        { image: "https://goodfishilc.github.io/spe/12牆壁.png", answer: "牆壁", sentence: "牆壁上貼著我們的作品。" },
+        { image: "https://goodfishilc.github.io/spe/12狂風.png", answer: "狂風", sentence: "狂風吹過，樹葉滿天飛。" },
+        { image: "https://goodfishilc.github.io/spe/12呼吸.png", answer: "呼吸", sentence: "跑步後，我慢慢呼吸讓自己平靜。" },
+        { image: "https://goodfishilc.github.io/spe/12睜眼.png", answer: "睜眼", sentence: "小寶寶睜眼看著媽媽。" },
+        { image: "https://goodfishilc.github.io/spe/12百貨.png", answer: "百貨", sentence: "星期天，媽媽帶我去百貨公司買鞋。" },
+        { image: "https://goodfishilc.github.io/spe/12跌倒.png", answer: "跌倒", sentence: "弟弟跌倒了，我扶他起來。" },
+        { image: "https://goodfishilc.github.io/spe/12力量.png", answer: "力量", sentence: "團結能帶來力量。" },
+        { image: "https://goodfishilc.github.io/spe/12巨大.png", answer: "巨大", sentence: "這棵樹非常巨大。" },
+        { image: "https://goodfishilc.github.io/spe/12差別.png", answer: "差別", sentence: "這兩張圖有一點差別。" },
+        { image: "https://goodfishilc.github.io/spe/12疲累.png", answer: "疲累", sentence: "爬山後我覺得疲累。" },
+        { image: "https://goodfishilc.github.io/spe/12緊張.png", answer: "緊張", sentence: "上台前我有點緊張。" },
+        { image: "https://goodfishilc.github.io/spe/12樹根.png", answer: "樹根", sentence: "我看見美麗的樹根。" },
+        { image: "https://goodfishilc.github.io/spe/12水桶.png", answer: "水桶", sentence: "我看見美麗的水桶。" },
+        { image: "https://goodfishilc.github.io/spe/12飢餓.png", answer: "飢餓", sentence: "小狗飢餓時會找食物。" },
+        { image: "https://goodfishilc.github.io/spe/12食物.png", answer: "食物", sentence: "我們要珍惜食物，不可以浪費。" }
     ]
 };
 
@@ -228,7 +247,7 @@ function loadQuestion() {
         displaySentence = displaySentence.replace(currentCorrectAnswer, "＿什麼＿");
     } else {
         // 解決「外形」對應「形狀」等字面不完全相同的智慧挖空防呆
-        let fallbackWords = ["危險", "車庫", "探索", "奧妙", "進步", "形狀", "志氣", "數字", "歡迎", "交通", "口令", "世界", "甲蟲", "界線", "約定", "圖畫", "圖書館", "參加", "題目", "士兵"];
+        let fallbackWords = ["危險", "車庫", "探索", "奧妙", "進步", "形狀", "志氣", "數字", "歡迎", "交通", "口令", "世界", "甲蟲", "界線", "約定", "圖畫", "圖書館"];
         fallbackWords.forEach(w => {
             if (displaySentence.includes(w)) {
                 displaySentence = displaySentence.replace(w, "＿什麼＿");
