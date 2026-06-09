@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>看圖選詞小遊戲（含造句提示）</title>
+    <title>看圖選詞小遊戲（含造句提示與語音）</title>
     <style>
         body {
             font-family: 'Microsoft JhengHei', sans-serif;
@@ -46,18 +46,43 @@
             max-height: 100%;
             object-fit: contain;
         }
-        /* 🔧 句子提示區樣式 */
-        .sentence-hint {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #2c3e50;
+        
+        /* 🔧 語音與句子提示區區塊排版 */
+        .sentence-box {
             background-color: #fff9db;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
             border-left: 5px solid #fcc419;
-            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .sentence-hint {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            letter-spacing: 2px;
+            text-align: left;
+            flex-grow: 1;
+        }
+        /* 🔊 語音按鈕樣式 */
+        .btn-speak {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background-color: #ffc107;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        .btn-speak:hover {
+            background-color: #ffb300;
+        }
+
         .options-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -113,7 +138,7 @@
     <div class="menu-container">
         <label for="lesson-select">請選擇課數：</label>
         <select id="lesson-select" onchange="changeLesson()">
-            </select>
+        </select>
     </div>
 
     <div class="game-box">
@@ -121,12 +146,13 @@
             <img id="question-image" src="" alt="題目圖片資料載入中...">
         </div>
 
-        <div class="sentence-hint" id="question-sentence">
-            句子載入中...
+        <div class="sentence-box">
+            <div class="sentence-hint" id="question-sentence">句子載入中...</div>
+            <button class="btn-speak" onclick="speakSentence()">🔊 唸讀</button>
         </div>
 
         <div class="options-grid" id="options-container">
-            </div>
+        </div>
 
         <div class="score-board" id="feedback">載入中...</div>
         <button class="next-btn" id="next-button" onclick="nextQuestion()">下一題 ➡️</button>
@@ -134,7 +160,6 @@
 
 <script>
 // ==================== 🎯 核心詞庫設定區 ====================
-// 已經幫老師加入造句欄位 (sentence)，網頁會自動把句子中的 answer 替換成 "＿＿＿＿"
 const wordBank = {
     "第十一課：小讀者樂園": [
         { image: "https://goodfishilc.github.io/spe/11圖書館.png", answer: "圖書館", sentence: "我去圖書館借書。" },
@@ -154,13 +179,12 @@ const wordBank = {
         { image: "https://goodfishilc.github.io/spe/11世界.png", answer: "界線", sentence: "打羽球不可以超出界線。" }, 
         { image: "https://goodfishilc.github.io/spe/11圖畫.png", answer: "圖畫", sentence: "我把圖畫掛在牆上。" }, 
         { image: "https://goodfishilc.github.io/spe/11探索.png", answer: "探索", sentence: "我們一起探索大自然。" },
-        { image: "https://goodfishilc.github.io/spe/11奥妙.png", answer: "奥秒", sentence: "星空裡有許多奧妙。" }, 
+        { image: "https://goodfishilc.github.io/spe/11奥妙.png", answer: "奧妙", sentence: "星空裡有許多奧妙。" }, // 已將 奧秒/奥妙 統一為 奧妙
         { image: "https://goodfishilc.github.io/spe/11危險.png", answer: "危險", sentence: "馬路上玩球很危險。" }, 
         { image: "https://goodfishilc.github.io/spe/11車庫.png", answer: "車庫", sentence: "爸爸把車子開進車庫。" } 
     ]
 };
 
-// 所有詞庫中出現過的詞彙，用來當作「錯誤選項」的機率庫
 const allWords = Object.values(wordBank).flat().map(item => item.answer);
 
 // ==================== ⚙️ 遊戲邏輯控制區 ====================
@@ -179,16 +203,13 @@ Object.keys(wordBank).forEach(lesson => {
     lessonSelect.appendChild(option);
 });
 
-// 切換課數
 function changeLesson() {
     currentLesson = lessonSelect.value;
-    // 複製該課題目並隨機打亂
     currentQuestions = [...wordBank[currentLesson]].sort(() => Math.random() - 0.5);
     currentIndex = 0;
     loadQuestion();
 }
 
-// 載入題目
 function loadQuestion() {
     hasAnswered = false;
     document.getElementById("next-button").style.display = "none";
@@ -200,33 +221,27 @@ function loadQuestion() {
     // 1. 顯示圖片
     document.getElementById("question-image").src = currentQ.image;
 
-    // 2. 顯示克漏字句子
-    // 用系統自動判斷，把句子中的正確答案文字，替換成 "＿＿＿＿"
-    // 同時也防呆：如果句子中有相似字，也會一併處理
+    // 2. 顯示與處理克漏字句子（含特殊對應防呆機制）
     let displaySentence = currentQ.sentence;
     
-    // 如果句子裡有完整對應的詞就替換，沒有的話就嘗試替換前兩個字或關聯字
     if (displaySentence.includes(currentCorrectAnswer)) {
         displaySentence = displaySentence.replace(currentCorrectAnswer, "＿＿＿＿");
     } else {
-        // 特殊防呆：處理原造句中字詞些許不同的情況（如 奧妙->奧秘、題目->主題、形狀->外形）
-        let fallbackWords = ["危險", "車庫", "探索", "奧妙", "進步", "形狀", "志氣", "數字", "歡迎", "交通", "口令", "世界", "甲蟲", "界線", "約定", "圖畫", "圖書館"];
+        // 解決「外形」對應「形狀」等字面不完全相同的智慧挖空防呆
+        let fallbackWords = ["危險", "車庫", "探索", "奧妙", "進步", "形狀", "志氣", "數字", "歡迎", "交通", "口令", "世界", "甲蟲", "界線", "約定", "圖畫", "圖書館", "參加", "題目", "士兵"];
         fallbackWords.forEach(w => {
-            if (currentQ.sentence.includes(w)) {
+            if (displaySentence.includes(w)) {
                 displaySentence = displaySentence.replace(w, "＿＿＿＿");
             }
         });
     }
     document.getElementById("question-sentence").textContent = displaySentence;
 
-    // 3. 產生選項（1個對的 + 3個隨機錯的）
+    // 3. 產生選項
     let options = [currentCorrectAnswer];
-    
-    // 篩選出非正確答案的其他詞彙
     let wrongPool = allWords.filter(word => word !== currentCorrectAnswer);
     wrongPool.sort(() => Math.random() - 0.5);
     
-    // 取前三個錯誤詞彙
     for(let i=0; i<3; i++) {
         if(wrongPool[i]) {
             options.push(wrongPool[i]);
@@ -234,11 +249,8 @@ function loadQuestion() {
             options.push("備用詞彙" + (i+1));
         }
     }
-
-    // 打亂四個選項的順序
     options.sort(() => Math.random() - 0.5);
 
-    // 渲染按鈕
     const container = document.getElementById("options-container");
     container.innerHTML = ""; 
 
@@ -251,7 +263,24 @@ function loadQuestion() {
     });
 }
 
-// 檢查答案
+// 🔊 語音朗讀功能
+function speakSentence() {
+    let textToSpeak = document.getElementById("question-sentence").textContent;
+    
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // 停止先前的聲音以免重疊
+        
+        let utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'zh-TW'; // 台灣發音
+        utterance.rate = 0.8;    // 慢速 0.8 倍，適合特教生聽讀
+        utterance.pitch = 1.1;   // 音調稍微輕快親切
+        
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert("很抱歉，您的裝置不支援語音功能。");
+    }
+}
+
 function checkAnswer(selectedBtn, selectedWord) {
     if (hasAnswered) return; 
     hasAnswered = true;
@@ -262,7 +291,7 @@ function checkAnswer(selectedBtn, selectedWord) {
         selectedBtn.classList.add("btn-correct");
         document.getElementById("feedback").textContent = "⭕ 太棒了！答對了！";
         
-        // 答對時，把原本挖空的句子還原，讓學生看完整的正確造句
+        // 答對時還原為完整句子
         let currentQ = currentQuestions[currentIndex];
         document.getElementById("question-sentence").textContent = currentQ.sentence;
     } else {
@@ -278,8 +307,12 @@ function checkAnswer(selectedBtn, selectedWord) {
     document.getElementById("next-button").style.display = "inline-block";
 }
 
-// 下一題
 function nextQuestion() {
+    // 換題時自動切斷還在播放的聲音
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    
     currentIndex++;
     if (currentIndex < currentQuestions.length) {
         loadQuestion();
@@ -292,7 +325,6 @@ function nextQuestion() {
     }
 }
 
-// 自動執行
 changeLesson();
 </script>
 
