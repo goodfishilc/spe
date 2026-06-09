@@ -225,13 +225,13 @@ function loadQuestion() {
     let displaySentence = currentQ.sentence;
     
     if (displaySentence.includes(currentCorrectAnswer)) {
-        displaySentence = displaySentence.replace(currentCorrectAnswer, "＿＿＿＿");
+        displaySentence = displaySentence.replace(currentCorrectAnswer, "    ");
     } else {
         // 解決「外形」對應「形狀」等字面不完全相同的智慧挖空防呆
         let fallbackWords = ["危險", "車庫", "探索", "奧妙", "進步", "形狀", "志氣", "數字", "歡迎", "交通", "口令", "世界", "甲蟲", "界線", "約定", "圖畫", "圖書館", "參加", "題目", "士兵"];
         fallbackWords.forEach(w => {
             if (displaySentence.includes(w)) {
-                displaySentence = displaySentence.replace(w, "＿＿＿＿");
+                displaySentence = displaySentence.replace(w, "    ");
             }
         });
     }
