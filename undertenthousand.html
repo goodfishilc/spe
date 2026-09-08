@@ -9,20 +9,21 @@
             font-family: "Microsoft JhengHei", Arial, sans-serif;
             background-color: #f4f7f6;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             color: #333;
         }
         h1 {
             text-align: center;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
         }
         .container {
             max-width: 1050px;
             margin: 0 auto;
         }
 
-        /* 列印專用的抬頭與學生姓名資訊區 (螢幕畫面上預設隱藏) */
+        /* 列印專用抬頭 (螢幕畫面上預設隱藏) */
         .print-header {
             display: none;
         }
@@ -31,19 +32,16 @@
         .legend-box {
             background-color: #ffffff;
             border: 2px dashed #3498db;
-            border-radius: 10px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .legend-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
             color: #2980b9;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-bottom: 4px;
         }
         .legend-canvas-container {
             width: 100%;
@@ -54,25 +52,26 @@
         .control-panel {
             background-color: #ffffff;
             border: 2px solid #3498db;
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }
         .control-panel h3 {
             margin: 0;
             color: #2980b9;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             width: 100%;
         }
         .input-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 0.9rem;
         }
         .checkbox-group {
             display: flex;
@@ -82,48 +81,73 @@
             color: #2c3e50;
             cursor: pointer;
             user-select: none;
+            font-size: 0.9rem;
         }
         .checkbox-group input {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
         }
         
         /* 題目卡片 */
         .question-card {
             background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-left: 6px solid #3498db;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-left: 5px solid #3498db;
             position: relative;
         }
+
+        /* 題目標題區 */
         .question-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
+            margin-bottom: 4px;
+            line-height: 1.1;
         }
         .question-title {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: bold;
             color: #2c3e50;
+            line-height: 1.1;
         }
 
-        /* 兩列表格位值表 */
+        /* 內容主要排列區：積木畫布靠左放滿，位值表靠右 */
+        .question-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 圖案區（拉大放滿） */
+        .canvas-wrapper {
+            flex: 1 1 auto;
+            min-width: 0; 
+        }
+
+        /* 位值表與答案區（靠右固定） */
+        .table-wrapper {
+            flex: 0 0 auto; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        /* 位值表格 */
         .place-value-table {
             border-collapse: collapse;
-            margin-left: auto;
             background-color: #fff;
         }
         .place-value-table th, 
         .place-value-table td {
-            border: 2px solid #34495e;
-            width: 40px;
-            height: 34px;
+            border: 1.5px solid #34495e;
+            width: 36px;
+            height: 30px;
             text-align: center;
             vertical-align: middle;
             padding: 0;
@@ -131,7 +155,7 @@
         .place-value-table th {
             background-color: #ebf5fb;
             color: #2c3e50;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
         }
         .place-value-table td input {
@@ -139,7 +163,7 @@
             height: 100%;
             border: none;
             text-align: center;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: bold;
             outline: none;
             background: transparent;
@@ -148,11 +172,11 @@
 
         /* 檢核結果提示狀態 */
         .status-badge {
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             font-weight: bold;
-            margin-left: 10px;
+            margin-left: 6px;
             display: inline-block;
-            min-width: 80px;
+            min-width: 65px;
         }
         .correct { color: #27ae60; }
         .wrong { color: #e74c3c; }
@@ -168,20 +192,20 @@
 
         /* 輸入框與按鈕 */
         .setup-num-input {
-            padding: 5px 8px;
-            font-size: 0.95rem;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            width: 75px;
+            padding: 2px 5px;
+            font-size: 0.9rem;
+            border: 1.5px solid #bdc3c7;
+            border-radius: 4px;
+            width: 65px;
             outline: none;
         }
         button {
-            padding: 8px 16px;
-            font-size: 1rem;
+            padding: 6px 12px;
+            font-size: 0.9rem;
             background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -192,21 +216,22 @@
         .btn-print:hover { background-color: #d35400; }
 
         .breakdown-info {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #555;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
             background: #eef7fc;
-            padding: 6px 10px;
-            border-radius: 6px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            line-height: 1.1;
         }
         
         canvas {
             background-color: #fafafa;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 6px;
             width: 100%;
             height: auto;
             display: block;
@@ -220,6 +245,11 @@
 
         /* 🖨️ 列印專用 CSS */
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+
             .control-panel, h1, .status-badge {
                 display: none !important;
             }
@@ -229,17 +259,17 @@
                 justify-content: space-between;
                 align-items: flex-end;
                 border-bottom: 2px solid #000;
-                padding-bottom: 4px;
-                margin-bottom: 8px;
+                padding-bottom: 3px;
+                margin-bottom: 6px;
             }
             .print-title {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 font-weight: bold;
                 color: #000;
                 margin: 0;
             }
             .print-student-info {
-                font-size: 1rem;
+                font-size: 0.9rem;
                 font-weight: bold;
                 color: #000;
             }
@@ -257,43 +287,39 @@
 
             .legend-box {
                 border: 1px solid #000 !important;
-                padding: 6px 10px !important;
-                margin-bottom: 10px !important;
+                padding: 4px 8px !important;
+                margin-bottom: 6px !important;
                 border-radius: 4px !important;
             }
             .legend-title {
-                font-size: 0.9rem !important;
-                margin-bottom: 4px !important;
+                font-size: 0.85rem !important;
+                margin-bottom: 2px !important;
                 color: #000 !important;
             }
             #legend-canvas {
-                max-height: 85px !important;
+                max-height: 75px !important;
             }
 
             .question-card {
                 box-shadow: none !important;
                 border: 1px solid #666 !important;
-                border-left: 4px solid #333 !important;
-                margin-bottom: 10px !important;
-                padding: 8px 12px !important;
-                page-break-inside: avoid !important;
+                border-left: 3px solid #333 !important;
+                margin-bottom: 5px !important;
+                padding: 4px 8px !important;
                 break-inside: avoid !important;
-            }
-
-            #card-5 {
-                page-break-after: always !important;
-                break-after: page !important;
+                page-break-inside: avoid !important;
             }
 
             .question-header {
-                margin-bottom: 6px !important;
+                margin-bottom: 2px !important;
             }
 
             .place-value-table th, 
             .place-value-table td {
-                height: 26px !important;
-                width: 38px !important;
-                font-size: 0.95rem !important;
+                height: 22px !important;
+                width: 30px !important;
+                font-size: 0.85rem !important;
+                border-width: 1px !important;
             }
 
             .place-value-table td input {
@@ -325,6 +351,10 @@
     <div class="control-panel">
         <h3>🎲 題目設定與工具面板</h3>
         <div class="input-group">
+            <label for="question-count">出題數：</label>
+            <input type="number" id="question-count" class="setup-num-input" value="10" min="1" max="50">
+        </div>
+        <div class="input-group">
             <label for="min-range">最小值：</label>
             <input type="number" id="min-range" class="setup-num-input" value="1" min="1" max="99999">
         </div>
@@ -332,7 +362,7 @@
             <label for="max-range">最大值：</label>
             <input type="number" id="max-range" class="setup-num-input" value="9999" min="1" max="99999">
         </div>
-        <button class="btn-random" onclick="generateRandomQuestions()">產生 10 題隨機題目</button>
+        <button class="btn-random" onclick="generateRandomQuestions()">產生隨機題目</button>
 
         <label class="checkbox-group">
             <input type="checkbox" id="toggle-input-cb" checked onchange="toggleInputVisibility()">
@@ -346,16 +376,15 @@
     <div class="legend-box">
         <div class="legend-title">📌 積木單位圖示說明：</div>
         <div class="legend-canvas-container">
-            <canvas id="legend-canvas" width="950" height="90"></canvas>
+            <canvas id="legend-canvas" width="950" height="85"></canvas>
         </div>
     </div>
 
-    <!-- 10 題卡片容器 -->
+    <!-- 題目卡片容器 -->
     <div id="questions-container"></div>
 </div>
 
 <script>
-    const TOTAL_QUESTIONS = 10;
     let questionAnswers = []; 
 
     function initPage() {
@@ -373,21 +402,21 @@
         ctx.fillStyle = "#2c3e50";
 
         // --- 第一列：萬位 與 千位 ---
-        drawBox(ctx, 30, 10, 26, 26, 13, "#d35400", "#f39c12");
-        ctx.fillText("萬位積木 = 10000", 80, 28);
+        drawBox(ctx, 30, 8, 24, 24, 12, "#d35400", "#f39c12");
+        ctx.fillText("萬位積木 = 10000", 75, 25);
 
-        drawCube1000Custom(ctx, 320, 12, 22, 22, 11);
-        ctx.fillText("千位積木 = 1000", 365, 28);
+        drawCube1000Custom(ctx, 320, 10, 20, 20, 10);
+        ctx.fillText("千位積木 = 1000", 360, 25);
 
         // --- 第二列：百位、十位 與 個位 ---
-        drawFlat100Custom(ctx, 30, 65, 22, 3, 16);
-        ctx.fillText("百位積木 = 100", 75, 70);
+        drawFlat100Custom(ctx, 30, 58, 20, 3, 15);
+        ctx.fillText("百位積木 = 100", 70, 63);
 
-        drawBar10Custom(ctx, 320, 75, 6, 24, 3);
-        ctx.fillText("十位積木 = 10", 340, 70);
+        drawBar10Custom(ctx, 320, 68, 6, 22, 3);
+        ctx.fillText("十位積木 = 10", 338, 63);
 
-        drawUnit1Custom(ctx, 560, 63, 8, 8, 4);
-        ctx.fillText("個位積木 = 1", 580, 70);
+        drawUnit1Custom(ctx, 560, 56, 8, 8, 4);
+        ctx.fillText("個位積木 = 1", 578, 63);
     }
 
     function toggleInputVisibility() {
@@ -401,8 +430,13 @@
     }
 
     function generateRandomQuestions() {
+        let count = parseInt(document.getElementById('question-count').value) || 10;
         let min = parseInt(document.getElementById('min-range').value) || 1;
         let max = parseInt(document.getElementById('max-range').value) || 9999;
+
+        if (count < 1) count = 1;
+        if (count > 50) count = 50;
+        document.getElementById('question-count').value = count;
 
         if (min < 1) min = 1;
         if (max > 99999) max = 99999;
@@ -420,7 +454,7 @@
         container.innerHTML = '';
         questionAnswers = [];
 
-        for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
+        for (let i = 1; i <= count; i++) {
             const randomVal = Math.floor(Math.random() * (max - min + 1)) + min;
             questionAnswers[i] = randomVal;
 
@@ -443,8 +477,17 @@
                             <input type="number" id="num-${i}" class="setup-num-input" value="${randomVal}" min="1" max="99999" oninput="manualUpdateQuestion(${i}, ${digitsCount})">
                         </span>
                     </div>
+                </div>
 
-                    <div style="display:flex; align-items:center;">
+                <div class="breakdown-info" id="info-${i}"></div>
+
+                <!-- 積木畫布放大佔左側，位值表靠右 -->
+                <div class="question-content">
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas-${i}" width="720" height="110"></canvas>
+                    </div>
+
+                    <div class="table-wrapper">
                         <table class="place-value-table">
                             <thead><tr>${thHTML}</tr></thead>
                             <tbody><tr>${tdHTML}</tr></tbody>
@@ -452,9 +495,6 @@
                         <span id="status-${i}" class="status-badge"></span>
                     </div>
                 </div>
-
-                <div class="breakdown-info" id="info-${i}"></div>
-                <canvas id="canvas-${i}" width="950" height="100"></canvas>
             `;
             container.appendChild(card);
             
@@ -558,17 +598,17 @@
         }
     }
 
-    /* 🎯 關鍵調整：確保同一位值排在同一列 */
+    /* 🎯 繪製積木（第一列與第二列間隔增加 10 點，並支援自動折行防裁切） */
     function drawBlocks(index, value) {
         const canvas = document.getElementById(`canvas-${index}`);
         const ctx = canvas.getContext('2d');
         
         if (value <= 0) {
-            canvas.height = 50;
+            canvas.height = 45;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = "15px sans-serif";
+            ctx.font = "14px sans-serif";
             ctx.fillStyle = "#aaa";
-            ctx.fillText("請輸入數字", 20, 30);
+            ctx.fillText("請輸入數字", 15, 28);
             return;
         }
 
@@ -578,67 +618,90 @@
         const tens = Math.floor((value % 100) / 10);
         const ones = value % 10;
 
-        // 計算此題目需要多少列 (非零位值各自佔據一列)
-        let activeRows = 0;
-        if (tenThous > 0) activeRows++;
-        if (thousands > 0) activeRows++;
-        if (hundreds > 0) activeRows++;
-        if (tens > 0) activeRows++;
-        if (ones > 0) activeRows++;
+        const baseRowHeight = 58;
+        const extraGap = 10; // ✨ 兩列之間額外增加 10px 間格
+        const canvasWidth = canvas.width;
 
-        const rowHeight = 75; // 每位值一列的高度
-        canvas.height = Math.max(activeRows * rowHeight + 15, 60);
+        let rowCount = 0;
+
+        if (tenThous > 0) rowCount++;
+
+        if (thousands > 0 || hundreds > 0) {
+            let widthNeeded = (thousands * 48) + (thousands > 0 ? 15 : 0) + (hundreds * 50);
+            rowCount += Math.ceil(widthNeeded / (canvasWidth - 20)) || 1;
+        }
+
+        if (tens > 0 || ones > 0) {
+            let widthNeeded = (tens * 16) + (tens > 0 ? 15 : 0) + (ones * 14);
+            rowCount += Math.ceil(widthNeeded / (canvasWidth - 20)) || 1;
+        }
+
+        // 動態高度納入額外的間距計算
+        const extraGapTotal = Math.max(0, rowCount - 1) * extraGap;
+        canvas.height = Math.max(rowCount * baseRowHeight + extraGapTotal + 10, 50);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         let currentY = 0;
 
-        // 1. 萬位積木（單獨一列）
+        // 0. 萬位積木
         if (tenThous > 0) {
-            currentY += rowHeight;
-            let currentX = 20;
+            currentY += baseRowHeight;
+            let currentX = 12;
             for (let i = 0; i < tenThous; i++) {
-                drawBox(ctx, currentX, currentY - 30, 40, 40, 20, "#d35400", "#f39c12");
-                currentX += 65;
+                drawBox(ctx, currentX, currentY - 28, 36, 36, 18, "#d35400", "#f39c12");
+                currentX += 58;
             }
         }
 
-        // 2. 千位積木（單獨一列）
-        if (thousands > 0) {
-            currentY += rowHeight;
-            let currentX = 20;
+        // 1. 千位與百位同列（若過寬自動折行）
+        if (thousands > 0 || hundreds > 0) {
+            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
+            let currentX = 12;
+
             for (let i = 0; i < thousands; i++) {
-                drawCube1000(ctx, currentX, currentY - 15);
-                currentX += 55;
+                if (currentX + 45 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawCube1000(ctx, currentX, currentY - 14);
+                currentX += 48;
             }
-        }
 
-        // 3. 百位積木（單獨一列，且保持 24px 大間距方便計數）
-        if (hundreds > 0) {
-            currentY += rowHeight;
-            let currentX = 20;
+            if (thousands > 0 && hundreds > 0) currentX += 12;
+
             for (let i = 0; i < hundreds; i++) {
+                if (currentX + 45 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
                 drawFlat100(ctx, currentX, currentY - 10);
-                currentX += 56; // 積木寬 32 + 間距 24 = 56px
+                currentX += 50;
             }
         }
 
-        // 4. 十位積木（單獨一列）
-        if (tens > 0) {
-            currentY += rowHeight;
-            let currentX = 20;
+        // 2. 十位與個位同列（與上一列之間增加 10 點間格）
+        if (tens > 0 || ones > 0) {
+            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
+            let currentX = 12;
+
             for (let i = 0; i < tens; i++) {
+                if (currentX + 15 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
                 drawBar10(ctx, currentX, currentY - 5);
-                currentX += 20;
-            }
-        }
-
-        // 5. 個位積木（單獨一列）
-        if (ones > 0) {
-            currentY += rowHeight;
-            let currentX = 20;
-            for (let i = 0; i < ones; i++) {
-                drawUnit1(ctx, currentX, currentY - 20);
                 currentX += 16;
+            }
+
+            if (tens > 0 && ones > 0) currentX += 12;
+
+            for (let i = 0; i < ones; i++) {
+                if (currentX + 12 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawUnit1(ctx, currentX, currentY - 18);
+                currentX += 14;
             }
         }
     }
@@ -676,16 +739,16 @@
         ctx.restore();
     }
 
-    function drawUnit1(ctx, x, y) { drawBox(ctx, x, y, 10, 10, 5); }
+    function drawUnit1(ctx, x, y) { drawBox(ctx, x, y, 9, 9, 4); }
     function drawUnit1Custom(ctx, x, y, w, h, d) { drawBox(ctx, x, y, w, h, d); }
 
     function drawBar10(ctx, x, y) {
-        drawBox(ctx, x, y - 36, 8, 36, 4);
+        drawBox(ctx, x, y - 32, 7, 32, 3.5);
         ctx.strokeStyle = "#888";
         for (let i = 1; i < 10; i++) {
             ctx.beginPath();
-            ctx.moveTo(x, y - (i * 3.6));
-            ctx.lineTo(x + 8, y - (i * 3.6));
+            ctx.moveTo(x, y - (i * 3.2));
+            ctx.lineTo(x + 7, y - (i * 3.2));
             ctx.stroke();
         }
     }
@@ -694,7 +757,7 @@
     }
 
     function drawFlat100(ctx, x, y) {
-        const w = 32, h = 4, d = 24;
+        const w = 28, h = 3.5, d = 20;
         drawBox(ctx, x, y, w, h, d, "#444", "#ededed");
         ctx.save();
         ctx.strokeStyle = "#888";
@@ -720,19 +783,19 @@
     }
 
     function drawCube1000(ctx, x, y) {
-        drawBox(ctx, x, y, 38, 38, 18);
+        drawBox(ctx, x, y, 34, 34, 16);
         ctx.save();
         ctx.strokeStyle = "#888";
         ctx.lineWidth = 0.8;
         for (let i = 1; i < 10; i++) {
             ctx.beginPath();
-            ctx.moveTo(x, y + (i * 3.8));
-            ctx.lineTo(x + 38, y + (i * 3.8));
+            ctx.moveTo(x, y + (i * 3.4));
+            ctx.lineTo(x + 34, y + (i * 3.4));
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(x + (i * 3.8), y);
-            ctx.lineTo(x + (i * 3.8), y + 38);
+            ctx.moveTo(x + (i * 3.4), y);
+            ctx.lineTo(x + (i * 3.4), y + 34);
             ctx.stroke();
         }
         ctx.restore();
