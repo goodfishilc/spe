@@ -218,12 +218,7 @@
             display: none !important;
         }
 
-        /* 🖨️ 列印專用 CSS（精確滿頁版面，不留過多空白） */
-        @page {
-            size: A4 portrait;
-            margin: 6mm 8mm; 
-        }
-
+        /* 🖨️ 列印專用 CSS */
         @media print {
             .control-panel, h1, .status-badge {
                 display: none !important;
@@ -260,7 +255,6 @@
                 width: 100% !important;
             }
 
-            /* 圖示說明欄位列印優化 */
             .legend-box {
                 border: 1px solid #000 !important;
                 padding: 6px 10px !important;
@@ -276,7 +270,6 @@
                 max-height: 85px !important;
             }
 
-            /* 題目卡片適度拉高，填滿頁面 */
             .question-card {
                 box-shadow: none !important;
                 border: 1px solid #666 !important;
@@ -287,7 +280,6 @@
                 break-inside: avoid !important;
             }
 
-            /* 第 5 題後強制換頁 */
             #card-5 {
                 page-break-after: always !important;
                 break-after: page !important;
@@ -312,7 +304,6 @@
             canvas {
                 border: 1px solid #888 !important;
                 background-color: #fff !important;
-                max-height: 125px !important; 
             }
         }
     </style>
@@ -463,7 +454,7 @@
                 </div>
 
                 <div class="breakdown-info" id="info-${i}"></div>
-                <canvas id="canvas-${i}" width="950" height="130"></canvas>
+                <canvas id="canvas-${i}" width="950" height="100"></canvas>
             `;
             container.appendChild(card);
             
@@ -567,6 +558,7 @@
         }
     }
 
+    /* 🎯 關鍵調整：確保同一位值排在同一列 */
     function drawBlocks(index, value) {
         const canvas = document.getElementById(`canvas-${index}`);
         const ctx = canvas.getContext('2d');
@@ -586,91 +578,67 @@
         const tens = Math.floor((value % 100) / 10);
         const ones = value % 10;
 
-        const canvasWidth = canvas.width;
-        const paddingX = 15;
-        const rowHeight = 85;
+        // 計算此題目需要多少列 (非零位值各自佔據一列)
+        let activeRows = 0;
+        if (tenThous > 0) activeRows++;
+        if (thousands > 0) activeRows++;
+        if (hundreds > 0) activeRows++;
+        if (tens > 0) activeRows++;
+        if (ones > 0) activeRows++;
 
-        let tempX = paddingX;
-        let totalRows = 1;
+        const rowHeight = 75; // 每位值一列的高度
+        canvas.height = Math.max(activeRows * rowHeight + 15, 60);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        function simulateWidth(w) {
-            if (tempX + w > canvasWidth - paddingX) {
-                tempX = paddingX;
-                totalRows++;
-            }
-            tempX += w;
-        }
+        let currentY = 0;
 
-        for (let i = 0; i < tenThous; i++) simulateWidth(60);
-        if (tenThous > 0) tempX += 12;
-
-        for (let i = 0; i < thousands; i++) simulateWidth(50);
-        if (thousands > 0) tempX += 12;
-
-        /* 百位積木總寬度（含加大後的間隔 24px） */
-        for (let i = 0; i < hundreds; i++) simulateWidth(50); // 32px(寬) + 18px(立體深)
-        if (hundreds > 0) tempX += 12;
-
-        for (let i = 0; i < tens; i++) simulateWidth(16);
-        if (tens > 0) tempX += 10;
-
-        if (ones > 0) simulateWidth(Math.min(ones, 5) * 15);
-
-        canvas.height = totalRows * rowHeight + 10;
-
-        let currentX = paddingX;
-        let currentY = 75;
-
-        function checkWrap(itemWidth) {
-            if (currentX + itemWidth > canvasWidth - paddingX) {
-                currentX = paddingX;
-                currentY += rowHeight;
-            }
-        }
-
+        // 1. 萬位積木（單獨一列）
         if (tenThous > 0) {
+            currentY += rowHeight;
+            let currentX = 20;
             for (let i = 0; i < tenThous; i++) {
-                checkWrap(60);
-                drawBox(ctx, currentX, currentY - 35, 45, 45, 22, "#d35400", "#f39c12");
-                currentX += 60;
+                drawBox(ctx, currentX, currentY - 30, 40, 40, 20, "#d35400", "#f39c12");
+                currentX += 65;
             }
-            currentX += 12;
         }
 
+        // 2. 千位積木（單獨一列）
         if (thousands > 0) {
+            currentY += rowHeight;
+            let currentX = 20;
             for (let i = 0; i < thousands; i++) {
-                checkWrap(50);
-                drawCube1000(ctx, currentX, currentY - 12);
-                currentX += 50;
+                drawCube1000(ctx, currentX, currentY - 15);
+                currentX += 55;
             }
-            currentX += 12;
         }
 
-        /* 💡 繪製百位積木：將間隔拉大至 24px，以方便視覺數數 */
+        // 3. 百位積木（單獨一列，且保持 24px 大間距方便計數）
         if (hundreds > 0) {
+            currentY += rowHeight;
+            let currentX = 20;
             for (let i = 0; i < hundreds; i++) {
-                checkWrap(50);
-                drawFlat100(ctx, currentX, currentY);
-                currentX += 50; // 加大間距（原為 38px）
+                drawFlat100(ctx, currentX, currentY - 10);
+                currentX += 56; // 積木寬 32 + 間距 24 = 56px
             }
-            currentX += 12;
         }
 
+        // 4. 十位積木（單獨一列）
         if (tens > 0) {
+            currentY += rowHeight;
+            let currentX = 20;
             for (let i = 0; i < tens; i++) {
-                checkWrap(16);
-                drawBar10(ctx, currentX, currentY + 5);
-                currentX += 16;
+                drawBar10(ctx, currentX, currentY - 5);
+                currentX += 20;
             }
-            currentX += 10;
         }
 
+        // 5. 個位積木（單獨一列）
         if (ones > 0) {
-            checkWrap(Math.min(ones, 5) * 15);
+            currentY += rowHeight;
+            let currentX = 20;
             for (let i = 0; i < ones; i++) {
-                const row = Math.floor(i / 5);
-                const col = i % 5;
-                drawUnit1(ctx, currentX + (col * 14), (currentY + 8) - (row * 14));
+                drawUnit1(ctx, currentX, currentY - 20);
+                currentX += 16;
             }
         }
     }
@@ -708,7 +676,7 @@
         ctx.restore();
     }
 
-    function drawUnit1(ctx, x, y) { drawBox(ctx, x, y, 8, 8, 4); }
+    function drawUnit1(ctx, x, y) { drawBox(ctx, x, y, 10, 10, 5); }
     function drawUnit1Custom(ctx, x, y, w, h, d) { drawBox(ctx, x, y, w, h, d); }
 
     function drawBar10(ctx, x, y) {
