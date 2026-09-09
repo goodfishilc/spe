@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萬以內數值與新台幣隨機出題學習網頁</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        /* 列印專用抬頭 */
+        .print-header {
+            display: none;
+        }
+
+        /* 新台幣說明區欄位 */
+        .legend-box {
+            background-color: #ffffff;
+            border: 2px dashed #27ae60;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .legend-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 4px;
+        }
+        .legend-canvas-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .control-panel h3 {
+            margin: 0;
+            color: #2980b9;
+            font-size: 1.05rem;
+            width: 100%;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+        .checkbox-group input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        /* 題目卡片 */
+        .question-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-left: 5px solid #27ae60;
+            position: relative;
+        }
+
+        /* 題目標題區 */
+        .question-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            line-height: 1.1;
+        }
+        .question-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.1;
+        }
+
+        /* 內容主要排列區 */
+        .question-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 圖案區 */
+        .canvas-wrapper {
+            flex: 1 1 auto;
+            min-width: 0; 
+        }
+
+        /* 位值表與答案區 */
+        .table-wrapper {
+            flex: 0 0 auto; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        /* 位值表格 */
+        .place-value-table {
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        .place-value-table th, 
+        .place-value-table td {
+            border: 1.5px solid #34495e;
+            width: 36px;
+            height: 30px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        .place-value-table th {
+            background-color: #e8f8f5;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .place-value-table td input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.05rem;
+            font-weight: bold;
+            outline: none;
+            background: transparent;
+            box-sizing: border-box;
+        }
+
+        /* 檢核結果提示狀態 */
+        .status-badge {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-left: 6px;
+            display: inline-block;
+            min-width: 65px;
+        }
+        .correct { color: #27ae60; }
+        .wrong { color: #e74c3c; }
+
+        .place-value-table td input.input-correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .place-value-table td input.input-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 輸入框與按鈕 */
+        .setup-num-input {
+            padding: 2px 5px;
+            font-size: 0.9rem;
+            border: 1.5px solid #bdc3c7;
+            border-radius: 4px;
+            width: 65px;
+            outline: none;
+        }
+        button {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #2980b9; }
+        .btn-random { background-color: #27ae60; font-weight: bold; }
+        .btn-random:hover { background-color: #219150; }
+        .btn-print { background-color: #e67e22; font-weight: bold; margin-left: auto; }
+        .btn-print:hover { background-color: #d35400; }
+
+        .breakdown-info {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: #e8f8f5;
+            padding: 3px 6px;
+            border-radius: 4px;
+            line-height: 1.1;
+        }
+        
+        canvas {
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 隱藏題目數字與解析的模式 */
+        .hide-input .input-area,
+        .hide-input .breakdown-info {
+            display: none !important;
+        }
+
+        /* 🖨️ 列印專用 CSS */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+
+            .control-panel, h1, .status-badge {
+                display: none !important;
+            }
+
+            .print-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: flex-end;
+                border-bottom: 2px solid #000;
+                padding-bottom: 3px;
+                margin-bottom: 6px;
+            }
+            .print-title {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #000;
+                margin: 0;
+            }
+            .print-student-info {
+                font-size: 0.9rem;
+                font-weight: bold;
+                color: #000;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            .legend-box {
+                border: 1px solid #000 !important;
+                padding: 4px 8px !important;
+                margin-bottom: 6px !important;
+                border-radius: 4px !important;
+            }
+            .legend-title {
+                font-size: 0.85rem !important;
+                margin-bottom: 2px !important;
+                color: #000 !important;
+            }
+            #legend-canvas {
+                max-height: 60px !important;
+            }
+
+            .question-card {
+                box-shadow: none !important;
+                border: 1px solid #666 !important;
+                border-left: 3px solid #333 !important;
+                margin-bottom: 5px !important;
+                padding: 4px 8px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .question-header {
+                margin-bottom: 2px !important;
+            }
+
+            .place-value-table th, 
+            .place-value-table td {
+                height: 22px !important;
+                width: 30px !important;
+                font-size: 0.85rem !important;
+                border-width: 1px !important;
+            }
+
+            .place-value-table td input {
+                color: transparent !important;
+                background-color: transparent !important;
+            }
+
+            canvas {
+                border: 1px solid #888 !important;
+                background-color: #fff !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>萬以內數值與新台幣位值學習網頁</h1>
+
+    <!-- 🖨️ 列印專用表頭 -->
+    <div class="print-header">
+        <h2 class="print-title">數值與新台幣位值表作業學習單</h2>
+        <div class="print-student-info">
+            ＿＿年 ＿＿班 &nbsp;&nbsp; 座號：＿＿ &nbsp;&nbsp; 姓名：＿＿＿＿＿＿
+        </div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <h3>🎲 題目設定與工具面板</h3>
+        <div class="input-group">
+            <label for="question-count">出題數：</label>
+            <input type="number" id="question-count" class="setup-num-input" value="10" min="1" max="50">
+        </div>
+        <div class="input-group">
+            <label for="min-range">最小值：</label>
+            <input type="number" id="min-range" class="setup-num-input" value="1" min="1" max="9999">
+        </div>
+        <div class="input-group">
+            <label for="max-range">最大值：</label>
+            <input type="number" id="max-range" class="setup-num-input" value="9999" min="1" max="9999">
+        </div>
+        <button class="btn-random" onclick="generateRandomQuestions()">產生隨機題目</button>
+
+        <label class="checkbox-group">
+            <input type="checkbox" id="toggle-input-cb" checked onchange="toggleInputVisibility()">
+            顯示題目數字與輸入框
+        </label>
+
+        <button class="btn-print" onclick="window.print()">🖨️ 列印作業/學習單</button>
+    </div>
+
+    <!-- 💡 新台幣說明欄 -->
+    <div class="legend-box">
+        <div class="legend-title">💵 新台幣面額圖示說明：</div>
+        <div class="legend-canvas-container">
+            <canvas id="legend-canvas" width="950" height="50"></canvas>
+        </div>
+    </div>
+
+    <!-- 題目卡片容器 -->
+    <div id="questions-container"></div>
+</div>
+
+<script>
+    let questionAnswers = []; 
+
+    function initPage() {
+        drawLegend();
+        generateRandomQuestions();
+    }
+
+    // 繪製新台幣說明列
+    function drawLegend() {
+        const canvas = document.getElementById('legend-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = "bold 13px Microsoft JhengHei, sans-serif";
+        ctx.fillStyle = "#2c3e50";
+
+        // 1000
+        drawNote1000(ctx, 15, 10, 52, 28);
+        ctx.fillText("1000元鈔票", 75, 28);
+
+        // 100
+        drawNote100(ctx, 210, 10, 52, 28);
+        ctx.fillText("100元鈔票", 270, 28);
+
+        // 10
+        drawCoin10(ctx, 390, 24, 13);
+        ctx.fillText("10元硬幣", 412, 28);
+
+        // 1
+        drawCoin1(ctx, 520, 24, 11);
+        ctx.fillText("1元硬幣", 540, 28);
+    }
+
+    function toggleInputVisibility() {
+        const isChecked = document.getElementById('toggle-input-cb').checked;
+        const container = document.getElementById('questions-container');
+        if (isChecked) {
+            container.classList.remove('hide-input');
+        } else {
+            container.classList.add('hide-input');
+        }
+    }
+
+    function generateRandomQuestions() {
+        let count = parseInt(document.getElementById('question-count').value) || 10;
+        let min = parseInt(document.getElementById('min-range').value) || 1;
+        let max = parseInt(document.getElementById('max-range').value) || 9999;
+
+        if (count < 1) count = 1;
+        if (count > 50) count = 50;
+        document.getElementById('question-count').value = count;
+
+        if (min < 1) min = 1;
+        if (max > 9999) max = 9999;
+        if (min > max) {
+            let temp = min; min = max; max = temp;
+            document.getElementById('min-range').value = min;
+            document.getElementById('max-range').value = max;
+        }
+
+        const placeHeaders = ['千', '百', '十', '個'];
+        const digitsCount = 4;
+
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        questionAnswers = [];
+
+        for (let i = 1; i <= count; i++) {
+            const randomVal = Math.floor(Math.random() * (max - min + 1)) + min;
+            questionAnswers[i] = randomVal;
+
+            let thHTML = placeHeaders.map(h => `<th>${h}</th>`).join('');
+            
+            let tdHTML = '';
+            for (let d = 0; d < digitsCount; d++) {
+                tdHTML += `<td><input type="text" maxlength="1" id="ans-${i}-${d}" oninput="handleInput(${i}, ${d}, ${digitsCount})" onkeydown="handleKeyDown(event, ${i}, ${d}, ${digitsCount})"></td>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `card-${i}`;
+            card.innerHTML = `
+                <div class="question-header">
+                    <div>
+                        <span class="question-title">第 ${i} 題</span>
+                        <span class="input-area">
+                            <label for="num-${i}">：</label>
+                            <input type="number" id="num-${i}" class="setup-num-input" value="${randomVal}" min="1" max="9999" oninput="manualUpdateQuestion(${i}, ${digitsCount})">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="breakdown-info" id="info-${i}"></div>
+
+                <div class="question-content">
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas-${i}" width="720" height="90"></canvas>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="place-value-table">
+                            <thead><tr>${thHTML}</tr></thead>
+                            <tbody><tr>${tdHTML}</tr></tbody>
+                        </table>
+                        <span id="status-${i}" class="status-badge"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+            
+            updateBreakdownAndCanvas(i, randomVal, digitsCount);
+        }
+    }
+
+    function manualUpdateQuestion(index, digitsCount) {
+        const input = document.getElementById(`num-${index}`);
+        let val = parseInt(input.value) || 0;
+        if (val < 0) val = 0;
+        if (val > 9999) val = 9999;
+
+        questionAnswers[index] = val;
+        updateBreakdownAndCanvas(index, val, digitsCount);
+        checkAnswer(index, digitsCount);
+    }
+
+    function updateBreakdownAndCanvas(index, val, digitsCount) {
+        const thous = Math.floor(val / 1000);
+        const hunds = Math.floor((val % 1000) / 100);
+        const tens = Math.floor((val % 100) / 10);
+        const ones = val % 10;
+
+        const info = document.getElementById(`info-${index}`);
+        info.innerHTML = `
+            <span><strong>1000元:</strong> ${thous} 張</span>
+            <span><strong>100元:</strong> ${hunds} 張</span>
+            <span><strong>10元:</strong> ${tens} 個</span>
+            <span><strong>1元:</strong> ${ones} 個</span>
+        `;
+
+        drawMoney(index, val);
+    }
+
+    function handleInput(qIndex, digitIndex, totalDigits) {
+        const input = document.getElementById(`ans-${qIndex}-${digitIndex}`);
+        input.value = input.value.replace(/[^0-9]/g, '');
+
+        if (input.value !== '' && digitIndex < totalDigits - 1) {
+            document.getElementById(`ans-${qIndex}-${digitIndex + 1}`).focus();
+        }
+
+        checkAnswer(qIndex, totalDigits);
+    }
+
+    function handleKeyDown(e, qIndex, digitIndex, totalDigits) {
+        if (e.key === 'Backspace') {
+            const input = document.getElementById(`ans-${qIndex}-${digitIndex}`);
+            if (input.value === '' && digitIndex > 0) {
+                document.getElementById(`ans-${qIndex}-${digitIndex - 1}`).focus();
+            }
+        }
+    }
+
+    function checkAnswer(qIndex, totalDigits) {
+        let userStr = '';
+        let isFilled = true;
+
+        for (let d = 0; d < totalDigits; d++) {
+            const input = document.getElementById(`ans-${qIndex}-${d}`);
+            if (input.value === '') {
+                isFilled = false;
+            }
+            userStr += input.value;
+        }
+
+        const statusSpan = document.getElementById(`status-${qIndex}`);
+        const correctVal = questionAnswers[qIndex];
+        const targetStr = String(correctVal).padStart(totalDigits, '0');
+
+        if (!isFilled) {
+            statusSpan.innerText = '';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = '';
+            }
+            return;
+        }
+
+        if (userStr === targetStr) {
+            statusSpan.innerText = '⭕ 正確';
+            statusSpan.className = 'status-badge correct';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = 'input-correct';
+            }
+        } else {
+            statusSpan.innerText = '❌ 再試試';
+            statusSpan.className = 'status-badge wrong';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = 'input-wrong';
+            }
+        }
+    }
+
+    /* 🎯 繪製新台幣（千元/百元超過9張換列，十元/一元按畫布寬度自動折行） */
+    function drawMoney(index, value) {
+        const canvas = document.getElementById(`canvas-${index}`);
+        const ctx = canvas.getContext('2d');
+        
+        if (value <= 0) {
+            canvas.height = 45;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "14px sans-serif";
+            ctx.fillStyle = "#aaa";
+            ctx.fillText("請輸入金額", 15, 28);
+            return;
+        }
+
+        const thousands = Math.floor(value / 1000);
+        const hundreds = Math.floor((value % 1000) / 100);
+        const tens = Math.floor((value % 100) / 10);
+        const ones = value % 10;
+
+        const baseRowHeight = 45;
+        const extraGap = 8;
+        const canvasWidth = canvas.width;
+
+        // 計算總行數
+        let totalRows = 0;
+
+        if (thousands > 0 || hundreds > 0) {
+            let thousRows = Math.ceil(thousands / 9) || (thousands > 0 ? 1 : 0);
+            let hundsRows = Math.ceil(hundreds / 9) || (hundreds > 0 ? 1 : 0);
+            totalRows += Math.max(1, thousRows, hundsRows);
+        }
+
+        if (tens > 0 || ones > 0) {
+            let estimatedWidth = (tens * 30) + (tens > 0 && ones > 0 ? 15 : 0) + (ones * 26);
+            let estimatedRows = Math.ceil(estimatedWidth / (canvasWidth - 24)) || 1;
+            totalRows += estimatedRows;
+        }
+
+        const extraGapTotal = Math.max(0, totalRows - 1) * extraGap;
+        canvas.height = Math.max(totalRows * baseRowHeight + extraGapTotal + 10, 50);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let currentY = 0;
+
+        // 1. 千元與百元鈔票同列 (超過 9 張自動換列)
+        if (thousands > 0 || hundreds > 0) {
+            currentY += baseRowHeight;
+            let currentX = 12;
+
+            // 千元鈔票
+            let countInRow = 0;
+            for (let i = 0; i < thousands; i++) {
+                if (countInRow >= 9 || currentX + 58 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                    countInRow = 0;
+                }
+                drawNote1000(ctx, currentX, currentY - 32, 54, 30);
+                currentX += 60;
+                countInRow++;
+            }
+
+            if (thousands > 0 && hundreds > 0) {
+                currentX += 10;
+            }
+
+            // 百元鈔票
+            let hundCountInRow = 0;
+            for (let i = 0; i < hundreds; i++) {
+                if (hundCountInRow >= 9 || currentX + 58 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                    hundCountInRow = 0;
+                }
+                drawNote100(ctx, currentX, currentY - 32, 54, 30);
+                currentX += 60;
+                hundCountInRow++;
+            }
+        }
+
+        // 2. 十元與一元硬幣同列 (不強制 9 個換列，依寬度換列)
+        if (tens > 0 || ones > 0) {
+            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
+            let currentX = 15;
+
+            // 十元硬幣
+            for (let i = 0; i < tens; i++) {
+                if (currentX + 28 > canvasWidth - 10) {
+                    currentX = 15;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawCoin10(ctx, currentX, currentY - 18, 13);
+                currentX += 30;
+            }
+
+            if (tens > 0 && ones > 0) {
+                currentX += 10;
+            }
+
+            // 一元硬幣
+            for (let i = 0; i < ones; i++) {
+                if (currentX + 24 > canvasWidth - 10) {
+                    currentX = 15;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawCoin1(ctx, currentX, currentY - 18, 11);
+                currentX += 26;
+            }
+        }
+    }
+
+    /* 💵 1000元紙鈔繪製（僅保留 1000 數字） */
+    function drawNote1000(ctx, x, y, w, h) {
+        ctx.save();
+        // 外框背景（藍色系）
+        ctx.fillStyle = "#2b5b84";
+        ctx.strokeStyle = "#1b3b57";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // 內框
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+
+        // 面額數字
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("1000", x + w / 2, y + h / 2);
+        ctx.restore();
+    }
+
+    /* 💴 100元紙鈔繪製（僅保留 100 數字） */
+    function drawNote100(ctx, x, y, w, h) {
+        ctx.save();
+        // 外框背景（紅色系）
+        ctx.fillStyle = "#c0392b";
+        ctx.strokeStyle = "#7b241c";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // 內框
+        ctx.strokeStyle = "#fadbd8";
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+
+        // 面額數字
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("100", x + w / 2, y + h / 2);
+        ctx.restore();
+    }
+
+    /* 🪙 10元硬幣繪製 (銀色) */
+    function drawCoin10(ctx, x, y, r) {
+        ctx.save();
+        // 圓形外框 (銀色金屬感)
+        let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.7, '#bdc3c7');
+        grad.addColorStop(1, '#7f8c8d');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#7f8c8d';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 內圈點綴
+        ctx.strokeStyle = '#95a5a6';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(x, y, r - 2.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 面額數字
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("10", x, y);
+        ctx.restore();
+    }
+
+    /* 🪙 1元硬幣繪製 (黃銅色) */
+    function drawCoin1(ctx, x, y, r) {
+        ctx.save();
+        // 圓形外框 (銅色)
+        let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
+        grad.addColorStop(0, '#f39c12');
+        grad.addColorStop(0.7, '#d35400');
+        grad.addColorStop(1, '#873600');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#873600';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 面額數字
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "bold 10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("1", x, y);
+        ctx.restore();
+    }
+
+    window.onload = initPage;
+</script>
+
+</body>
+</html>
