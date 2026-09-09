@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萬以內數值與積木隨機出題學習網頁</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        /* 列印專用抬頭 (螢幕畫面上預設隱藏) */
+        .print-header {
+            display: none;
+        }
+
+        /* 積木圖示說明區欄位 */
+        .legend-box {
+            background-color: #ffffff;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .legend-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 4px;
+        }
+        .legend-canvas-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .control-panel h3 {
+            margin: 0;
+            color: #2980b9;
+            font-size: 1.05rem;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .place-range-section {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+        .place-range-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+        .place-inputs-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .place-input-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.88rem;
+            background: #fff;
+            padding: 4px 8px;
+            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+        .checkbox-group input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        /* 題目卡片 */
+        .question-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-left: 5px solid #3498db;
+            position: relative;
+        }
+
+        /* 題目標題區 */
+        .question-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            line-height: 1.1;
+        }
+        .question-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.1;
+        }
+
+        /* 內容主要排列區：積木畫布靠左放滿，位值表靠右 */
+        .question-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 圖案區（拉大放滿） */
+        .canvas-wrapper {
+            flex: 1 1 auto;
+            min-width: 0; 
+        }
+
+        /* 位值表與答案區（靠右固定） */
+        .table-wrapper {
+            flex: 0 0 auto; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        /* 位值表格 */
+        .place-value-table {
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        .place-value-table th, 
+        .place-value-table td {
+            border: 1.5px solid #34495e;
+            width: 36px;
+            height: 30px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        .place-value-table th {
+            background-color: #ebf5fb;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .place-value-table td input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.05rem;
+            font-weight: bold;
+            outline: none;
+            background: transparent;
+            box-sizing: border-box;
+        }
+
+        /* 檢核結果提示狀態 */
+        .status-badge {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-left: 6px;
+            display: inline-block;
+            min-width: 65px;
+        }
+        .correct { color: #27ae60; }
+        .wrong { color: #e74c3c; }
+
+        .place-value-table td input.input-correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .place-value-table td input.input-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 輸入框與按鈕 */
+        .setup-num-input {
+            padding: 2px 5px;
+            font-size: 0.9rem;
+            border: 1.5px solid #bdc3c7;
+            border-radius: 4px;
+            width: 55px;
+            outline: none;
+            text-align: center;
+        }
+        button {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #2980b9; }
+        .btn-random { background-color: #27ae60; font-weight: bold; }
+        .btn-random:hover { background-color: #219150; }
+        .btn-print { background-color: #e67e22; font-weight: bold; margin-left: auto; }
+        .btn-print:hover { background-color: #d35400; }
+
+        .breakdown-info {
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 6px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #eef7fc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            line-height: 1.2;
+        }
+        
+        canvas {
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 隱藏題目數字與解析的模式 */
+        .hide-input .input-area,
+        .hide-input .breakdown-info {
+            display: none !important;
+        }
+
+        /* 🖨️ 列印專用 CSS */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+
+            .control-panel, h1, .status-badge {
+                display: none !important;
+            }
+
+            .print-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: flex-end;
+                border-bottom: 2px solid #000;
+                padding-bottom: 3px;
+                margin-bottom: 6px;
+            }
+            .print-title {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #000;
+                margin: 0;
+            }
+            .print-student-info {
+                font-size: 0.9rem;
+                font-weight: bold;
+                color: #000;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            .legend-box {
+                border: 1px solid #000 !important;
+                padding: 4px 8px !important;
+                margin-bottom: 6px !important;
+                border-radius: 4px !important;
+            }
+            .legend-title {
+                font-size: 0.85rem !important;
+                margin-bottom: 2px !important;
+                color: #000 !important;
+            }
+            #legend-canvas {
+                max-height: 75px !important;
+            }
+
+            .question-card {
+                box-shadow: none !important;
+                border: 1px solid #666 !important;
+                border-left: 3px solid #333 !important;
+                margin-bottom: 5px !important;
+                padding: 4px 8px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .question-header {
+                margin-bottom: 2px !important;
+            }
+
+            .place-value-table th, 
+            .place-value-table td {
+                height: 22px !important;
+                width: 30px !important;
+                font-size: 0.85rem !important;
+                border-width: 1px !important;
+            }
+
+            .place-value-table td input {
+                color: transparent !important;
+                background-color: transparent !important;
+            }
+
+            canvas {
+                border: 1px solid #888 !important;
+                background-color: #fff !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>萬以內數值與積木學習網頁</h1>
+
+    <!-- 🖨️ 列印專用表頭 -->
+    <div class="print-header">
+        <h2 class="print-title">數值與積木位值表作業學習單</h2>
+        <div class="print-student-info">
+            ＿＿年 ＿＿班 &nbsp;&nbsp; 座號：＿＿ &nbsp;&nbsp; 姓名：＿＿＿＿＿＿
+        </div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <h3>🎲 題目設定與工具面板</h3>
+        
+        <div class="control-row">
+            <div class="input-group">
+                <label for="question-count">出題數：</label>
+                <input type="number" id="question-count" class="setup-num-input" value="10" min="1" max="50">
+            </div>
+            <button class="btn-random" onclick="generateRandomQuestions()">產生隨機題目</button>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="toggle-input-cb" checked onchange="toggleInputVisibility()">
+                顯示題目數字與輸入框
+            </label>
+
+            <button class="btn-print" onclick="window.print()">🖨️ 列印作業/學習單</button>
+        </div>
+
+        <!-- 各位值積木數量隨機範圍設定區 -->
+        <div class="place-range-section">
+            <div class="place-range-title">🧩 各單位積木數量隨機範圍設定（可進行超過10的換位練習，如12個百、16個十）：</div>
+            <div class="place-inputs-grid">
+                <div class="place-input-item">
+                    <strong>萬位：</strong>
+                    <input type="number" id="wan-min" class="setup-num-input" value="0" min="0" max="9"> ~
+                    <input type="number" id="wan-max" class="setup-num-input" value="0" min="0" max="9"> 個
+                </div>
+                <div class="place-input-item">
+                    <strong>千位：</strong>
+                    <input type="number" id="qian-min" class="setup-num-input" value="0" min="0" max="20"> ~
+                    <input type="number" id="qian-max" class="setup-num-input" value="9" min="0" max="20"> 個
+                </div>
+                <div class="place-input-item">
+                    <strong>百位：</strong>
+                    <input type="number" id="bai-min" class="setup-num-input" value="0" min="0" max="30"> ~
+                    <input type="number" id="bai-max" class="setup-num-input" value="15" min="0" max="30"> 個
+                </div>
+                <div class="place-input-item">
+                    <strong>十位：</strong>
+                    <input type="number" id="shi-min" class="setup-num-input" value="0" min="0" max="30"> ~
+                    <input type="number" id="shi-max" class="setup-num-input" value="18" min="0" max="30"> 個
+                </div>
+                <div class="place-input-item">
+                    <strong>個位：</strong>
+                    <input type="number" id="ge-min" class="setup-num-input" value="1" min="0" max="30"> ~
+                    <input type="number" id="ge-max" class="setup-num-input" value="9" min="0" max="30"> 個
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💡 固定分成兩列的積木說明欄 -->
+    <div class="legend-box">
+        <div class="legend-title">📌 積木單位圖示說明：</div>
+        <div class="legend-canvas-container">
+            <canvas id="legend-canvas" width="950" height="85"></canvas>
+        </div>
+    </div>
+
+    <!-- 題目卡片容器 -->
+    <div id="questions-container"></div>
+</div>
+
+<script>
+    let questionAnswers = []; 
+    let questionCounts = []; // 保存每題各單位的具體積木數量 {tenThous, thous, hunds, tens, ones}
+
+    function initPage() {
+        drawLegend();
+        generateRandomQuestions();
+    }
+
+    // 繪製固定兩列的積木圖示說明
+    function drawLegend() {
+        const canvas = document.getElementById('legend-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = "bold 13px Microsoft JhengHei, sans-serif";
+        ctx.fillStyle = "#2c3e50";
+
+        // --- 第一列：萬位 與 千位 ---
+        drawBox(ctx, 30, 8, 24, 24, 12, "#d35400", "#f39c12");
+        ctx.fillText("萬位積木 = 10000", 75, 25);
+
+        drawCube1000Custom(ctx, 320, 10, 20, 20, 10);
+        ctx.fillText("千位積木 = 1000", 360, 25);
+
+        // --- 第二列：百位、十位 與 個位 ---
+        drawFlat100Custom(ctx, 30, 58, 20, 3, 15);
+        ctx.fillText("百位積木 = 100", 70, 63);
+
+        drawBar10Custom(ctx, 320, 68, 6, 22, 3);
+        ctx.fillText("十位積木 = 10", 338, 63);
+
+        drawUnit1Custom(ctx, 560, 56, 8, 8, 4);
+        ctx.fillText("個位積木 = 1", 578, 63);
+    }
+
+    function toggleInputVisibility() {
+        const isChecked = document.getElementById('toggle-input-cb').checked;
+        const container = document.getElementById('questions-container');
+        if (isChecked) {
+            container.classList.remove('hide-input');
+        } else {
+            container.classList.add('hide-input');
+        }
+    }
+
+    function getRandomInRange(minId, maxId, defaultMin, defaultMax) {
+        let min = parseInt(document.getElementById(minId).value);
+        let max = parseInt(document.getElementById(maxId).value);
+        if (isNaN(min)) min = defaultMin;
+        if (isNaN(max)) max = defaultMax;
+        if (min < 0) min = 0;
+        if (max < min) {
+            let temp = min; min = max; max = temp;
+        }
+        document.getElementById(minId).value = min;
+        document.getElementById(maxId).value = max;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateRandomQuestions() {
+        let count = parseInt(document.getElementById('question-count').value) || 10;
+        if (count < 1) count = 1;
+        if (count > 50) count = 50;
+        document.getElementById('question-count').value = count;
+
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        questionAnswers = [];
+        questionCounts = [];
+
+        // 讀取設定範圍並判斷是否可能出現萬位
+        const wanMaxVal = parseInt(document.getElementById('wan-max').value) || 0;
+
+        for (let i = 1; i <= count; i++) {
+            // 隨機產生各積木單位的個數
+            let tenThous = getRandomInRange('wan-min', 'wan-max', 0, 0);
+            let thous = getRandomInRange('qian-min', 'qian-max', 0, 9);
+            let hunds = getRandomInRange('bai-min', 'bai-max', 0, 15);
+            let tens = getRandomInRange('shi-min', 'shi-max', 0, 18);
+            let ones = getRandomInRange('ge-min', 'ge-max', 1, 9);
+
+            // 計算組合總數值
+            let totalVal = (tenThous * 10000) + (thous * 1000) + (hunds * 100) + (tens * 10) + ones;
+            
+            // 避免全部為0
+            if (totalVal === 0) {
+                ones = 1;
+                totalVal = 1;
+            }
+
+            questionAnswers[i] = totalVal;
+            questionCounts[i] = { tenThous, thous, hunds, tens, ones };
+
+            const isFiveDigits = totalVal >= 10000 || wanMaxVal > 0;
+            const placeHeaders = isFiveDigits ? ['萬', '千', '百', '十', '個'] : ['千', '百', '十', '個'];
+            const digitsCount = placeHeaders.length;
+
+            let thHTML = placeHeaders.map(h => `<th>${h}</th>`).join('');
+            
+            let tdHTML = '';
+            for (let d = 0; d < digitsCount; d++) {
+                tdHTML += `<td><input type="text" maxlength="1" id="ans-${i}-${d}" oninput="handleInput(${i}, ${d}, ${digitsCount})" onkeydown="handleKeyDown(event, ${i}, ${d}, ${digitsCount})"></td>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `card-${i}`;
+            card.innerHTML = `
+                <div class="question-header">
+                    <div>
+                        <span class="question-title">第 ${i} 題</span>
+                        <span class="input-area">
+                            <label for="num-${i}">：</label>
+                            <input type="number" id="num-${i}" class="setup-num-input" style="width: 75px;" value="${totalVal}" min="1" max="99999" oninput="manualUpdateQuestion(${i}, ${digitsCount})">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="breakdown-info" id="info-${i}"></div>
+
+                <!-- 積木畫布放大佔左側，位值表靠右 -->
+                <div class="question-content">
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas-${i}" width="720" height="110"></canvas>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="place-value-table">
+                            <thead><tr>${thHTML}</tr></thead>
+                            <tbody><tr>${tdHTML}</tr></tbody>
+                        </table>
+                        <span id="status-${i}" class="status-badge"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+            
+            updateBreakdownAndCanvas(i, digitsCount);
+        }
+
+        // 保留顯隱狀態
+        toggleInputVisibility();
+    }
+
+    function manualUpdateQuestion(index, digitsCount) {
+        const input = document.getElementById(`num-${index}`);
+        let val = parseInt(input.value) || 0;
+        if (val < 0) val = 0;
+        if (val > 99999) val = 99999;
+
+        questionAnswers[index] = val;
+
+        // 當手動修改總數時，將積木重新依照標準十進制分解
+        questionCounts[index] = {
+            tenThous: Math.floor(val / 10000),
+            thous: Math.floor((val % 10000) / 1000),
+            hunds: Math.floor((val % 1000) / 100),
+            tens: Math.floor((val % 100) / 10),
+            ones: val % 10
+        };
+
+        updateBreakdownAndCanvas(index, digitsCount);
+        checkAnswer(index, digitsCount);
+    }
+
+    function updateBreakdownAndCanvas(index, digitsCount) {
+        const counts = questionCounts[index];
+        const val = questionAnswers[index];
+
+        const info = document.getElementById(`info-${index}`);
+        let infoStr = '';
+        
+        // 顯示積木實際個數（包含超過10個的累積）
+        if (digitsCount === 5 || counts.tenThous > 0) {
+            infoStr += `<span><strong>萬位積木:</strong> ${counts.tenThous} 個</span>`;
+        }
+        infoStr += `
+            <span><strong>千位積木:</strong> ${counts.thous} 個</span>
+            <span><strong>百位積木:</strong> ${counts.hunds} 個</span>
+            <span><strong>十位積木:</strong> ${counts.tens} 個</span>
+            <span><strong>個位積木:</strong> ${counts.ones} 個</span>
+            <span style="margin-left: 8px; color: #2980b9; font-weight: bold;">(合起來是 ${val})</span>
+        `;
+        info.innerHTML = infoStr;
+
+        drawBlocks(index);
+    }
+
+    function handleInput(qIndex, digitIndex, totalDigits) {
+        const input = document.getElementById(`ans-${qIndex}-${digitIndex}`);
+        input.value = input.value.replace(/[^0-9]/g, '');
+
+        if (input.value !== '' && digitIndex < totalDigits - 1) {
+            document.getElementById(`ans-${qIndex}-${digitIndex + 1}`).focus();
+        }
+
+        checkAnswer(qIndex, totalDigits);
+    }
+
+    function handleKeyDown(e, qIndex, digitIndex, totalDigits) {
+        if (e.key === 'Backspace') {
+            const input = document.getElementById(`ans-${qIndex}-${digitIndex}`);
+            if (input.value === '' && digitIndex > 0) {
+                document.getElementById(`ans-${qIndex}-${digitIndex - 1}`).focus();
+            }
+        }
+    }
+
+    function checkAnswer(qIndex, totalDigits) {
+        let userStr = '';
+        let isFilled = true;
+
+        for (let d = 0; d < totalDigits; d++) {
+            const input = document.getElementById(`ans-${qIndex}-${d}`);
+            if (input.value === '') {
+                isFilled = false;
+            }
+            userStr += input.value;
+        }
+
+        const statusSpan = document.getElementById(`status-${qIndex}`);
+        const correctVal = questionAnswers[qIndex];
+        const targetStr = String(correctVal).padStart(totalDigits, '0');
+
+        if (!isFilled) {
+            statusSpan.innerText = '';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = '';
+            }
+            return;
+        }
+
+        if (userStr === targetStr) {
+            statusSpan.innerText = '⭕ 正確';
+            statusSpan.className = 'status-badge correct';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = 'input-correct';
+            }
+        } else {
+            statusSpan.innerText = '❌ 再試試';
+            statusSpan.className = 'status-badge wrong';
+            for (let d = 0; d < totalDigits; d++) {
+                const input = document.getElementById(`ans-${qIndex}-${d}`);
+                input.className = 'input-wrong';
+            }
+        }
+    }
+
+    /* 🎯 繪製積木（上排：千位與十位；下排：百位與個位） */
+    function drawBlocks(index) {
+        const canvas = document.getElementById(`canvas-${index}`);
+        const ctx = canvas.getContext('2d');
+        const counts = questionCounts[index];
+        const totalVal = questionAnswers[index];
+        
+        if (totalVal <= 0) {
+            canvas.height = 45;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "14px sans-serif";
+            ctx.fillStyle = "#aaa";
+            ctx.fillText("請輸入數字", 15, 28);
+            return;
+        }
+
+        const { tenThous, thous, hunds, tens, ones } = counts;
+
+        const baseRowHeight = 58;
+        const extraGap = 10; // 列之間的額外間格
+        const canvasWidth = canvas.width;
+
+        // 計算所需總列數
+        let totalRows = 0;
+
+        // 萬位（若存在）
+        if (tenThous > 0) {
+            totalRows += Math.ceil(tenThous / 9);
+        }
+
+        // 上排：千位與十位
+        if (thous > 0 || tens > 0) {
+            let thousRows = Math.ceil(thous / 9) || (thous > 0 ? 1 : 0);
+            let tensWidth = tens * 16;
+            let tensRows = Math.ceil(tensWidth / (canvasWidth - 24)) || (tens > 0 ? 1 : 0);
+            totalRows += Math.max(1, thousRows, tensRows);
+        }
+
+        // 下排：百位與個位
+        if (hunds > 0 || ones > 0) {
+            let hundsRows = Math.ceil(hunds / 9) || (hunds > 0 ? 1 : 0);
+            let onesWidth = ones * 14;
+            let onesRows = Math.ceil(onesWidth / (canvasWidth - 24)) || (ones > 0 ? 1 : 0);
+            totalRows += Math.max(1, hundsRows, onesRows);
+        }
+
+        if (totalRows === 0) totalRows = 1;
+
+        const extraGapTotal = Math.max(0, totalRows - 1) * extraGap;
+        canvas.height = Math.max(totalRows * baseRowHeight + extraGapTotal + 10, 50);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let currentY = 0;
+
+        // 0. 萬位積木（如有則最優先繪製）
+        if (tenThous > 0) {
+            currentY += baseRowHeight;
+            let currentX = 12;
+            let countInRow = 0;
+
+            for (let i = 0; i < tenThous; i++) {
+                if (countInRow >= 9 || currentX + 50 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                    countInRow = 0;
+                }
+                drawBox(ctx, currentX, currentY - 28, 36, 36, 18, "#d35400", "#f39c12");
+                currentX += 58;
+                countInRow++;
+            }
+        }
+
+        // 1. 上排：千位 與 十位
+        if (thous > 0 || tens > 0) {
+            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
+            let currentX = 12;
+
+            // 千位
+            let countInRow = 0;
+            for (let i = 0; i < thous; i++) {
+                if (countInRow >= 9 || currentX + 45 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                    countInRow = 0;
+                }
+                drawCube1000(ctx, currentX, currentY - 14);
+                currentX += 48;
+                countInRow++;
+            }
+
+            if (thous > 0 && tens > 0) {
+                currentX += 16;
+            }
+
+            // 十位
+            for (let i = 0; i < tens; i++) {
+                if (currentX + 15 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawBar10(ctx, currentX, currentY - 5);
+                currentX += 16;
+            }
+        }
+
+        // 2. 下排：百位 與 個位
+        if (hunds > 0 || ones > 0) {
+            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
+            let currentX = 12;
+
+            // 百位
+            let hundCountInRow = 0;
+            for (let i = 0; i < hunds; i++) {
+                if (hundCountInRow >= 9 || currentX + 45 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                    hundCountInRow = 0;
+                }
+                drawFlat100(ctx, currentX, currentY - 10);
+                currentX += 50;
+                hundCountInRow++;
+            }
+
+            if (hunds > 0 && ones > 0) {
+                currentX += 16;
+            }
+
+            // 個位
+            for (let i = 0; i < ones; i++) {
+                if (currentX + 12 > canvasWidth - 10) {
+                    currentX = 12;
+                    currentY += baseRowHeight + extraGap;
+                }
+                drawUnit1(ctx, currentX, currentY - 18);
+                currentX += 14;
+            }
+        }
+    }
+
+    // 繪圖基本與自訂函式
+    function drawBox(ctx, x, y, w, h, d, strokeColor = "#555", fillColor = "#ededed") {
+        ctx.save();
+        ctx.fillStyle = fillColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + d, y - d * 0.5);
+        ctx.lineTo(x + w + d, y - d * 0.5);
+        ctx.lineTo(x + w, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + w, y);
+        ctx.lineTo(x + w + d, y - d * 0.5);
+        ctx.lineTo(x + w + d, y + h - d * 0.5);
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawUnit1(ctx, x, y) { drawBox(ctx, x, y, 9, 9, 4); }
+    function drawUnit1Custom(ctx, x, y, w, h, d) { drawBox(ctx, x, y, w, h, d); }
+
+    function drawBar10(ctx, x, y) {
+        drawBox(ctx, x, y - 32, 7, 32, 3.5);
+        ctx.strokeStyle = "#888";
+        for (let i = 1; i < 10; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - (i * 3.2));
+            ctx.lineTo(x + 7, y - (i * 3.2));
+            ctx.stroke();
+        }
+    }
+    function drawBar10Custom(ctx, x, y, w, h, d) {
+        drawBox(ctx, x, y - h, w, h, d);
+    }
+
+    function drawFlat100(ctx, x, y) {
+        const w = 28, h = 3.5, d = 20;
+        drawBox(ctx, x, y, w, h, d, "#444", "#ededed");
+        ctx.save();
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 0.8;
+        for (let i = 1; i < 10; i++) {
+            let startX = x + (i * d / 10);
+            let startY = y - (i * d * 0.5 / 10);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + w, startY);
+            ctx.stroke();
+
+            let lineX = x + (i * w / 10);
+            ctx.beginPath();
+            ctx.moveTo(lineX, y);
+            ctx.lineTo(lineX + d, y - d * 0.5);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+    function drawFlat100Custom(ctx, x, y, w, h, d) {
+        drawBox(ctx, x, y, w, h, d, "#444", "#ededed");
+    }
+
+    function drawCube1000(ctx, x, y) {
+        drawBox(ctx, x, y, 34, 34, 16);
+        ctx.save();
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 0.8;
+        for (let i = 1; i < 10; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + (i * 3.4));
+            ctx.lineTo(x + 34, y + (i * 3.4));
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x + (i * 3.4), y);
+            ctx.lineTo(x + (i * 3.4), y + 34);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+    function drawCube1000Custom(ctx, x, y, w, h, d) {
+        drawBox(ctx, x, y, w, h, d);
+    }
+
+    window.onload = initPage;
+</script>
+
+</body>
+</html>
