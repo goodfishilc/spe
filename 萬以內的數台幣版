@@ -46,6 +46,9 @@
         .legend-canvas-container {
             width: 100%;
             overflow-x: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         /* 控制面板 */
@@ -126,7 +129,22 @@
         /* 圖案區 */
         .canvas-wrapper {
             flex: 1 1 auto;
-            min-width: 0; 
+            min-width: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .money-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .money-image {
+            height: 40px;
+            object-fit: contain;
         }
 
         /* 位值表與答案區 */
@@ -227,14 +245,22 @@
             border-radius: 4px;
             line-height: 1.1;
         }
-        
-        canvas {
-            background-color: #fafafa;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            width: 100%;
-            height: auto;
-            display: block;
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .legend-item img {
+            height: 30px;
+            object-fit: contain;
+        }
+
+        .legend-label {
+            font-size: 0.9rem;
+            color: #2c3e50;
         }
 
         /* 隱藏題目數字與解析的模式 */
@@ -296,8 +322,17 @@
                 margin-bottom: 2px !important;
                 color: #000 !important;
             }
-            #legend-canvas {
-                max-height: 60px !important;
+            
+            .legend-canvas-container {
+                gap: 8px !important;
+            }
+
+            .legend-item img {
+                height: 25px !important;
+            }
+
+            .legend-label {
+                font-size: 0.8rem !important;
             }
 
             .question-card {
@@ -314,6 +349,14 @@
                 margin-bottom: 2px !important;
             }
 
+            .canvas-wrapper {
+                gap: 3px !important;
+            }
+
+            .money-image {
+                height: 28px !important;
+            }
+
             .place-value-table th, 
             .place-value-table td {
                 height: 22px !important;
@@ -325,11 +368,6 @@
             .place-value-table td input {
                 color: transparent !important;
                 background-color: transparent !important;
-            }
-
-            canvas {
-                border: 1px solid #888 !important;
-                background-color: #fff !important;
             }
         }
     </style>
@@ -376,7 +414,26 @@
     <div class="legend-box">
         <div class="legend-title">💵 新台幣面額圖示說明：</div>
         <div class="legend-canvas-container">
-            <canvas id="legend-canvas" width="950" height="50"></canvas>
+            <div class="legend-item">
+                <img src="1000.jpg" alt="1000元" class="money-image">
+                <span class="legend-label">1000元鈔票</span>
+            </div>
+            <div class="legend-item">
+                <div style="display: flex; align-items: center; gap: 3px;">
+                    <div style="width: 50px; height: 30px; background-color: #c0392b; border: 1px solid #7b241c; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-weight: bold; font-size: 11px;">100</span>
+                    </div>
+                </div>
+                <span class="legend-label">100元鈔票</span>
+            </div>
+            <div class="legend-item">
+                <canvas id="legend-coin10" width="30" height="30" style="border: none;"></canvas>
+                <span class="legend-label">10元硬幣</span>
+            </div>
+            <div class="legend-item">
+                <canvas id="legend-coin1" width="30" height="30" style="border: none;"></canvas>
+                <span class="legend-label">1元硬幣</span>
+            </div>
         </div>
     </div>
 
@@ -388,34 +445,21 @@
     let questionAnswers = []; 
 
     function initPage() {
-        drawLegend();
+        drawLegendCoins();
         generateRandomQuestions();
     }
 
-    // 繪製新台幣說明列
-    function drawLegend() {
-        const canvas = document.getElementById('legend-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 繪製說明列中的硬幣
+    function drawLegendCoins() {
+        // 10元硬幣
+        const canvas10 = document.getElementById('legend-coin10');
+        const ctx10 = canvas10.getContext('2d');
+        drawCoin10(ctx10, 15, 15, 12);
 
-        ctx.font = "bold 13px Microsoft JhengHei, sans-serif";
-        ctx.fillStyle = "#2c3e50";
-
-        // 1000
-        drawNote1000(ctx, 15, 10, 52, 28);
-        ctx.fillText("1000元鈔票", 75, 28);
-
-        // 100
-        drawNote100(ctx, 210, 10, 52, 28);
-        ctx.fillText("100元鈔票", 270, 28);
-
-        // 10
-        drawCoin10(ctx, 390, 24, 13);
-        ctx.fillText("10元硬幣", 412, 28);
-
-        // 1
-        drawCoin1(ctx, 520, 24, 11);
-        ctx.fillText("1元硬幣", 540, 28);
+        // 1元硬幣
+        const canvas1 = document.getElementById('legend-coin1');
+        const ctx1 = canvas1.getContext('2d');
+        drawCoin1(ctx1, 15, 15, 12);
     }
 
     function toggleInputVisibility() {
@@ -480,8 +524,7 @@
                 <div class="breakdown-info" id="info-${i}"></div>
 
                 <div class="question-content">
-                    <div class="canvas-wrapper">
-                        <canvas id="canvas-${i}" width="720" height="90"></canvas>
+                    <div class="canvas-wrapper" id="money-display-${i}">
                     </div>
 
                     <div class="table-wrapper">
@@ -589,17 +632,13 @@
         }
     }
 
-    /* 🎯 繪製新台幣（千元/百元超過9張換列，十元/一元按畫布寬度自動折行） */
+    /* 🎯 繪製新台幣（千元用圖片，其他用繪製） */
     function drawMoney(index, value) {
-        const canvas = document.getElementById(`canvas-${index}`);
-        const ctx = canvas.getContext('2d');
+        const container = document.getElementById(`money-display-${index}`);
+        container.innerHTML = '';
         
         if (value <= 0) {
-            canvas.height = 45;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = "14px sans-serif";
-            ctx.fillStyle = "#aaa";
-            ctx.fillText("請輸入金額", 15, 28);
+            container.innerHTML = '<span style="color: #aaa; font-size: 14px;">請輸入金額</span>';
             return;
         }
 
@@ -608,144 +647,60 @@
         const tens = Math.floor((value % 100) / 10);
         const ones = value % 10;
 
-        const baseRowHeight = 45;
-        const extraGap = 8;
-        const canvasWidth = canvas.width;
-
-        // 計算總行數
-        let totalRows = 0;
-
-        if (thousands > 0 || hundreds > 0) {
-            let thousRows = Math.ceil(thousands / 9) || (thousands > 0 ? 1 : 0);
-            let hundsRows = Math.ceil(hundreds / 9) || (hundreds > 0 ? 1 : 0);
-            totalRows += Math.max(1, thousRows, hundsRows);
+        // 千元用圖片
+        for (let i = 0; i < thousands; i++) {
+            const img = document.createElement('img');
+            img.src = '1000.jpg';
+            img.alt = '1000元';
+            img.className = 'money-image';
+            container.appendChild(img);
         }
 
-        if (tens > 0 || ones > 0) {
-            let estimatedWidth = (tens * 30) + (tens > 0 && ones > 0 ? 15 : 0) + (ones * 26);
-            let estimatedRows = Math.ceil(estimatedWidth / (canvasWidth - 24)) || 1;
-            totalRows += estimatedRows;
+        // 百元用繪製
+        for (let i = 0; i < hundreds; i++) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 50;
+            canvas.height = 30;
+            canvas.style.margin = '2px';
+            const ctx = canvas.getContext('2d');
+            drawNote100ForSmall(ctx, 0, 0, 50, 30);
+            container.appendChild(canvas);
         }
 
-        const extraGapTotal = Math.max(0, totalRows - 1) * extraGap;
-        canvas.height = Math.max(totalRows * baseRowHeight + extraGapTotal + 10, 50);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        let currentY = 0;
-
-        // 1. 千元與百元鈔票同列 (超過 9 張自動換列)
-        if (thousands > 0 || hundreds > 0) {
-            currentY += baseRowHeight;
-            let currentX = 12;
-
-            // 千元鈔票
-            let countInRow = 0;
-            for (let i = 0; i < thousands; i++) {
-                if (countInRow >= 9 || currentX + 58 > canvasWidth - 10) {
-                    currentX = 12;
-                    currentY += baseRowHeight + extraGap;
-                    countInRow = 0;
-                }
-                drawNote1000(ctx, currentX, currentY - 32, 54, 30);
-                currentX += 60;
-                countInRow++;
-            }
-
-            if (thousands > 0 && hundreds > 0) {
-                currentX += 10;
-            }
-
-            // 百元鈔票
-            let hundCountInRow = 0;
-            for (let i = 0; i < hundreds; i++) {
-                if (hundCountInRow >= 9 || currentX + 58 > canvasWidth - 10) {
-                    currentX = 12;
-                    currentY += baseRowHeight + extraGap;
-                    hundCountInRow = 0;
-                }
-                drawNote100(ctx, currentX, currentY - 32, 54, 30);
-                currentX += 60;
-                hundCountInRow++;
-            }
+        // 十元用繪製
+        for (let i = 0; i < tens; i++) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 28;
+            canvas.height = 28;
+            canvas.style.margin = '2px';
+            const ctx = canvas.getContext('2d');
+            drawCoin10(ctx, 14, 14, 12);
+            container.appendChild(canvas);
         }
 
-        // 2. 十元與一元硬幣同列 (不強制 9 個換列，依寬度換列)
-        if (tens > 0 || ones > 0) {
-            currentY += (currentY > 0 ? baseRowHeight + extraGap : baseRowHeight);
-            let currentX = 15;
-
-            // 十元硬幣
-            for (let i = 0; i < tens; i++) {
-                if (currentX + 28 > canvasWidth - 10) {
-                    currentX = 15;
-                    currentY += baseRowHeight + extraGap;
-                }
-                drawCoin10(ctx, currentX, currentY - 18, 13);
-                currentX += 30;
-            }
-
-            if (tens > 0 && ones > 0) {
-                currentX += 10;
-            }
-
-            // 一元硬幣
-            for (let i = 0; i < ones; i++) {
-                if (currentX + 24 > canvasWidth - 10) {
-                    currentX = 15;
-                    currentY += baseRowHeight + extraGap;
-                }
-                drawCoin1(ctx, currentX, currentY - 18, 11);
-                currentX += 26;
-            }
+        // 一元用繪製
+        for (let i = 0; i < ones; i++) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 24;
+            canvas.height = 24;
+            canvas.style.margin = '2px';
+            const ctx = canvas.getContext('2d');
+            drawCoin1(ctx, 12, 12, 10);
+            container.appendChild(canvas);
         }
     }
 
-    /* 💵 1000元紙鈔繪製（僅保留 1000 數字） */
-    function drawNote1000(ctx, x, y, w, h) {
+    /* 💴 100元紙鈔繪製（簡化版） */
+    function drawNote100ForSmall(ctx, x, y, w, h) {
         ctx.save();
-        // 外框背景（藍色系）
-        ctx.fillStyle = "#2b5b84";
-        ctx.strokeStyle = "#1b3b57";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, 3);
-        ctx.fill();
-        ctx.stroke();
-
-        // 內框
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 0.8;
-        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-
-        // 面額數字
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 12px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("1000", x + w / 2, y + h / 2);
-        ctx.restore();
-    }
-
-    /* 💴 100元紙鈔繪製（僅保留 100 數字） */
-    function drawNote100(ctx, x, y, w, h) {
-        ctx.save();
-        // 外框背景（紅色系）
         ctx.fillStyle = "#c0392b";
         ctx.strokeStyle = "#7b241c";
         ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, 3);
-        ctx.fill();
-        ctx.stroke();
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
 
-        // 內框
-        ctx.strokeStyle = "#fadbd8";
-        ctx.lineWidth = 0.8;
-        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-
-        // 面額數字
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 12px sans-serif";
+        ctx.font = "bold 10px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("100", x + w / 2, y + h / 2);
@@ -755,7 +710,6 @@
     /* 🪙 10元硬幣繪製 (銀色) */
     function drawCoin10(ctx, x, y, r) {
         ctx.save();
-        // 圓形外框 (銀色金屬感)
         let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
         grad.addColorStop(0, '#ffffff');
         grad.addColorStop(0.7, '#bdc3c7');
@@ -769,16 +723,14 @@
         ctx.fill();
         ctx.stroke();
 
-        // 內圈點綴
         ctx.strokeStyle = '#95a5a6';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.arc(x, y, r - 2.5, 0, Math.PI * 2);
         ctx.stroke();
 
-        // 面額數字
         ctx.fillStyle = '#2c3e50';
-        ctx.font = "bold 11px sans-serif";
+        ctx.font = "bold 9px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("10", x, y);
@@ -788,7 +740,6 @@
     /* 🪙 1元硬幣繪製 (黃銅色) */
     function drawCoin1(ctx, x, y, r) {
         ctx.save();
-        // 圓形外框 (銅色)
         let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
         grad.addColorStop(0, '#f39c12');
         grad.addColorStop(0.7, '#d35400');
@@ -802,9 +753,8 @@
         ctx.fill();
         ctx.stroke();
 
-        // 面額數字
         ctx.fillStyle = '#ffffff';
-        ctx.font = "bold 10px sans-serif";
+        ctx.font = "bold 8px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("1", x, y);
