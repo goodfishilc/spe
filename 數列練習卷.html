@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數列規律練習題產生器</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --accent-color: #059669;
+            
+            /* 可自訂尺寸 CSS 變數 (預設邊界 12mm) */
+            --ws-font-size: 16pt;
+            --ws-blank-width: 65px;
+            --ws-blank-height: 38px;
+            --ws-margin-tb: 12mm;
+            --ws-margin-lr: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 控制面板 (列印時隱藏) */
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h1 {
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .type-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .type-card {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .type-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: #64748b; color: white; }
+        .btn-success { background-color: var(--accent-color); color: white; }
+        .btn-outline { background: transparent; border: 1px dashed var(--primary-color); color: var(--primary-color); width: 100%; }
+
+        /* 試卷呈現區 (動態邊界與字體大小) */
+        .sheet-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .worksheet-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: var(--ws-margin-tb) var(--ws-margin-lr);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .ws-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ws-title {
+            font-size: calc(var(--ws-font-size) * 1.5);
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .ws-info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: calc(var(--ws-font-size) * 0.85);
+        }
+
+        .ws-info-line {
+            display: inline-block;
+            border-bottom: 1.5px solid #000;
+            min-width: 80px;
+        }
+
+        .ws-section-header {
+            font-size: var(--ws-font-size);
+            font-weight: bold;
+            margin: 22px 0 12px 0;
+            background: #f1f5f9;
+            padding: 6px 10px;
+            border-left: 5px solid #334155;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ws-questions-container.cols-1 { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .ws-questions-container.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+
+        .q-item {
+            font-size: var(--ws-font-size);
+            line-height: 2;
+            page-break-inside: avoid;
+        }
+
+        .q-num {
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: var(--ws-font-size);
+        }
+
+        .seq-row {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: var(--ws-font-size);
+            font-weight: bold;
+        }
+
+        .seq-blank {
+            display: inline-block;
+            min-width: var(--ws-blank-width);
+            height: var(--ws-blank-height);
+            border: 2px solid #000;
+            border-radius: 6px;
+            background-color: #fff;
+            text-align: center;
+            line-height: calc(var(--ws-blank-height) - 4px);
+            font-size: var(--ws-font-size);
+            vertical-align: middle;
+        }
+
+        .seq-blank.ans-key {
+            color: #dc2626;
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            font-weight: bold;
+        }
+
+        .page-break-tag { page-break-before: always; }
+
+        /* 列印專屬設定 */
+        @media print {
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .no-print { display: none !important; }
+            .sheet-container { gap: 0; }
+            .worksheet-page {
+                box-shadow: none !important;
+                width: 100% !important;
+                min-height: 100vh !important;
+                padding: var(--ws-margin-tb) var(--ws-margin-lr) !important;
+                page-break-after: always;
+            }
+            .worksheet-page:last-child { page-break-after: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="control-panel no-print">
+        <div class="panel-header">
+            <h1>🔢 數列規律練習題產生器</h1>
+        </div>
+
+        <div class="section-title">📌 試卷基本設定</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="wsTitle">試卷名稱</label>
+                <input type="text" id="wsTitle" value="數列規律綜合練習卷" oninput="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="seqLength">每題數字個數</label>
+                <input type="number" id="seqLength" value="6" min="4" max="10" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="blankCount">每題填空個數</label>
+                <input type="number" id="blankCount" value="2" min="1" max="4" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="layoutCols">版面欄數</label>
+                <select id="layoutCols" onchange="generateWorksheet()">
+                    <option value="1">單欄 (字體大、空間足夠)</option>
+                    <option value="2" selected>雙欄 (精簡，節省紙張)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 尺寸與列印邊界設定 -->
+        <div class="section-title">📐 字體、方格與列印邊界設定</div>
+        <div class="form-grid" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div class="form-group">
+                <label for="fontSize">題目字體大小 (pt)</label>
+                <input type="number" id="fontSize" value="16" min="10" max="28" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="blankWidth">空格寬度 (px)</label>
+                <input type="number" id="blankWidth" value="65" min="30" max="150" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="blankHeight">空格高度 (px)</label>
+                <input type="number" id="blankHeight" value="38" min="20" max="80" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="marginTB">頁面上下邊界 (mm)</label>
+                <input type="number" id="marginTB" value="12" min="5" max="50" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="marginLR">頁面左右邊界 (mm)</label>
+                <input type="number" id="marginLR" value="12" min="5" max="50" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px;">
+            <label><input type="checkbox" id="showAnswers" checked onchange="generateWorksheet()"> 包含解答頁</label>
+            <label><input type="checkbox" id="showRuleHint" onchange="generateWorksheet()"> 題目顯示規則提示 (如：+10)</label>
+        </div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
+
+        <div class="section-title">⚙️ 數列類型設定</div>
+        <div class="type-list" id="typeList"></div>
+        <button class="btn btn-outline" onclick="addTypeCard()">➕ 新增題型類別</button>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="generateWorksheet()">🎲 重新產生題目</button>
+            <button class="btn btn-success" onclick="window.print()">🖨️ 列印 / 輸出 PDF</button>
+            <button class="btn btn-secondary" onclick="resetDefaults()">🔄 重置預設範例</button>
+        </div>
+    </div>
+
+    <!-- 試卷預覽區 -->
+    <div class="sheet-container" id="sheetContainer"></div>
+</div>
+
+<script>
+    const defaultTypes = [
+        { name: "固定加法數列 (+10)", count: 4, min: 10, max: 200, ruleType: "add", ruleVal: "10" },
+        { name: "固定減法數列 (-100)", count: 4, min: 200, max: 1000, ruleType: "sub", ruleVal: "100" },
+        { name: "等比乘法數列 (×2)", count: 3, min: 2, max: 30, ruleType: "mul", ruleVal: "2" },
+        { name: "遞增步長數列 (+1,+2,+3...)", count: 3, min: 1, max: 50, ruleType: "step_inc", ruleVal: "1" }
+    ];
+
+    let typeIdCounter = 0;
+
+    window.onload = function() { resetDefaults(); };
+
+    function resetDefaults() {
+        document.getElementById('typeList').innerHTML = '';
+        typeIdCounter = 0;
+        document.getElementById('fontSize').value = 16;
+        document.getElementById('blankWidth').value = 65;
+        document.getElementById('blankHeight').value = 38;
+        document.getElementById('marginTB').value = 12;
+        document.getElementById('marginLR').value = 12;
+        defaultTypes.forEach(t => addTypeCard(t));
+        generateWorksheet();
+    }
+
+    function addTypeCard(data = null) {
+        typeIdCounter++;
+        const id = typeIdCounter;
+        const card = document.createElement('div');
+        card.className = 'type-card';
+        card.id = `type-card-${id}`;
+
+        const name = data ? data.name : `自訂數列類型 ${id}`;
+        const count = data ? data.count : 3;
+        const min = data ? data.min : 1;
+        const max = data ? data.max : 100;
+        const ruleType = data ? data.ruleType : 'add';
+        const ruleVal = data ? data.ruleVal : '5';
+
+        card.innerHTML = `
+            <div class="type-card-header">
+                <strong>類別 ${id}</strong>
+                <button class="btn-delete" onclick="removeTypeCard(${id})">刪除</button>
+            </div>
+            <div class="type-grid">
+                <div class="form-group">
+                    <label>類型名稱</label>
+                    <input type="text" class="t-name" value="${name}" oninput="generateWorksheet()">
+                </div>
+                <div class="form-group">
+                    <label>題數</label>
+                    <input type="number" class="t-count" value="${count}" min="1" max="20" onchange="generateWorksheet()">
+                </div>
+                <div class="form-group">
+                    <label>數字範圍 (小~大)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="number" class="t-min" value="${min}" onchange="generateWorksheet()">
+                        <input type="number" class="t-max" value="${max}" onchange="generateWorksheet()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>規則類型</label>
+                    <select class="t-ruletype" onchange="generateWorksheet()">
+                        <option value="add" ${ruleType === 'add' ? 'selected' : ''}>固定加法 (+N)</option>
+                        <option value="sub" ${ruleType === 'sub' ? 'selected' : ''}>固定減法 (-N)</option>
+                        <option value="mul" ${ruleType === 'mul' ? 'selected' : ''}>固定倍數 (×N)</option>
+                        <option value="step_inc" ${ruleType === 'step_inc' ? 'selected' : ''}>步長遞增 (+1,+2...)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>規則數值 (N)</label>
+                    <input type="number" class="t-ruleval" value="${ruleVal}" onchange="generateWorksheet()">
+                </div>
+            </div>
+        `;
+
+        document.getElementById('typeList').appendChild(card);
+    }
+
+    function removeTypeCard(id) {
+        const card = document.getElementById(`type-card-${id}`);
+        if (card) { card.remove(); generateWorksheet(); }
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateSingleSequence(config) {
+        const { min, max, ruleType, ruleVal, seqLen } = config;
+        let sequence = [];
+        let startNum = getRandomInt(min, max);
+
+        if (ruleType === 'add') {
+            const step = parseInt(ruleVal) || 1;
+            for (let i = 0; i < seqLen; i++) sequence.push(startNum + i * step);
+        } else if (ruleType === 'sub') {
+            const step = parseInt(ruleVal) || 1;
+            let safeStart = Math.max(startNum, step * seqLen + 5);
+            for (let i = 0; i < seqLen; i++) sequence.push(safeStart - i * step);
+        } else if (ruleType === 'mul') {
+            const factor = parseInt(ruleVal) || 2;
+            let current = Math.max(1, startNum);
+            for (let i = 0; i < seqLen; i++) { sequence.push(current); current *= factor; }
+        } else if (ruleType === 'step_inc') {
+            let startStep = parseInt(ruleVal) || 1;
+            let current = startNum;
+            for (let i = 0; i < seqLen; i++) { sequence.push(current); current += (startStep + i); }
+        }
+        return sequence;
+    }
+
+    function selectBlankIndices(length, blankCount) {
+        let indices = [];
+        let count = Math.min(blankCount, length - 1);
+        while (indices.length < count) {
+            let idx = getRandomInt(1, length - 1);
+            if (!indices.includes(idx)) indices.push(idx);
+        }
+        return indices.sort((a, b) => a - b);
+    }
+
+    function generateWorksheet() {
+        const fSize = document.getElementById('fontSize').value || 16;
+        const bWidth = document.getElementById('blankWidth').value || 65;
+        const bHeight = document.getElementById('blankHeight').value || 38;
+        const mTB = document.getElementById('marginTB').value || 12;
+        const mLR = document.getElementById('marginLR').value || 12;
+
+        document.documentElement.style.setProperty('--ws-font-size', fSize + 'pt');
+        document.documentElement.style.setProperty('--ws-blank-width', bWidth + 'px');
+        document.documentElement.style.setProperty('--ws-blank-height', bHeight + 'px');
+        document.documentElement.style.setProperty('--ws-margin-tb', mTB + 'mm');
+        document.documentElement.style.setProperty('--ws-margin-lr', mLR + 'mm');
+
+        const title = document.getElementById('wsTitle').value || '數列規律練習卷';
+        const seqLen = parseInt(document.getElementById('seqLength').value) || 6;
+        const blankCount = parseInt(document.getElementById('blankCount').value) || 2;
+        const cols = document.getElementById('layoutCols').value;
+        const showAnswers = document.getElementById('showAnswers').checked;
+        const showRuleHint = document.getElementById('showRuleHint').checked;
+
+        const cardElements = document.querySelectorAll('.type-card');
+        if (cardElements.length === 0) return;
+
+        let allSections = [];
+        let globalQuestionNumber = 1;
+
+        cardElements.forEach(card => {
+            const name = card.querySelector('.t-name').value;
+            const count = parseInt(card.querySelector('.t-count').value) || 1;
+            const min = parseInt(card.querySelector('.t-min').value) || 1;
+            const max = parseInt(card.querySelector('.t-max').value) || 100;
+            const ruleType = card.querySelector('.t-ruletype').value;
+            const ruleVal = card.querySelector('.t-ruleval') ? card.querySelector('.t-ruleval').value : '0';
+
+            let questions = [];
+            for (let i = 0; i < count; i++) {
+                let rawSeq = generateSingleSequence({ min, max, ruleType, ruleVal, seqLen });
+                let blankIndices = selectBlankIndices(seqLen, blankCount);
+                questions.push({ qNum: globalQuestionNumber++, rawSeq, blankIndices, ruleType, ruleVal });
+            }
+            allSections.push({ title: name, questions });
+        });
+
+        const container = document.getElementById('sheetContainer');
+        container.innerHTML = '';
+        container.appendChild(createPageHTML(title, allSections, cols, false, showRuleHint));
+
+        if (showAnswers) {
+            const answerPage = createPageHTML(title + ' (解答頁)', allSections, cols, true, showRuleHint);
+            answerPage.classList.add('page-break-tag');
+            container.appendChild(answerPage);
+        }
+    }
+
+    function createPageHTML(pageTitle, sections, cols, isAnswerKey, showRuleHint) {
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'worksheet-page';
+
+        let html = `
+            <div class="ws-header">
+                <div class="ws-title">${pageTitle}</div>
+                <div class="ws-info-bar">
+                    <div>班級：<span class="ws-info-line"></span></div>
+                    <div>姓名：<span class="ws-info-line"></span></div>
+                    <div>日期：<span class="ws-info-line"></span></div>
+                    <div>得分：<span class="ws-info-line"></span></div>
+                </div>
+            </div>
+        `;
+
+        sections.forEach(sec => {
+            html += `<div class="ws-section-header">
+                <span>${sec.title}</span>
+                <span style="font-size: 0.85em; font-weight: normal;">(共 ${sec.questions.length} 題)</span>
+            </div>`;
+            
+            html += `<div class="ws-questions-container cols-${cols}">`;
+
+            sec.questions.forEach(q => {
+                html += `<div class="q-item">
+                    <span class="q-num">(${q.qNum})</span>
+                    <div class="seq-row">`;
+
+                q.rawSeq.forEach((num, idx) => {
+                    const isBlank = q.blankIndices.includes(idx);
+                    if (isBlank) {
+                        html += isAnswerKey ? `<span class="seq-blank ans-key">${num}</span>` : `<span class="seq-blank"></span>`;
+                    } else {
+                        html += `<span>${num}</span>`;
+                    }
+                    if (idx < q.rawSeq.length - 1) html += `<span>, </span>`;
+                });
+
+                if (showRuleHint) {
+                    let hintStr = `[${q.ruleType === 'add' ? '+' + q.ruleVal : q.ruleType === 'sub' ? '-' + q.ruleVal : '×' + q.ruleVal}]`;
+                    html += `<span style="font-size: 0.8em; color: #64748b; margin-left: 6px;">${hintStr}</span>`;
+                }
+
+                html += `</div></div>`;
+            });
+            html += `</div>`;
+        });
+
+        pageDiv.innerHTML = html;
+        return pageDiv;
+    }
+</script>
+
+</body>
+</html>
