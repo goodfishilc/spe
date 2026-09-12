@@ -221,8 +221,9 @@
 
         .q-item {
             font-size: var(--ws-font-size);
-            line-height: 2;
+            line-height: 1.8;
             page-break-inside: avoid;
+            margin-bottom: 6px;
         }
 
         .q-num {
@@ -239,6 +240,81 @@
             font-family: "Courier New", Courier, monospace;
             font-size: var(--ws-font-size);
             font-weight: bold;
+        }
+
+        /* 千百十個位數錢幣圖案樣式 */
+        .money-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 4px;
+            padding: 3px 6px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .money-label {
+            font-size: 0.75em;
+            color: #64748b;
+            font-weight: normal;
+            margin-right: 4px;
+        }
+
+        .money-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .m-1000 {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 1px 5px;
+            border-radius: 3px;
+            border: 1px solid #1d4ed8;
+            font-size: 8pt;
+            min-width: 32px;
+            height: 18px;
+        }
+
+        .m-100 {
+            background-color: #dc2626;
+            color: #ffffff;
+            padding: 1px 5px;
+            border-radius: 3px;
+            border: 1px solid #b91c1c;
+            font-size: 8pt;
+            min-width: 26px;
+            height: 18px;
+        }
+
+        .m-10 {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border: 1.5px solid #64748b;
+            border-radius: 50%;
+            font-size: 7.5pt;
+            width: 18px;
+            height: 18px;
+        }
+
+        .m-1 {
+            background-color: #ea580c;
+            color: #ffffff;
+            border: 1px solid #c2410c;
+            border-radius: 50%;
+            font-size: 7pt;
+            width: 16px;
+            height: 16px;
         }
 
         /* 自動響應字體與位數長度的空格輸入框 */
@@ -322,6 +398,10 @@
                 background: white !important;
                 color: black !important;
             }
+            .money-container, .money-badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -381,9 +461,10 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px;">
+        <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px; flex-wrap: wrap;">
             <label><input type="checkbox" id="showAnswers" checked onchange="generateWorksheet()"> 包含解答頁</label>
             <label><input type="checkbox" id="showRuleHint" onchange="generateWorksheet()"> 題目顯示規則提示 (如：+10)</label>
+            <label><input type="checkbox" id="showMoneyVisual" checked onchange="generateWorksheet()"> 顯示首數錢幣/鈔票視覺提示</label>
         </div>
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
@@ -528,6 +609,25 @@
         return indices.sort((a, b) => a - b);
     }
 
+    /* 產生千、百、十、一元錢幣與鈔票之圖案 HTML */
+    function renderMoneyVisual(amount) {
+        if (!amount || amount <= 0) return '';
+
+        const th = Math.floor(amount / 1000);
+        const hu = Math.floor((amount % 1000) / 100);
+        const te = Math.floor((amount % 100) / 10);
+        const on = Math.floor(amount % 10);
+
+        let badges = '';
+        for (let i = 0; i < th; i++) badges += `<span class="money-badge m-1000">1000</span>`;
+        for (let i = 0; i < hu; i++) badges += `<span class="money-badge m-100">100</span>`;
+        for (let i = 0; i < te; i++) badges += `<span class="money-badge m-10">10</span>`;
+        for (let i = 0; i < on; i++) badges += `<span class="money-badge m-1">1</span>`;
+
+        if (!badges) return '';
+        return `<div class="money-container"><span class="money-label">💡 首數圖示：</span>${badges}</div>`;
+    }
+
     function generateWorksheet() {
         const fSize = document.getElementById('fontSize').value || 16;
         const bWidth = document.getElementById('blankWidth').value || 45;
@@ -547,6 +647,7 @@
         const cols = document.getElementById('layoutCols').value;
         const showAnswers = document.getElementById('showAnswers').checked;
         const showRuleHint = document.getElementById('showRuleHint').checked;
+        const showMoneyVisual = document.getElementById('showMoneyVisual').checked;
 
         const cardElements = document.querySelectorAll('.type-card');
         if (cardElements.length === 0) return;
@@ -573,10 +674,10 @@
 
         const container = document.getElementById('sheetContainer');
         container.innerHTML = '';
-        container.appendChild(createPageHTML(title, allSections, cols, false, showRuleHint));
+        container.appendChild(createPageHTML(title, allSections, cols, false, showRuleHint, showMoneyVisual));
 
         if (showAnswers) {
-            const answerPage = createPageHTML(title + ' (解答頁)', allSections, cols, true, showRuleHint);
+            const answerPage = createPageHTML(title + ' (解答頁)', allSections, cols, true, showRuleHint, showMoneyVisual);
             answerPage.classList.add('page-break-tag');
             container.appendChild(answerPage);
         }
@@ -587,7 +688,7 @@
         banner.innerHTML = '';
     }
 
-    function createPageHTML(pageTitle, sections, cols, isAnswerKey, showRuleHint) {
+    function createPageHTML(pageTitle, sections, cols, isAnswerKey, showRuleHint, showMoneyVisual) {
         const pageDiv = document.createElement('div');
         pageDiv.className = 'worksheet-page';
 
@@ -612,9 +713,14 @@
             html += `<div class="ws-questions-container cols-${cols}">`;
 
             sec.questions.forEach(q => {
+                const firstNum = q.rawSeq[0];
+                const moneyVisualHTML = showMoneyVisual ? renderMoneyVisual(firstNum) : '';
+
                 html += `<div class="q-item">
-                    <span class="q-num">(${q.qNum})</span>
-                    <div class="seq-row">`;
+                    ${moneyVisualHTML}
+                    <div>
+                        <span class="q-num">(${q.qNum})</span>
+                        <div class="seq-row">`;
 
                 q.rawSeq.forEach((num, idx) => {
                     const isBlank = q.blankIndices.includes(idx);
@@ -640,7 +746,7 @@
                     html += `<span style="font-size: 0.8em; color: #64748b; margin-left: 6px;">${hintStr}</span>`;
                 }
 
-                html += `</div></div>`;
+                html += `</div></div></div>`;
             });
             html += `</div>`;
         });
