@@ -474,8 +474,6 @@
     // 根據範圍產生單一數列
     function createSequence(ruleType, ruleVal, seqLen, minStart, maxStart) {
         let seq = [];
-        
-        // 確保最小值不小於 1，且最小值不大於最大值
         let validMin = Math.max(1, Math.min(minStart, maxStart));
         let validMax = Math.max(validMin, Math.max(minStart, maxStart));
         let startNum = getRandomInt(validMin, validMax);
@@ -486,7 +484,7 @@
             let safeStart = Math.max(startNum, ruleVal * seqLen + 10);
             for (let i = 0; i < seqLen; i++) seq.push(safeStart - i * ruleVal);
         } else if (ruleType === 'mul') {
-            let smallStart = Math.max(1, Math.min(startNum, 10)); // 乘法起始值控制，避免數字過大
+            let smallStart = Math.max(1, Math.min(startNum, 10));
             let current = smallStart;
             for (let i = 0; i < seqLen; i++) {
                 seq.push(current);
@@ -496,7 +494,7 @@
         return seq;
     }
 
-    // 產生預設錢幣圖示 HTML
+    // 根據數值自動按位值（千、百、十、一）換算並產生最簡化的進位錢幣圖示 HTML
     function buildInitialMoneyHTML(amount) {
         if (!amount || amount <= 0) return '';
         const th = Math.floor(amount / 1000);
@@ -512,48 +510,46 @@
         return html;
     }
 
-    // 右側 2*2 按鈕點擊事件：增加指定圖示
-    function addMoneyIcon(qIndex, value) {
+    // 取得當前題目的錢幣總和
+    function getCurrentTotal(qIndex) {
         const container = document.getElementById(`money-display-${qIndex}`);
-        if (!container) return;
-
-        const badge = document.createElement('span');
-        badge.className = `money-badge m-${value}`;
-        badge.dataset.val = value;
-        badge.innerText = value;
-        badge.onclick = function() { removeMoneyBadge(this); };
-        container.appendChild(badge);
-
-        updateMoneyDisplayAndTotal(qIndex);
+        if (!container) return 0;
+        const badges = container.querySelectorAll('.money-badge');
+        let total = 0;
+        badges.forEach(b => total += (parseInt(b.dataset.val) || 0));
+        return total;
     }
 
-    // 點擊錢幣圖示即可刪除
+    // 重新繪製自動進位後的圖示並更新顯示數字
+    function renderMoneyAndTotal(qIndex, total) {
+        const container = document.getElementById(`money-display-${qIndex}`);
+        const totalEl = document.getElementById(`money-total-${qIndex}`);
+        if (container) {
+            container.innerHTML = buildInitialMoneyHTML(total);
+        }
+        if (totalEl) {
+            totalEl.innerText = total;
+        }
+    }
+
+    // 右側 2*2 按鈕點擊事件：加總後自動進行十進位轉換
+    function addMoneyIcon(qIndex, value) {
+        let currentTotal = getCurrentTotal(qIndex);
+        let newTotal = currentTotal + value;
+        renderMoneyAndTotal(qIndex, newTotal);
+    }
+
+    // 點擊錢幣圖示即可扣除該面額，並自動進行借位/退位顯示
     function removeMoneyBadge(badgeEl) {
         const container = badgeEl.parentElement;
         if (!container) return;
         const qIndex = container.id.replace('money-display-', '');
-        badgeEl.remove();
-        updateMoneyDisplayAndTotal(qIndex);
-    }
+        
+        let badgeVal = parseInt(badgeEl.dataset.val) || 0;
+        let currentTotal = getCurrentTotal(qIndex);
+        let newTotal = Math.max(0, currentTotal - badgeVal);
 
-    // 依位值排序圖示 (1000 > 100 > 10 > 1) 並即時計算總和更新數字
-    function updateMoneyDisplayAndTotal(qIndex) {
-        const container = document.getElementById(`money-display-${qIndex}`);
-        if (!container) return;
-
-        const badges = Array.from(container.querySelectorAll('.money-badge'));
-        badges.sort((a, b) => parseInt(b.dataset.val) - parseInt(a.dataset.val));
-
-        let total = 0;
-        badges.forEach(badge => {
-            total += parseInt(badge.dataset.val) || 0;
-            container.appendChild(badge);
-        });
-
-        const totalEl = document.getElementById(`money-total-${qIndex}`);
-        if (totalEl) {
-            totalEl.innerText = total;
-        }
+        renderMoneyAndTotal(qIndex, newTotal);
     }
 
     // 精準計算文字寬度並調整輸入框大小
@@ -612,7 +608,7 @@
             });
             seqRowHTML += `</div>`;
 
-            // 2. 下方：左(動態數字)、中(圖示牆)、右(2*2 控制格子)
+            // 2. 下方：左(動態數字)、中(自動進位圖示牆)、右(2*2 控制格子)
             let helperBarHTML = `
                 <div class="q-helper-bar">
                     <div class="helper-left">
