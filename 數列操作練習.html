@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數列規律與積木錢幣練習頁</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --accent-color: #059669;
+            
+            /* 可自訂邊界與字型 */
+            --ws-font-size: 16pt;
+            --ws-blank-min-width: 60px;
+            --ws-blank-min-height: 38px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-header h1 {
+            font-size: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: #64748b; color: white; }
+        .btn-warning { background-color: #d97706; color: white; }
+        .btn-success { background-color: var(--accent-color); color: white; }
+
+        /* 試卷頁面區域 */
+        .sheet-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .worksheet-page {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            padding: 24px 32px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ws-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ws-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .ws-info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+        }
+
+        .ws-info-line {
+            display: inline-block;
+            border-bottom: 1.5px solid #000;
+            min-width: 80px;
+        }
+
+        /* 題目項目 */
+        .q-item {
+            font-size: var(--ws-font-size);
+            margin-bottom: 28px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .seq-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: var(--ws-font-size);
+            font-weight: bold;
+            margin-bottom: 14px;
+        }
+
+        .q-num {
+            font-weight: bold;
+            margin-right: 6px;
+            color: #1e293b;
+        }
+
+        /* 可動態隨輸入長度調整寬度的填空輸入框 */
+        .seq-input {
+            display: inline-block;
+            height: var(--ws-blank-min-height);
+            padding: 0 8px;
+            border: 2px solid #334155;
+            border-radius: 6px;
+            background-color: #fff;
+            text-align: center;
+            font-size: var(--ws-font-size);
+            font-weight: bold;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background-color 0.2s, width 0.1s ease-out;
+        }
+
+        .seq-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .seq-input.correct {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+        }
+
+        .seq-input.incorrect {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
+        }
+
+        /* 題目下方輔助列：左(動態總和數字)、中(圖示牆)、右(2*2控制鈕) */
+        .q-helper-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 14px;
+            gap: 14px;
+        }
+
+        /* 左邊：顯示與圖示加總連動的數字 */
+        .helper-left {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            padding: 8px 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .helper-left .val {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        /* 中間：錢幣圖示動態展演區 */
+        .helper-middle {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            align-content: flex-start;
+            gap: 6px;
+            min-height: 70px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        /* 右邊：2*2 的格子按鈕區 */
+        .helper-right-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 6px;
+            min-width: 150px;
+        }
+
+        .btn-add-money {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: transform 0.1s, opacity 0.2s;
+            user-select: none;
+        }
+
+        .btn-add-money:active {
+            transform: scale(0.95);
+        }
+
+        /* 千百十個顏色樣式 */
+        .m-1000-btn { background-color: #2563eb; color: white; }
+        .m-100-btn { background-color: #dc2626; color: white; }
+        .m-10-btn { background-color: #64748b; color: white; }
+        .m-1-btn { background-color: #ea580c; color: white; }
+
+        /* 中間圖示視覺元件 */
+        .money-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            user-select: none;
+            cursor: pointer;
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .money-badge.m-1000 {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #1d4ed8;
+            font-size: 9pt;
+            min-width: 38px;
+            height: 22px;
+        }
+
+        .money-badge.m-100 {
+            background-color: #dc2626;
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #b91c1c;
+            font-size: 9pt;
+            min-width: 32px;
+            height: 22px;
+        }
+
+        .money-badge.m-10 {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border: 2px solid #64748b;
+            border-radius: 50%;
+            font-size: 8pt;
+            width: 22px;
+            height: 22px;
+        }
+
+        .money-badge.m-1 {
+            background-color: #ea580c;
+            color: #ffffff;
+            border: 1px solid #c2410c;
+            border-radius: 50%;
+            font-size: 8pt;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 答題結果提示條 */
+        .score-banner {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .score-banner.show { display: block; }
+        .score-banner.pass { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .score-banner.retry { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 教師設定控制面板 -->
+    <div class="control-panel">
+        <div class="panel-header">
+            <h1>⚙️ 數列與錢幣教學設定</h1>
+        </div>
+
+        <div class="section-title">📌 題目參數與樣式設定</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="ruleType">數列規則</label>
+                <select id="ruleType" onchange="generateWorksheet()">
+                    <option value="add">固定加法 (+N)</option>
+                    <option value="sub">固定減法 (-N)</option>
+                    <option value="mul">固定倍數 (×N)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ruleVal">規則變動數值 (N)</label>
+                <input type="number" id="ruleVal" value="10" min="1" max="500" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="minStart">起始數字最小值</label>
+                <input type="number" id="minStart" value="100" min="1" max="99999" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="maxStart">起始數字最大值</label>
+                <input type="number" id="maxStart" value="2000" min="1" max="99999" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="questionCount">總題數</label>
+                <input type="number" id="questionCount" value="4" min="1" max="10" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="seqLength">每題數列個數</label>
+                <input type="number" id="seqLength" value="6" min="4" max="10" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="blankCount">每題空格數</label>
+                <input type="number" id="blankCount" value="2" min="1" max="4" onchange="generateWorksheet()">
+            </div>
+            <div class="form-group">
+                <label for="blankWidth">預設最小空格寬度 (px)</label>
+                <input type="number" id="blankWidth" value="60" min="35" max="150" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="generateWorksheet()">🎲 重新產生題目</button>
+            <button class="btn btn-warning" onclick="checkAnswers()">✅ 檢查學生答案</button>
+            <button class="btn btn-secondary" onclick="resetStudentInputs()">🧹 清空填寫與圖示</button>
+            <button class="btn btn-success" onclick="window.print()">🖨️ 列印考卷</button>
+        </div>
+
+        <div id="scoreBanner" class="score-banner"></div>
+    </div>
+
+    <!-- 學生作答頁面 -->
+    <div class="sheet-container">
+        <div class="worksheet-page" id="worksheetPage">
+            <div class="ws-header">
+                <div class="ws-title">數列規律與位值積木練習卷</div>
+                <div class="ws-info-bar">
+                    <div>班級：<span class="ws-info-line"></span></div>
+                    <div>姓名：<span class="ws-info-line"></span></div>
+                    <div>得分：<span class="ws-info-line" id="scoreDisplay"></span></div>
+                </div>
+            </div>
+
+            <!-- 題目容器 -->
+            <div id="questionsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 隨機整數產生器
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // 隨機選取要填空的索引位置
+    function selectBlankIndices(length, blankCount) {
+        let indices = [];
+        let count = Math.min(blankCount, length - 1);
+        while (indices.length < count) {
+            let idx = getRandomInt(1, length - 1); // 預設不把第1個數字挖空
+            if (!indices.includes(idx)) indices.push(idx);
+        }
+        return indices.sort((a, b) => a - b);
+    }
+
+    // 根據範圍產生單一數列
+    function createSequence(ruleType, ruleVal, seqLen, minStart, maxStart) {
+        let seq = [];
+        
+        // 確保最小值不小於 1，且最小值不大於最大值
+        let validMin = Math.max(1, Math.min(minStart, maxStart));
+        let validMax = Math.max(validMin, Math.max(minStart, maxStart));
+        let startNum = getRandomInt(validMin, validMax);
+
+        if (ruleType === 'add') {
+            for (let i = 0; i < seqLen; i++) seq.push(startNum + i * ruleVal);
+        } else if (ruleType === 'sub') {
+            let safeStart = Math.max(startNum, ruleVal * seqLen + 10);
+            for (let i = 0; i < seqLen; i++) seq.push(safeStart - i * ruleVal);
+        } else if (ruleType === 'mul') {
+            let smallStart = Math.max(1, Math.min(startNum, 10)); // 乘法起始值控制，避免數字過大
+            let current = smallStart;
+            for (let i = 0; i < seqLen; i++) {
+                seq.push(current);
+                current *= ruleVal;
+            }
+        }
+        return seq;
+    }
+
+    // 產生預設錢幣圖示 HTML
+    function buildInitialMoneyHTML(amount) {
+        if (!amount || amount <= 0) return '';
+        const th = Math.floor(amount / 1000);
+        const hu = Math.floor((amount % 1000) / 100);
+        const te = Math.floor((amount % 100) / 10);
+        const on = Math.floor(amount % 10);
+
+        let html = '';
+        for (let i = 0; i < th; i++) html += `<span class="money-badge m-1000" data-val="1000" onclick="removeMoneyBadge(this)">1000</span>`;
+        for (let i = 0; i < hu; i++) html += `<span class="money-badge m-100" data-val="100" onclick="removeMoneyBadge(this)">100</span>`;
+        for (let i = 0; i < te; i++) html += `<span class="money-badge m-10" data-val="10" onclick="removeMoneyBadge(this)">10</span>`;
+        for (let i = 0; i < on; i++) html += `<span class="money-badge m-1" data-val="1" onclick="removeMoneyBadge(this)">1</span>`;
+        return html;
+    }
+
+    // 右側 2*2 按鈕點擊事件：增加指定圖示
+    function addMoneyIcon(qIndex, value) {
+        const container = document.getElementById(`money-display-${qIndex}`);
+        if (!container) return;
+
+        const badge = document.createElement('span');
+        badge.className = `money-badge m-${value}`;
+        badge.dataset.val = value;
+        badge.innerText = value;
+        badge.onclick = function() { removeMoneyBadge(this); };
+        container.appendChild(badge);
+
+        updateMoneyDisplayAndTotal(qIndex);
+    }
+
+    // 點擊錢幣圖示即可刪除
+    function removeMoneyBadge(badgeEl) {
+        const container = badgeEl.parentElement;
+        if (!container) return;
+        const qIndex = container.id.replace('money-display-', '');
+        badgeEl.remove();
+        updateMoneyDisplayAndTotal(qIndex);
+    }
+
+    // 依位值排序圖示 (1000 > 100 > 10 > 1) 並即時計算總和更新數字
+    function updateMoneyDisplayAndTotal(qIndex) {
+        const container = document.getElementById(`money-display-${qIndex}`);
+        if (!container) return;
+
+        const badges = Array.from(container.querySelectorAll('.money-badge'));
+        badges.sort((a, b) => parseInt(b.dataset.val) - parseInt(a.dataset.val));
+
+        let total = 0;
+        badges.forEach(badge => {
+            total += parseInt(badge.dataset.val) || 0;
+            container.appendChild(badge);
+        });
+
+        const totalEl = document.getElementById(`money-total-${qIndex}`);
+        if (totalEl) {
+            totalEl.innerText = total;
+        }
+    }
+
+    // 精準計算文字寬度並調整輸入框大小
+    function autoAdjustInputWidth(inputEl) {
+        const minWidth = parseInt(document.getElementById('blankWidth').value) || 60;
+        const text = inputEl.value || '';
+
+        if (!autoAdjustInputWidth.canvas) {
+            autoAdjustInputWidth.canvas = document.createElement("canvas");
+        }
+        const context = autoAdjustInputWidth.canvas.getContext("2d");
+        
+        const computedStyle = window.getComputedStyle(inputEl);
+        context.font = `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+        
+        const textWidth = context.measureText(text).width;
+        const padding = 20; 
+        const targetWidth = Math.max(minWidth, Math.ceil(textWidth + padding));
+        
+        inputEl.style.width = targetWidth + 'px';
+    }
+
+    // 重新繪製整份試卷
+    function generateWorksheet() {
+        const ruleType = document.getElementById('ruleType').value;
+        const ruleVal = parseInt(document.getElementById('ruleVal').value) || 10;
+        const minStart = parseInt(document.getElementById('minStart').value) || 100;
+        const maxStart = parseInt(document.getElementById('maxStart').value) || 2000;
+        const qCount = parseInt(document.getElementById('questionCount').value) || 4;
+        const seqLen = parseInt(document.getElementById('seqLength').value) || 6;
+        const blankCount = parseInt(document.getElementById('blankCount').value) || 2;
+        const minWidth = parseInt(document.getElementById('blankWidth').value) || 60;
+
+        document.documentElement.style.setProperty('--ws-blank-min-width', minWidth + 'px');
+
+        const qContainer = document.getElementById('questionsContainer');
+        qContainer.innerHTML = '';
+
+        for (let q = 1; q <= qCount; q++) {
+            const rawSeq = createSequence(ruleType, ruleVal, seqLen, minStart, maxStart);
+            const blankIndices = selectBlankIndices(seqLen, blankCount);
+            const firstNum = rawSeq[0];
+
+            let qItem = document.createElement('div');
+            qItem.className = 'q-item';
+
+            // 1. 上方：數列內容與動態縮放填空框
+            let seqRowHTML = `<div class="seq-row"><span class="q-num">(${q})</span>`;
+            rawSeq.forEach((num, idx) => {
+                if (blankIndices.includes(idx)) {
+                    seqRowHTML += `<input type="text" class="seq-input" data-ans="${num}" autocomplete="off" oninput="autoAdjustInputWidth(this)" style="width:${minWidth}px;">`;
+                } else {
+                    seqRowHTML += `<span>${num}</span>`;
+                }
+                if (idx < rawSeq.length - 1) seqRowHTML += `<span>, </span>`;
+            });
+            seqRowHTML += `</div>`;
+
+            // 2. 下方：左(動態數字)、中(圖示牆)、右(2*2 控制格子)
+            let helperBarHTML = `
+                <div class="q-helper-bar">
+                    <div class="helper-left">
+                        <span class="val" id="money-total-${q}">${firstNum}</span>
+                    </div>
+
+                    <div class="helper-middle" id="money-display-${q}">
+                        ${buildInitialMoneyHTML(firstNum)}
+                    </div>
+
+                    <div class="helper-right-grid">
+                        <button class="btn-add-money m-1000-btn" onclick="addMoneyIcon(${q}, 1000)">+1000</button>
+                        <button class="btn-add-money m-100-btn" onclick="addMoneyIcon(${q}, 100)">+100</button>
+                        <button class="btn-add-money m-10-btn" onclick="addMoneyIcon(${q}, 10)">+10</button>
+                        <button class="btn-add-money m-1-btn" onclick="addMoneyIcon(${q}, 1)">+1</button>
+                    </div>
+                </div>
+            `;
+
+            qItem.innerHTML = seqRowHTML + helperBarHTML;
+            qContainer.appendChild(qItem);
+        }
+
+        // 初始化所有輸入框寬度
+        document.querySelectorAll('.seq-input').forEach(input => autoAdjustInputWidth(input));
+
+        // 重置得分提示
+        document.getElementById('scoreDisplay').innerText = '';
+        const banner = document.getElementById('scoreBanner');
+        banner.className = 'score-banner';
+        banner.innerHTML = '';
+    }
+
+    // 檢查答案對錯
+    function checkAnswers() {
+        const inputs = document.querySelectorAll('.seq-input');
+        if (inputs.length === 0) return;
+
+        let correctCount = 0;
+        let totalCount = inputs.length;
+
+        inputs.forEach(input => {
+            const userAns = input.value.trim();
+            const strokeAns = input.dataset.ans;
+
+            input.classList.remove('correct', 'incorrect');
+            if (userAns !== '' && userAns === strokeAns) {
+                input.classList.add('correct');
+                correctCount++;
+            } else {
+                input.classList.add('incorrect');
+            }
+        });
+
+        const score = Math.round((correctCount / totalCount) * 100);
+        document.getElementById('scoreDisplay').innerText = score + ' 分';
+
+        const banner = document.getElementById('scoreBanner');
+        if (score === 100) {
+            banner.className = 'score-banner show pass';
+            banner.innerHTML = `🎉 太棒了！全對！得分：100 分 (${correctCount}/${totalCount} 格)`;
+        } else {
+            banner.className = 'score-banner show retry';
+            banner.innerHTML = `💪 答對 ${correctCount} / ${totalCount} 格 (得分：${score} 分)，請修正紅框處！`;
+        }
+    }
+
+    // 清空填寫與還原圖示
+    function resetStudentInputs() {
+        generateWorksheet();
+    }
+
+    // 頁面載入後自動初始化
+    window.onload = function() {
+        generateWorksheet();
+    };
+</script>
+
+</body>
+</html>
