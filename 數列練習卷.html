@@ -20,6 +20,7 @@
             --ws-blank-min-height: 36px;
             --ws-margin-tb: 12mm;
             --ws-margin-lr: 12mm;
+            --ws-question-gap: 20px;
         }
 
         * {
@@ -220,8 +221,8 @@
             display: none;
         }
 
-        .ws-questions-container.cols-1 { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .ws-questions-container.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+        .ws-questions-container.cols-1 { display: grid; grid-template-columns: 1fr; gap: var(--ws-question-gap); }
+        .ws-questions-container.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ws-question-gap) 28px; }
 
         .q-item {
             font-size: var(--ws-font-size);
@@ -463,6 +464,10 @@
                 <label for="marginLR">頁面左右邊界 (mm)</label>
                 <input type="number" id="marginLR" value="12" min="5" max="50" onchange="generateWorksheet()" oninput="generateWorksheet()">
             </div>
+            <div class="form-group">
+                <label for="questionGap">題目間距 (px)</label>
+                <input type="number" id="questionGap" value="20" min="5" max="80" onchange="generateWorksheet()" oninput="generateWorksheet()">
+            </div>
         </div>
 
         <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px; flex-wrap: wrap;">
@@ -513,6 +518,7 @@
         document.getElementById('blankHeight').value = 36;
         document.getElementById('marginTB').value = 12;
         document.getElementById('marginLR').value = 12;
+        document.getElementById('questionGap').value = 20;
         defaultTypes.forEach(t => addTypeCard(t));
         generateWorksheet();
     }
@@ -639,12 +645,14 @@
         const bHeight = document.getElementById('blankHeight').value || 36;
         const mTB = document.getElementById('marginTB').value || 12;
         const mLR = document.getElementById('marginLR').value || 12;
+        const qGap = document.getElementById('questionGap').value || 20;
 
         document.documentElement.style.setProperty('--ws-font-size', fSize + 'pt');
         document.documentElement.style.setProperty('--ws-blank-min-width', bWidth + 'px');
         document.documentElement.style.setProperty('--ws-blank-min-height', bHeight + 'px');
         document.documentElement.style.setProperty('--ws-margin-tb', mTB + 'mm');
         document.documentElement.style.setProperty('--ws-margin-lr', mLR + 'mm');
+        document.documentElement.style.setProperty('--ws-question-gap', qGap + 'px');
 
         const title = document.getElementById('wsTitle').value || '數列規律練習卷';
         const seqLen = parseInt(document.getElementById('seqLength').value) || 6;
