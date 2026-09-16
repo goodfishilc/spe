@@ -216,6 +216,10 @@
             justify-content: space-between;
         }
 
+        .ws-section-header.hidden {
+            display: none;
+        }
+
         .ws-questions-container.cols-1 { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .ws-questions-container.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
 
@@ -465,6 +469,7 @@
             <label><input type="checkbox" id="showAnswers" checked onchange="generateWorksheet()"> 包含解答頁</label>
             <label><input type="checkbox" id="showRuleHint" onchange="generateWorksheet()"> 題目顯示規則提示 (如：+10)</label>
             <label><input type="checkbox" id="showMoneyVisual" checked onchange="generateWorksheet()"> 顯示首數錢幣/鈔票視覺提示</label>
+            <label><input type="checkbox" id="showCategoryName" checked onchange="generateWorksheet()"> 顯示類別名稱列</label>
         </div>
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
@@ -648,6 +653,7 @@
         const showAnswers = document.getElementById('showAnswers').checked;
         const showRuleHint = document.getElementById('showRuleHint').checked;
         const showMoneyVisual = document.getElementById('showMoneyVisual').checked;
+        const showCategoryName = document.getElementById('showCategoryName').checked;
 
         const cardElements = document.querySelectorAll('.type-card');
         if (cardElements.length === 0) return;
@@ -674,10 +680,10 @@
 
         const container = document.getElementById('sheetContainer');
         container.innerHTML = '';
-        container.appendChild(createPageHTML(title, allSections, cols, false, showRuleHint, showMoneyVisual));
+        container.appendChild(createPageHTML(title, allSections, cols, false, showRuleHint, showMoneyVisual, showCategoryName));
 
         if (showAnswers) {
-            const answerPage = createPageHTML(title + ' (解答頁)', allSections, cols, true, showRuleHint, showMoneyVisual);
+            const answerPage = createPageHTML(title + ' (解答頁)', allSections, cols, true, showRuleHint, showMoneyVisual, showCategoryName);
             answerPage.classList.add('page-break-tag');
             container.appendChild(answerPage);
         }
@@ -688,7 +694,7 @@
         banner.innerHTML = '';
     }
 
-    function createPageHTML(pageTitle, sections, cols, isAnswerKey, showRuleHint, showMoneyVisual) {
+    function createPageHTML(pageTitle, sections, cols, isAnswerKey, showRuleHint, showMoneyVisual, showCategoryName) {
         const pageDiv = document.createElement('div');
         pageDiv.className = 'worksheet-page';
 
@@ -705,7 +711,8 @@
         `;
 
         sections.forEach(sec => {
-            html += `<div class="ws-section-header">
+            const headerClass = showCategoryName ? '' : 'hidden';
+            html += `<div class="ws-section-header ${headerClass}">
                 <span>${sec.title}</span>
                 <span style="font-size: 0.85em; font-weight: normal;">(共 ${sec.questions.length} 題)</span>
             </div>`;
