@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上抽籤系統</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .btn-setup {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-setup:hover {
+            background-color: #45a049;
+        }
+        .btn-draw {
+            background-color: #008CBA;
+            color: white;
+        }
+        .btn-draw:hover {
+            background-color: #007bb5;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #495057;
+        }
+        .result-box {
+            margin-top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        .win {
+            color: #d9534f;
+            background-color: #fdf7f7;
+            border: 2px dashed #d9534f;
+        }
+        .lose {
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border: 2px dashed #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎲 線上抽籤系統</h1>
+
+    <div class="input-group">
+        <label for="totalPicks">全部幾支籤：</label>
+        <input type="number" id="totalPicks" min="1" value="10">
+    </div>
+
+    <div class="input-group">
+        <label for="winningPicks">中獎幾支籤：</label>
+        <input type="number" id="winningPicks" min="0" value="2">
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-setup" onclick="initLottery()">重設/開始籤桶</button>
+        <button class="btn-draw" id="drawBtn" onclick="draw()" disabled>開始抽籤</button>
+    </div>
+
+    <div class="status-box" id="status">
+        請設定籤數並點擊「重設/開始籤桶」
+    </div>
+
+    <div class="result-box" id="result">
+        籤筒準備中
+    </div>
+</div>
+
+<script>
+    let pool = []; // 存放剩餘的籤
+
+    function initLottery() {
+        const total = parseInt(document.getElementById('totalPicks').value);
+        const win = parseInt(document.getElementById('winningPicks').value);
+
+        // 檢查輸入合法性
+        if (isNaN(total) || total <= 0) {
+            alert('請輸入有效的全部籤數！');
+            return;
+        }
+        if (isNaN(win) || win < 0) {
+            alert('請輸入有效的中獎籤數！');
+            return;
+        }
+        if (win > total) {
+            alert('中獎籤數不能大於全部籤數！');
+            return;
+        }
+
+        // 初始化籤筒 ( true 代表中獎，false 代表沒中 )
+        pool = [];
+        for (let i = 0; i < win; i++) {
+            pool.push(true);
+        }
+        for (let i = 0; i < (total - win); i++) {
+            pool.push(false);
+        }
+
+        // 啟用抽籤按鈕
+        document.getElementById('drawBtn').disabled = false;
+        
+        // 更新狀態 display
+        updateStatus(total, win);
+        
+        // 重置結果區
+        const resultDiv = document.getElementById('result');
+        resultDiv.textContent = '準備好了，請抽籤！';
+        resultDiv.className = 'result-box';
+    }
+
+    function draw() {
+        if (pool.length === 0) {
+            alert('籤筒已經空了！請重新設定籤桶。');
+            return;
+        }
+
+        // 隨機選取一支籤
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        const isWin = pool.splice(randomIndex, 1)[0]; // 抽出並從陣列移除
+
+        // 顯示結果
+        const resultDiv = document.getElementById('result');
+        if (isWin) {
+            resultDiv.textContent = '🎉 恭喜中獎！';
+            resultDiv.className = 'result-box win';
+        } else {
+            resultDiv.textContent = '💩 銘謝惠顧';
+            resultDiv.className = 'result-box lose';
+        }
+
+        // 計算剩餘的中獎數與總數
+        const remainingTotal = pool.length;
+        const remainingWin = pool.filter(item => item === true).length;
+
+        updateStatus(remainingTotal, remainingWin);
+
+        // 如果籤抽完了，停用按鈕
+        if (remainingTotal === 0) {
+            document.getElementById('drawBtn').disabled = true;
+            setTimeout(() => {
+                alert('所有籤已抽完！');
+            }, 100);
+        }
+    }
+
+    function updateStatus(remainingTotal, remainingWin) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = `剩餘籤數：<b>${remainingTotal}</b> 支 | 剩餘中獎籤：<b>${remainingWin}</b> 支`;
+    }
+</script>
+
+</body>
+</html>
