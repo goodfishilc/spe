@@ -32,7 +32,7 @@
             flex-wrap: wrap;
             gap: 15px;
             margin-bottom: 15px;
-            align-items: stretch;
+            align-items: center;
         }
 
         .section-box {
@@ -277,6 +277,11 @@
             text-align: center;
         }
 
+        /* 隱藏括號內底線控制 */
+        .worksheet.hide-underline .answer-space {
+            border-bottom: none !important;
+        }
+
         /* 位值表表格樣式 */
         .place-value-table {
             border-collapse: collapse;
@@ -462,13 +467,19 @@
                 <input type="number" id="item-gap" value="15" min="5" max="100" step="5" onchange="renderWorksheet()">
             </label>
 
+            <!-- 新增：填空底線開關選項 -->
+            <label style="cursor: pointer; font-weight: bold; color: #28a745;">
+                <input type="checkbox" id="show-underline" checked onchange="renderWorksheet()">
+                顯示填空底線
+            </label>
+
             <button onclick="generateAllNewValues()">重新隨機產生所有題目數字</button>
             <button class="print-btn" onclick="window.print()">列印 / 儲存為PDF</button>
         </div>
     </div>
 
     <!-- 作業單內容區塊 -->
-    <div class="worksheet">
+    <div class="worksheet" id="worksheet-paper">
         <div class="header">
             <h1 id="paper-main-title">國小數學：位值與數量練習單</h1>
             <div class="student-info">
@@ -630,6 +641,15 @@
 
         // 渲染作業單畫面
         function renderWorksheet() {
+            // 切換是否顯示底線 CSS Class
+            const showUnderline = document.getElementById('show-underline').checked;
+            const paperEl = document.getElementById('worksheet-paper');
+            if (showUnderline) {
+                paperEl.classList.remove('hide-underline');
+            } else {
+                paperEl.classList.add('hide-underline');
+            }
+
             // 更新主標題
             const mainTitleText = document.getElementById('main-title-input').value;
             document.getElementById('paper-main-title').innerText = mainTitleText || "國小數學：位值與數量練習單";
@@ -726,7 +746,6 @@
                         `);
                     });
                 } else if (sec.type === 'placevalue') {
-                    // 包含了指定要求的分解題型 'decompose_units'
                     const types = ['decompose_units', 'compose', 'fill_place'];
 
                     sec.items.forEach((item, i) => {
@@ -742,7 +761,6 @@
                         let qText = "";
 
                         if (qType === 'decompose_units') {
-                            // 新增的要求題型：這個數是（ ）個千（ ）個百（ ）個十（ ）個一
                             let unitPrompt = [];
                             if (w > 0 || val >= 10000) unitPrompt.push(`（ <span class="answer-space"></span> ）個萬`);
                             unitPrompt.push(`（ <span class="answer-space"></span> ）個千`);
