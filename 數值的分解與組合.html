@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小數學：位值與數量練習單產生器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "BiauKai", "標楷體", "Kingnam Maiandra", "微軟正黑體", sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* 控制面板 (列印時隱藏) */
+        .no-print {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto 20px auto;
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: stretch;
+        }
+
+        .section-box {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            border-radius: 6px;
+            background-color: #fafafa;
+            flex: 1 1 300px;
+        }
+
+        .section-box h4 {
+            margin: 0 0 10px 0;
+            color: #0056b3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-box h4 input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .input-row {
+            margin-bottom: 8px;
+        }
+
+        .sub-options-row {
+            display: flex;
+            gap: 12px;
+            background-color: #f0f7ff;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #cfe2ff;
+            margin-bottom: 8px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        input[type="text"] {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="number"], select {
+            width: 90px;
+            padding: 4px 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .title-input {
+            width: 100%;
+            max-width: 400px;
+            font-size: 16px;
+            padding: 6px 10px;
+        }
+
+        .section-title-input {
+            width: 100%;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+
+        /* 各大題內的小題數字手動微調容器 */
+        .items-adjust-container {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #bbb;
+        }
+
+        .items-adjust-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .items-adjust-container h5 {
+            margin: 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .btn-shuffle-small {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-shuffle-small:hover { background: #5a6268; }
+
+        .item-input-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .item-input-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 12px;
+            background: #fff;
+            padding: 2px 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .item-input-tag input {
+            width: 60px;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover { background-color: #218838; }
+        button.print-btn { background-color: #007bff; }
+        button.print-btn:hover { background-color: #0069d9; }
+
+        /* 作業單本體 (A4 尺寸) */
+        .worksheet {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm 15mm;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            background-color: #f0f0f0;
+            padding: 4px 8px;
+            border-left: 5px solid #333;
+        }
+
+        /* 題目清單版面控制 (單欄 vs 雙欄) */
+        .question-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-list.cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 20px;
+            align-items: start;
+        }
+
+        .question-item {
+            font-size: 16px;
+            line-height: 1.5;
+            page-break-inside: avoid;
+        }
+
+        /* 圖示容器 */
+        .svg-container {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            vertical-align: middle;
+            margin: 6px 0;
+        }
+
+        /* 鈔票與錢幣 */
+        .money {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .bill-1000 {
+            width: 65px;
+            height: 32px;
+            border: 2px solid #1f4e79;
+            background-color: #d9e1f2;
+            color: #1f4e79;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .coin {
+            border-radius: 50%;
+            border: 2px solid #555;
+            font-size: 11px;
+            background-color: #fff;
+        }
+        .coin-100 { width: 34px; height: 34px; border-color: #e67e22; color: #d35400; background: #fef5e7; }
+        .coin-10 { width: 28px; height: 28px; border-color: #f1c40f; color: #b7950b; background: #fefde8; }
+        .coin-1 { width: 22px; height: 22px; border-color: #95a5a6; color: #7f8c8d; background: #f4f6f6; }
+
+        .answer-space {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* 位值表表格樣式 */
+        .place-value-table {
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 5px;
+            background-color: #fff;
+        }
+
+        .place-value-table th, .place-value-table td {
+            border: 1px solid #000;
+            width: 44px;
+            height: 26px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .place-value-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+
+        /* 列印模式設定 */
+        @media print {
+            body { background: none; padding: 0; }
+            .no-print { display: none !important; }
+            .worksheet {
+                box-shadow: none;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            @page { size: A4; margin: 15mm; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 控制面板 -->
+    <div class="no-print">
+        <h2>數學作業單產生器設定</h2>
+        
+        <!-- 主標題設定 -->
+        <div class="input-row" style="margin-bottom: 15px;">
+            <label><strong>作業單主標題：</strong></label><br>
+            <input type="text" id="main-title-input" class="title-input" value="國小數學：位值與數量練習單" oninput="renderWorksheet()">
+        </div>
+
+        <div class="control-group">
+            <!-- 大題一設定 -->
+            <div class="section-box">
+                <h4>
+                    <input type="checkbox" id="show-blocks" checked onchange="renderWorksheet()">
+                    大題一設定
+                </h4>
+                <div class="input-row">
+                    <label>大題名稱：</label>
+                    <input type="text" id="title-blocks" class="section-title-input" value="看積木圖寫出數量" oninput="renderWorksheet()">
+                </div>
+                <div class="sub-options-row">
+                    <label style="cursor: pointer; font-weight: bold; color: #0d6efd;">
+                        <input type="checkbox" id="table-blocks" checked onchange="renderWorksheet()">
+                        顯示位值表
+                    </label>
+                    <label style="cursor: pointer; font-weight: bold; color: #d63384;">
+                        <input type="checkbox" id="shuffle-blocks" onchange="renderWorksheet()">
+                        小題順序隨機打亂
+                    </label>
+                </div>
+                <div class="input-row">
+                    <label>題數：<input type="number" id="count-blocks" value="3" min="1" max="20" onchange="generateValuesForSection('blocks')"></label>
+                </div>
+                <div class="input-row">
+                    <label>範圍：</label>
+                    <input type="number" id="min-blocks" value="10" min="1" max="99999" onchange="generateValuesForSection('blocks')"> ~
+                    <input type="number" id="max-blocks" value="2350" min="1" max="99999" onchange="generateValuesForSection('blocks')">
+                </div>
+                
+                <!-- 大題一內各小題數字調整區 -->
+                <div class="items-adjust-container">
+                    <div class="items-adjust-header">
+                        <h5>✏️ 各小題數字微調：</h5>
+                        <button class="btn-shuffle-small" onclick="shuffleSectionOrder('blocks')">🔀 立即洗牌題目順序</button>
+                    </div>
+                    <div id="items-list-blocks" class="item-input-list"></div>
+                </div>
+            </div>
+
+            <!-- 大題二設定 -->
+            <div class="section-box">
+                <h4>
+                    <input type="checkbox" id="show-coins" checked onchange="renderWorksheet()">
+                    大題二設定
+                </h4>
+                <div class="input-row">
+                    <label>大題名稱：</label>
+                    <input type="text" id="title-coins" class="section-title-input" value="看錢幣與鈔票寫出總金額" oninput="renderWorksheet()">
+                </div>
+                <div class="sub-options-row">
+                    <label style="cursor: pointer; font-weight: bold; color: #0d6efd;">
+                        <input type="checkbox" id="table-coins" checked onchange="renderWorksheet()">
+                        顯示位值表
+                    </label>
+                    <label style="cursor: pointer; font-weight: bold; color: #d63384;">
+                        <input type="checkbox" id="shuffle-coins" onchange="renderWorksheet()">
+                        小題順序隨機打亂
+                    </label>
+                </div>
+                <div class="input-row">
+                    <label>題數：<input type="number" id="count-coins" value="3" min="1" max="20" onchange="generateValuesForSection('coins')"></label>
+                </div>
+                <div class="input-row">
+                    <label>範圍：</label>
+                    <input type="number" id="min-coins" value="100" min="1" max="99999" onchange="generateValuesForSection('coins')"> ~
+                    <input type="number" id="max-coins" value="5230" min="1" max="99999" onchange="generateValuesForSection('coins')">
+                </div>
+
+                <!-- 大題二內各小題數字調整區 -->
+                <div class="items-adjust-container">
+                    <div class="items-adjust-header">
+                        <h5>✏️ 各小題數字微調：</h5>
+                        <button class="btn-shuffle-small" onclick="shuffleSectionOrder('coins')">🔀 立即洗牌題目順序</button>
+                    </div>
+                    <div id="items-list-coins" class="item-input-list"></div>
+                </div>
+            </div>
+
+            <!-- 大題三設定 -->
+            <div class="section-box">
+                <h4>
+                    <input type="checkbox" id="show-placevalue" checked onchange="renderWorksheet()">
+                    大題三設定
+                </h4>
+                <div class="input-row">
+                    <label>大題名稱：</label>
+                    <input type="text" id="title-placevalue" class="section-title-input" value="位值與數的組合與分解" oninput="renderWorksheet()">
+                </div>
+                <div class="sub-options-row">
+                    <label style="cursor: pointer; font-weight: bold; color: #0d6efd;">
+                        <input type="checkbox" id="table-placevalue" checked onchange="renderWorksheet()">
+                        顯示位值表
+                    </label>
+                    <label style="cursor: pointer; font-weight: bold; color: #d63384;">
+                        <input type="checkbox" id="shuffle-placevalue" onchange="renderWorksheet()">
+                        小題順序隨機打亂
+                    </label>
+                </div>
+                <div class="input-row">
+                    <label>題數：<input type="number" id="count-placevalue" value="4" min="1" max="20" onchange="generateValuesForSection('placevalue')"></label>
+                </div>
+                <div class="input-row">
+                    <label>範圍：</label>
+                    <input type="number" id="min-placevalue" value="100" min="1" max="99999" onchange="generateValuesForSection('placevalue')"> ~
+                    <input type="number" id="max-placevalue" value="2350" min="1" max="99999" onchange="generateValuesForSection('placevalue')">
+                </div>
+
+                <!-- 大題三內各小題數字調整區 -->
+                <div class="items-adjust-container">
+                    <div class="items-adjust-header">
+                        <h5>✏️ 各小題數字微調：</h5>
+                        <button class="btn-shuffle-small" onclick="shuffleSectionOrder('placevalue')">🔀 立即洗牌題目順序</button>
+                    </div>
+                    <div id="items-list-placevalue" class="item-input-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label><strong>版面配置：</strong>
+                <select id="layout-columns" onchange="renderWorksheet()">
+                    <option value="1">單一欄 (直排)</option>
+                    <option value="2">兩欄 (並排)</option>
+                </select>
+            </label>
+
+            <label><strong>大題順序：</strong>
+                <select id="section-order" onchange="renderWorksheet()">
+                    <option value="sequential">按順序排列</option>
+                    <option value="random">隨機排列</option>
+                </select>
+            </label>
+
+            <label><strong>題目間距 (px)：</strong>
+                <input type="number" id="item-gap" value="15" min="5" max="100" step="5" onchange="renderWorksheet()">
+            </label>
+
+            <button onclick="generateAllNewValues()">重新隨機產生所有題目數字</button>
+            <button class="print-btn" onclick="window.print()">列印 / 儲存為PDF</button>
+        </div>
+    </div>
+
+    <!-- 作業單內容區塊 -->
+    <div class="worksheet">
+        <div class="header">
+            <h1 id="paper-main-title">國小數學：位值與數量練習單</h1>
+            <div class="student-info">
+                <span>___ 年 ___ 班</span>
+                <span>座號：___</span>
+                <span>姓名：__________</span>
+                <span>得分：_______</span>
+            </div>
+        </div>
+
+        <div id="worksheet-content"></div>
+    </div>
+
+    <script>
+        // 儲存各大題當前小題的數值物件陣列
+        let sectionItems = {
+            blocks: [],
+            coins: [],
+            placevalue: []
+        };
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // 為單一大題重新生成數字
+        function generateValuesForSection(type) {
+            let cnt = parseInt(document.getElementById(`count-${type}`).value) || 1;
+            let min = parseInt(document.getElementById(`min-${type}`).value) || 1;
+            let max = parseInt(document.getElementById(`max-${type}`).value) || 99999;
+
+            if (min > max) { let temp = min; min = max; max = temp; }
+
+            let items = [];
+            for (let i = 0; i < cnt; i++) {
+                items.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    val: getRandomInt(min, max)
+                });
+            }
+            sectionItems[type] = items;
+
+            renderSectionItemInputs(type);
+            renderWorksheet();
+        }
+
+        // 立即打亂某大題的小題順序（洗牌）
+        function shuffleSectionOrder(type) {
+            sectionItems[type].sort(() => Math.random() - 0.5);
+            renderSectionItemInputs(type);
+            renderWorksheet();
+        }
+
+        // 渲染各大題面板內的各小題微調輸入框
+        function renderSectionItemInputs(type) {
+            const container = document.getElementById(`items-list-${type}`);
+            container.innerHTML = "";
+
+            sectionItems[type].forEach((item, idx) => {
+                container.innerHTML += `
+                    <div class="item-input-tag">
+                        第(${idx + 1})題:
+                        <input type="number" value="${item.val}" min="1" max="99999" 
+                            onchange="updateSingleItemValue('${type}', ${idx}, this.value)">
+                    </div>
+                `;
+            });
+        }
+
+        // 修改單一題目的數值時觸發
+        function updateSingleItemValue(type, index, newVal) {
+            let num = parseInt(newVal);
+            if (isNaN(num) || num < 1) num = 1;
+            if (num > 99999) num = 99999;
+
+            sectionItems[type][index].val = num;
+            renderWorksheet();
+        }
+
+        // 重新全部隨機產生數字
+        function generateAllNewValues() {
+            generateValuesForSection('blocks');
+            generateValuesForSection('coins');
+            generateValuesForSection('placevalue');
+        }
+
+        // 動態生成位值表 HTML
+        function generatePlaceValueTable(val) {
+            let showWan = val >= 10000;
+            let showQian = val >= 1000 || showWan;
+
+            let headers = [];
+            if (showWan) headers.push('萬位');
+            if (showQian) headers.push('千位');
+            headers.push('百位', '十位', '個位');
+
+            let thHtml = headers.map(h => `<th>${h}</th>`).join('');
+            let tdHtml = headers.map(() => `<td></td>`).join('');
+
+            return `
+                <table class="place-value-table">
+                    <tr>${thHtml}</tr>
+                    <tr>${tdHtml}</tr>
+                </table>
+            `;
+        }
+
+        // SVG 積木繪製
+        function drawBlocks(num) {
+            const th = Math.floor((num % 10000) / 1000);
+            const h = Math.floor((num % 1000) / 100);
+            const t = Math.floor((num % 100) / 10);
+            const o = num % 10;
+
+            let html = '<div class="svg-container">';
+            for (let i = 0; i < th; i++) {
+                html += `<svg width="38" height="38" viewBox="0 0 120 120" style="background:#e8f8f5;">
+                    <rect x="10" y="30" width="80" height="80" fill="#a3e4d7" stroke="#117a65" stroke-width="2"/>
+                    <path d="M 10 30 L 40 10 L 120 10 L 90 30 Z" fill="#a3e4d7" stroke="#117a65" stroke-width="2"/>
+                    <path d="M 90 30 L 120 10 L 120 90 L 90 110 Z" fill="#76d7c4" stroke="#117a65" stroke-width="2"/>
+                    <text x="50" y="75" font-size="28" fill="#117a65" font-weight="bold" text-anchor="middle">千</text>
+                </svg>`;
+            }
+            for (let i = 0; i < h; i++) {
+                html += `<svg width="32" height="32" viewBox="0 0 100 100" style="border:1px solid #333; background:#e0f7fa;">
+                    <path d="M 0,20 L 100,20 M 0,40 L 100,40 M 0,60 L 100,60 M 0,80 L 100,80" stroke="#b2ebf2" stroke-width="2"/>
+                    <path d="M 20,0 L 20,100 M 40,0 L 40,100 M 60,0 L 60,100 M 80,0 L 80,100" stroke="#b2ebf2" stroke-width="2"/>
+                </svg>`;
+            }
+            for (let i = 0; i < t; i++) {
+                html += `<svg width="7" height="32" viewBox="0 0 20 100" style="border:1px solid #333; background:#fff9c4;">
+                    <path d="M 0,20 L 20,20 M 0,40 L 20,40 M 0,60 L 20,60 M 0,80 L 20,80" stroke="#fff176" stroke-width="3"/>
+                </svg>`;
+            }
+            for (let i = 0; i < o; i++) {
+                html += `<svg width="7" height="7" viewBox="0 0 20 20" style="border:1px solid #333; background:#ffcdd2;"></svg>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // 錢幣/鈔票繪製
+        function drawCoins(num) {
+            const th = Math.floor((num % 10000) / 1000);
+            const h = Math.floor((num % 1000) / 100);
+            const t = Math.floor((num % 100) / 10);
+            const o = num % 10;
+
+            let html = '<div class="svg-container">';
+            for (let i = 0; i < th; i++) html += `<span class="money bill-1000">1000元</span>`;
+            for (let i = 0; i < h; i++) html += `<span class="money coin coin-100">100</span>`;
+            for (let i = 0; i < t; i++) html += `<span class="money coin coin-10">10</span>`;
+            for (let i = 0; i < o; i++) html += `<span class="money coin coin-1">1</span>`;
+            html += '</div>';
+            return html;
+        }
+
+        // 渲染作業單畫面
+        function renderWorksheet() {
+            // 更新主標題
+            const mainTitleText = document.getElementById('main-title-input').value;
+            document.getElementById('paper-main-title').innerText = mainTitleText || "國小數學：位值與數量練習單";
+
+            const gap = document.getElementById('item-gap').value;
+            const orderOption = document.getElementById('section-order').value;
+            const colsOption = document.getElementById('layout-columns').value; // 欄數設定 (1 或 2)
+
+            // 收集需顯示的大題資料
+            let sectionsToDraw = [];
+
+            if (document.getElementById('show-blocks').checked) {
+                let itemsList = [...sectionItems.blocks];
+                if (document.getElementById('shuffle-blocks').checked) {
+                    itemsList.sort(() => Math.random() - 0.5);
+                }
+                sectionsToDraw.push({
+                    type: 'blocks',
+                    title: document.getElementById('title-blocks').value || "看積木圖寫出數量",
+                    showTable: document.getElementById('table-blocks').checked,
+                    items: itemsList
+                });
+            }
+
+            if (document.getElementById('show-coins').checked) {
+                let itemsList = [...sectionItems.coins];
+                if (document.getElementById('shuffle-coins').checked) {
+                    itemsList.sort(() => Math.random() - 0.5);
+                }
+                sectionsToDraw.push({
+                    type: 'coins',
+                    title: document.getElementById('title-coins').value || "看錢幣與鈔票寫出總金額",
+                    showTable: document.getElementById('table-coins').checked,
+                    items: itemsList
+                });
+            }
+
+            if (document.getElementById('show-placevalue').checked) {
+                let itemsList = [...sectionItems.placevalue];
+                if (document.getElementById('shuffle-placevalue').checked) {
+                    itemsList.sort(() => Math.random() - 0.5);
+                }
+                sectionsToDraw.push({
+                    type: 'placevalue',
+                    title: document.getElementById('title-placevalue').value || "位值與數的組合與分解",
+                    showTable: document.getElementById('table-placevalue').checked,
+                    items: itemsList
+                });
+            }
+
+            // 隨機排列大題順序
+            if (orderOption === 'random') {
+                sectionsToDraw.sort(() => Math.random() - 0.5);
+            }
+
+            const chineseNumbers = ["一", "二", "三", "四"];
+            const container = document.getElementById('worksheet-content');
+            container.innerHTML = "";
+
+            if (sectionsToDraw.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:red; font-size:18px;'>請至少勾選顯示一個大題！</p>";
+                return;
+            }
+
+            sectionsToDraw.forEach((sec, index) => {
+                let itemsHtml = [];
+
+                if (sec.type === 'blocks') {
+                    sec.items.forEach((item, i) => {
+                        let val = item.val;
+                        let tableHtml = sec.showTable ? generatePlaceValueTable(val) : '';
+                        let promptText = sec.showTable ? "看圖將數字填入位值表並寫出答案：" : "看圖數數看，共有多少？";
+                        itemsHtml.push(`
+                            <div class="question-item" style="margin-bottom: ${gap}px;">
+                                (${i + 1}) ${promptText}<br>
+                                ${drawBlocks(val)}<br>
+                                ${tableHtml}
+                                答：共（ <span class="answer-space"></span> ）個積木。
+                            </div>
+                        `);
+                    });
+                } else if (sec.type === 'coins') {
+                    sec.items.forEach((item, i) => {
+                        let val = item.val;
+                        let tableHtml = sec.showTable ? generatePlaceValueTable(val) : '';
+                        let promptText = sec.showTable ? "算算看，將金額填入位值表並寫出總金額：" : "算算看，一共有多少元？";
+                        itemsHtml.push(`
+                            <div class="question-item" style="margin-bottom: ${gap}px;">
+                                (${i + 1}) ${promptText}<br>
+                                ${drawCoins(val)}<br>
+                                ${tableHtml}
+                                答：共（ <span class="answer-space"></span> ）元。
+                            </div>
+                        `);
+                    });
+                } else if (sec.type === 'placevalue') {
+                    // 包含了指定要求的分解題型 'decompose_units'
+                    const types = ['decompose_units', 'compose', 'fill_place'];
+
+                    sec.items.forEach((item, i) => {
+                        let val = item.val;
+                        let tableHtml = sec.showTable ? generatePlaceValueTable(val) : '';
+                        let w = Math.floor(val / 10000);
+                        let th = Math.floor((val % 10000) / 1000);
+                        let h = Math.floor((val % 1000) / 100);
+                        let t = Math.floor((val % 100) / 10);
+                        let o = val % 10;
+
+                        let qType = types[i % types.length];
+                        let qText = "";
+
+                        if (qType === 'decompose_units') {
+                            // 新增的要求題型：這個數是（ ）個千（ ）個百（ ）個十（ ）個一
+                            let unitPrompt = [];
+                            if (w > 0 || val >= 10000) unitPrompt.push(`（ <span class="answer-space"></span> ）個萬`);
+                            unitPrompt.push(`（ <span class="answer-space"></span> ）個千`);
+                            unitPrompt.push(`（ <span class="answer-space"></span> ）個百`);
+                            unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
+                            unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+
+                            qText = `<b>${val}</b> 是 ${unitPrompt.join('')}。`;
+                        } else if (qType === 'compose') {
+                            let parts = [];
+                            if (w > 0) parts.push(`<b>${w}</b>個萬`);
+                            if (th > 0 || w > 0) parts.push(`<b>${th}</b>個千`);
+                            if (h > 0 || th > 0 || w > 0) parts.push(`<b>${h}</b>個百`);
+                            parts.push(`<b>${t}</b>個十`);
+                            parts.push(`<b>${o}</b>個一`);
+                            qText = `${parts.join('、')}，合起來是多少？<br>答：（ <span class="answer-space"></span> ）`;
+                        } else if (qType === 'fill_place') {
+                            qText = sec.showTable 
+                                ? `請將 <b>${val}</b> 填入位值表：`
+                                : `<b>${val}</b> 的位值表示：<br>答：（ <span class="answer-space"></span> ）`;
+                        }
+
+                        itemsHtml.push(`
+                            <div class="question-item" style="margin-bottom: ${gap}px;">
+                                (${i + 1}) ${qText}<br>
+                                ${tableHtml}
+                            </div>
+                        `);
+                    });
+                }
+
+                let listClass = colsOption === '2' ? "question-list cols-2" : "question-list";
+                let sectionTitleHtml = `<div class="section-title">${chineseNumbers[index]}、${sec.title}</div>`;
+                container.innerHTML += sectionTitleHtml + `<div class="${listClass}">${itemsHtml.join('')}</div>`;
+            });
+        }
+
+        // 初始化載入
+        window.onload = function() {
+            generateAllNewValues();
+        };
+    </script>
+</body>
+</html>
