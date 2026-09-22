@@ -654,35 +654,29 @@
 
         // 百元用繪製
         for (let i = 0; i < hundreds; i++) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 50;
-            canvas.height = 30;
-            canvas.style.margin = '2px';
-            const ctx = canvas.getContext('2d');
-            drawNote100ForSmall(ctx, 0, 0, 50, 30);
-            container.appendChild(canvas);
+              const img = document.createElement('img');
+            img.src = '100ntd.jpg';
+            img.alt = '100元';
+            img.className = 'money-image';
+            container.appendChild(img);
         }
 
         // 十元用繪製
         for (let i = 0; i < tens; i++) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 28;
-            canvas.height = 28;
-            canvas.style.margin = '2px';
-            const ctx = canvas.getContext('2d');
-            drawCoin10(ctx, 14, 14, 12);
-            container.appendChild(canvas);
+              const img = document.createElement('img');
+            img.src = '10ntd.jpg';
+            img.alt = '10元';
+            img.className = 'money-image';
+            container.appendChild(img);
         }
 
         // 一元用繪製
         for (let i = 0; i < ones; i++) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 24;
-            canvas.height = 24;
-            canvas.style.margin = '2px';
-            const ctx = canvas.getContext('2d');
-            drawCoin1(ctx, 12, 12, 10);
-            container.appendChild(canvas);
+              const img = document.createElement('img');
+            img.src = '1ntd.jpg';
+            img.alt = '1元';
+            img.className = 'money-image';
+            container.appendChild(img);
         }
     }
 
