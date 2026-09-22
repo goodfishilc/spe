@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>國小數學：位值與數量練習單產生器</title>
     <style>
+        :root {
+            --worksheet-font-size: 16px;
+        }
+
         * {
             box-sizing: border-box;
             font-family: "BiauKai", "標楷體", "Kingnam Maiandra", "微軟正黑體", sans-serif;
@@ -205,7 +209,7 @@
         }
 
         .section-title {
-            font-size: 18px;
+            font-size: calc(var(--worksheet-font-size) * 1.125);
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 12px;
@@ -228,7 +232,7 @@
         }
 
         .question-item {
-            font-size: 16px;
+            font-size: var(--worksheet-font-size);
             line-height: 1.8;
             page-break-inside: avoid;
         }
@@ -236,8 +240,8 @@
         /* 比大小方框 (□) */
         .square-box {
             display: inline-block;
-            width: 24px;
-            height: 24px;
+            width: calc(var(--worksheet-font-size) * 1.3);
+            height: calc(var(--worksheet-font-size) * 1.3);
             border: 1.5px solid #000;
             border-radius: 3px;
             vertical-align: middle;
@@ -286,6 +290,10 @@
             border-bottom: 1px solid #000;
             min-width: 55px;
             text-align: center;
+        }
+
+        .answer-space.wide {
+            min-width: 150px;
         }
 
         /* 隱藏括號內底線控制 */
@@ -476,7 +484,6 @@
                     </label>
                 </div>
                 
-                <!-- 比大小題型與符號選擇 -->
                 <div class="input-row" style="background: #eef2f5; padding: 6px 8px; border-radius: 4px;">
                     <label><strong>題型選擇：</strong>
                         <select id="compare-type" onchange="renderWorksheet()">
@@ -518,6 +525,55 @@
                 </div>
             </div>
 
+            <!-- 大題五設定：數的讀法與寫法 -->
+            <div class="section-box">
+                <h4>
+                    <input type="checkbox" id="show-chinesenum" checked onchange="renderWorksheet()">
+                    大題五設定（數的讀法與寫法）
+                </h4>
+                <div class="input-row">
+                    <label>大題名稱：</label>
+                    <input type="text" id="title-chinesenum" class="section-title-input" value="數的讀法與寫法" oninput="renderWorksheet()">
+                </div>
+                <div class="sub-options-row">
+                    <label style="cursor: pointer; font-weight: bold; color: #0d6efd;">
+                        <input type="checkbox" id="table-chinesenum" onchange="renderWorksheet()">
+                        顯示位值表
+                    </label>
+                    <label style="cursor: pointer; font-weight: bold; color: #d63384;">
+                        <input type="checkbox" id="shuffle-chinesenum" onchange="renderWorksheet()">
+                        小題順序隨機打亂
+                    </label>
+                </div>
+
+                <div class="input-row" style="background: #eef2f5; padding: 6px 8px; border-radius: 4px;">
+                    <label><strong>題型選擇：</strong>
+                        <select id="chinesenum-type" onchange="renderWorksheet()">
+                            <option value="type1">型一：數字轉國字（5768 → 五千七百六十八）</option>
+                            <option value="type2">型二：國字轉數字（四千零五 → 4005）</option>
+                            <option value="mixed" selected>混合題型（兩種輪流）</option>
+                        </select>
+                    </label>
+                </div>
+                
+                <div class="input-row">
+                    <label>題數：<input type="number" id="count-chinesenum" value="4" min="1" max="20" style="width:70px;" onchange="generateValuesForSection('chinesenum')"></label>
+                </div>
+                <div class="input-row">
+                    <label>範圍：</label>
+                    <input type="number" id="min-chinesenum" value="100" min="1" max="99999" style="width:80px;" onchange="generateValuesForSection('chinesenum')"> ~
+                    <input type="number" id="max-chinesenum" value="9999" style="width:80px;" onchange="generateValuesForSection('chinesenum')">
+                </div>
+
+                <div class="items-adjust-container">
+                    <div class="items-adjust-header">
+                        <h5>✏️ 各小題數字微調：</h5>
+                        <button class="btn-shuffle-small" onclick="shuffleSectionOrder('chinesenum')">🔀 立即洗牌題目順序</button>
+                    </div>
+                    <div id="items-list-chinesenum" class="item-input-list"></div>
+                </div>
+            </div>
+
         </div>
 
         <div class="control-group">
@@ -533,6 +589,11 @@
                     <option value="sequential">按順序排列</option>
                     <option value="random">隨機排列</option>
                 </select>
+            </label>
+
+            <!-- 新增：題目字體大小調整選項 -->
+            <label style="color: #0056b3; font-weight: bold;"><strong>題目字體大小 (px)：</strong>
+                <input type="number" id="font-size-input" value="16" min="12" max="32" style="width:65px;" onchange="renderWorksheet()" oninput="renderWorksheet()">
             </label>
 
             <label><strong>題目間距 (px)：</strong>
@@ -570,13 +631,46 @@
             blocks: [],
             coins: [],
             placevalue: [],
-            compare: []
+            compare: [],
+            chinesenum: []
         };
 
         function getRandomInt(min, max) {
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // 將數字轉換為國字讀法（符合國小數學課程規範）
+        function numberToChinese(num) {
+            if (num === 0) return '零';
+            const digits = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+            const units = ['', '十', '百', '千', '萬'];
+            
+            let str = num.toString();
+            let len = str.length;
+            let result = '';
+            let zeroFlag = false;
+
+            for (let i = 0; i < len; i++) {
+                let d = parseInt(str[i]);
+                let pos = len - 1 - i;
+
+                if (d === 0) {
+                    zeroFlag = true;
+                } else {
+                    if (zeroFlag) {
+                        result += '零';
+                        zeroFlag = false;
+                    }
+                    if (pos === 1 && len === 2 && d === 1 && i === 0) {
+                        result += '十'; // 10~19 前方的「一」省略，如 12 -> 十二
+                    } else {
+                        result += digits[d] + units[pos];
+                    }
+                }
+            }
+            return result;
         }
 
         // 為單一大題重新生成數字
@@ -681,6 +775,7 @@
             generateValuesForSection('coins');
             generateValuesForSection('placevalue');
             generateValuesForSection('compare');
+            generateValuesForSection('chinesenum');
         }
 
         // 動態生成位值表 HTML
@@ -756,6 +851,10 @@
 
         // 渲染作業單畫面
         function renderWorksheet() {
+            // 更新 CSS 變數字體大小
+            const fontSizeVal = document.getElementById('font-size-input').value || 16;
+            document.documentElement.style.setProperty('--worksheet-font-size', fontSizeVal + 'px');
+
             const showUnderline = document.getElementById('show-underline').checked;
             const paperEl = document.getElementById('worksheet-paper');
             if (showUnderline) {
@@ -821,6 +920,19 @@
                     type: 'compare',
                     title: document.getElementById('title-compare').value || "比大小練習",
                     showTable: document.getElementById('table-compare').checked,
+                    items: itemsList
+                });
+            }
+
+            if (document.getElementById('show-chinesenum').checked) {
+                let itemsList = [...sectionItems.chinesenum];
+                if (document.getElementById('shuffle-chinesenum').checked) {
+                    itemsList.sort(() => Math.random() - 0.5);
+                }
+                sectionsToDraw.push({
+                    type: 'chinesenum',
+                    title: document.getElementById('title-chinesenum').value || "數的讀法與寫法",
+                    showTable: document.getElementById('table-chinesenum').checked,
                     items: itemsList
                 });
             }
@@ -923,21 +1035,18 @@
                         let itemHtml = "";
                         let displayNums = [...nums];
 
-                        // 判斷當前小題使用何種題型
                         let isType1 = (compareTypeSetting === 'type1') || 
                                       (compareTypeSetting === 'mixed' && i % 2 === 0);
 
                         if (isType1) {
-                            // 第一種題型：523、662、375 -> (  ) > (  ) > (  ) （維持洗牌亂序）
                             let numListStr = nums.join('、');
                             let blankBoxes = nums.map(() => `（ <span class="answer-space" style="min-width:60px;"></span> ）`).join(` ${sortSign} `);
                             itemHtml = `把下列各數由${sortSign === '>' ? '大到小' : '小到大'}排列：<br><b>${numListStr}</b><br>答：${blankBoxes}`;
                         } else {
-                            // 第二種題型：依選項（由大到小 或 由小到大）預先排序數字
                             if (sortSign === '>') {
-                                displayNums.sort((a, b) => b - a); // 由大到小
+                                displayNums.sort((a, b) => b - a);
                             } else {
-                                displayNums.sort((a, b) => a - b); // 由小到大
+                                displayNums.sort((a, b) => a - b);
                             }
                             let compareBoxStr = displayNums.join(' <span class="square-box"></span> ');
                             itemHtml = `請在 □ 中填入 ＞、＜ 或 ＝：<br>${compareBoxStr}`;
@@ -955,6 +1064,34 @@
                             <div class="question-item" style="margin-bottom: ${gap}px;">
                                 (${i + 1}) ${itemHtml}
                                 ${tablesHtml}
+                            </div>
+                        `);
+                    });
+                } else if (sec.type === 'chinesenum') {
+                    const typeSetting = document.getElementById('chinesenum-type').value;
+
+                    sec.items.forEach((item, i) => {
+                        let val = item.val;
+                        let chinText = numberToChinese(val);
+                        let itemHtml = "";
+
+                        let isType1 = (typeSetting === 'type1') || 
+                                      (typeSetting === 'mixed' && i % 2 === 0);
+
+                        if (isType1) {
+                            // 數字寫成國字
+                            itemHtml = `把下列數字寫成國字：<br><b>${val}</b> 讀作：（ <span class="answer-space wide"></span> ）`;
+                        } else {
+                            // 國字寫成數字
+                            itemHtml = `把下列國字寫成數字：<br><b>${chinText}</b> 記作：（ <span class="answer-space"></span> ）`;
+                        }
+
+                        let tableHtml = sec.showTable ? generatePlaceValueTable(val) : '';
+
+                        itemsHtml.push(`
+                            <div class="question-item" style="margin-bottom: ${gap}px;">
+                                (${i + 1}) ${itemHtml}
+                                ${tableHtml}
                             </div>
                         `);
                     });
