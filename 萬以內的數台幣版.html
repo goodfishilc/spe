@@ -133,7 +133,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .money-item {
@@ -142,9 +142,16 @@
             gap: 2px;
         }
 
+        /* 貨幣圖片基準與縮放 */
         .money-image {
             height: 40px;
             object-fit: contain;
+        }
+        .money-image.coin-10 {
+            height: 32px; /* 80% */
+        }
+        .money-image.coin-1 {
+            height: 28px; /* 70% */
         }
 
         /* 位值表與答案區 */
@@ -253,11 +260,6 @@
             white-space: nowrap;
         }
 
-        .legend-item img {
-            height: 30px;
-            object-fit: contain;
-        }
-
         .legend-label {
             font-size: 0.9rem;
             color: #2c3e50;
@@ -327,10 +329,6 @@
                 gap: 8px !important;
             }
 
-            .legend-item img {
-                height: 25px !important;
-            }
-
             .legend-label {
                 font-size: 0.8rem !important;
             }
@@ -355,6 +353,12 @@
 
             .money-image {
                 height: 28px !important;
+            }
+            .money-image.coin-10 {
+                height: 22.4px !important; /* 28px * 80% */
+            }
+            .money-image.coin-1 {
+                height: 19.6px !important; /* 28px * 70% */
             }
 
             .place-value-table th, 
@@ -423,11 +427,11 @@
                 <span class="legend-label">100元鈔票</span>
             </div>
             <div class="legend-item">
-                <img src="10ntd.jpg" alt="10元" class="money-image">
+                <img src="10ntd.jpg" alt="10元" class="money-image coin-10">
                 <span class="legend-label">10元硬幣</span>
             </div>
             <div class="legend-item">
-                <img src="1ntd.jpg" alt="1元" class="money-image">
+                <img src="1ntd.jpg" alt="1元" class="money-image coin-1">
                 <span class="legend-label">1元硬幣</span>
             </div>
         </div>
@@ -441,21 +445,7 @@
     let questionAnswers = []; 
 
     function initPage() {
-        drawLegendCoins();
         generateRandomQuestions();
-    }
-
-    // 繪製說明列中的硬幣
-    function drawLegendCoins() {
-        // 10元硬幣
-        const canvas10 = document.getElementById('legend-coin10');
-        const ctx10 = canvas10.getContext('2d');
-        drawCoin10(ctx10, 15, 15, 12);
-
-        // 1元硬幣
-        const canvas1 = document.getElementById('legend-coin1');
-        const ctx1 = canvas1.getContext('2d');
-        drawCoin1(ctx1, 15, 15, 12);
     }
 
     function toggleInputVisibility() {
@@ -628,7 +618,7 @@
         }
     }
 
-    /* 🎯 繪製新台幣（千元用圖片，其他用繪製） */
+    /* 🎯 繪製新台幣圖片 */
     function drawMoney(index, value) {
         const container = document.getElementById(`money-display-${index}`);
         container.innerHTML = '';
@@ -643,7 +633,7 @@
         const tens = Math.floor((value % 100) / 10);
         const ones = value % 10;
 
-        // 千元用圖片
+        // 千元
         for (let i = 0; i < thousands; i++) {
             const img = document.createElement('img');
             img.src = '1000.jpg';
@@ -652,103 +642,32 @@
             container.appendChild(img);
         }
 
-        // 百元用繪製
+        // 百元
         for (let i = 0; i < hundreds; i++) {
-              const img = document.createElement('img');
+            const img = document.createElement('img');
             img.src = '100ntd.jpg';
             img.alt = '100元';
             img.className = 'money-image';
             container.appendChild(img);
         }
 
-        // 十元用繪製
+        // 十元 (加上 coin-10 Class 縮放至 80%)
         for (let i = 0; i < tens; i++) {
-              const img = document.createElement('img');
+            const img = document.createElement('img');
             img.src = '10ntd.jpg';
             img.alt = '10元';
-            img.className = 'money-image';
+            img.className = 'money-image coin-10';
             container.appendChild(img);
         }
 
-        // 一元用繪製
+        // 一元 (加上 coin-1 Class 縮放至 70%)
         for (let i = 0; i < ones; i++) {
-              const img = document.createElement('img');
+            const img = document.createElement('img');
             img.src = '1ntd.jpg';
             img.alt = '1元';
-            img.className = 'money-image';
+            img.className = 'money-image coin-1';
             container.appendChild(img);
         }
-    }
-
-    /* 💴 100元紙鈔繪製（簡化版） */
-    function drawNote100ForSmall(ctx, x, y, w, h) {
-        ctx.save();
-        ctx.fillStyle = "#c0392b";
-        ctx.strokeStyle = "#7b241c";
-        ctx.lineWidth = 1;
-        ctx.fillRect(x, y, w, h);
-        ctx.strokeRect(x, y, w, h);
-
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 10px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("100", x + w / 2, y + h / 2);
-        ctx.restore();
-    }
-
-    /* 🪙 10元硬幣繪製 (銀色) */
-    function drawCoin10(ctx, x, y, r) {
-        ctx.save();
-        let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
-        grad.addColorStop(0, '#ffffff');
-        grad.addColorStop(0.7, '#bdc3c7');
-        grad.addColorStop(1, '#7f8c8d');
-
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = '#7f8c8d';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.strokeStyle = '#95a5a6';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.arc(x, y, r - 2.5, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = "bold 9px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("10", x, y);
-        ctx.restore();
-    }
-
-    /* 🪙 1元硬幣繪製 (黃銅色) */
-    function drawCoin1(ctx, x, y, r) {
-        ctx.save();
-        let grad = ctx.createRadialGradient(x - 2, y - 2, 2, x, y, r);
-        grad.addColorStop(0, '#f39c12');
-        grad.addColorStop(0.7, '#d35400');
-        grad.addColorStop(1, '#873600');
-
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = '#873600';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = "bold 8px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("1", x, y);
-        ctx.restore();
     }
 
     window.onload = initPage;
