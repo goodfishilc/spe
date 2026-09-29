@@ -75,6 +75,7 @@
             margin-bottom: 8px;
             font-size: 13px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         label {
@@ -368,6 +369,13 @@
                         <input type="checkbox" id="shuffle-blocks" onchange="renderWorksheet()">
                         小題順序隨機打亂
                     </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-blocks" onchange="renderWorksheet()">
+                            <option value="1" selected>單一欄 (直排)</option>
+                            <option value="2">兩欄 (並排)</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="input-row">
                     <label>題數：<input type="number" id="count-blocks" value="3" min="1" max="20" style="width:70px;" onchange="generateValuesForSection('blocks')"></label>
@@ -406,6 +414,13 @@
                         <input type="checkbox" id="shuffle-coins" onchange="renderWorksheet()">
                         小題順序隨機打亂
                     </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-coins" onchange="renderWorksheet()">
+                            <option value="1" selected>單一欄 (直排)</option>
+                            <option value="2">兩欄 (並排)</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="input-row">
                     <label>題數：<input type="number" id="count-coins" value="3" min="1" max="20" style="width:70px;" onchange="generateValuesForSection('coins')"></label>
@@ -425,7 +440,7 @@
                 </div>
             </div>
 
-            <!-- 大題三設定：數線填填看 (新增) -->
+            <!-- 大題三設定：數線填填看 -->
             <div class="section-box">
                 <h4>
                     <input type="checkbox" id="show-numberline" checked onchange="renderWorksheet()">
@@ -443,6 +458,13 @@
                     <label style="cursor: pointer; font-weight: bold; color: #d63384;">
                         <input type="checkbox" id="shuffle-numberline" onchange="renderWorksheet()">
                         小題順序隨機打亂
+                    </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-numberline" onchange="renderWorksheet()">
+                            <option value="1" selected>單一欄 (直排)</option>
+                            <option value="2">兩欄 (並排)</option>
+                        </select>
                     </label>
                 </div>
 
@@ -500,6 +522,13 @@
                         <input type="checkbox" id="shuffle-placevalue" onchange="renderWorksheet()">
                         小題順序隨機打亂
                     </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-placevalue" onchange="renderWorksheet()">
+                            <option value="1" selected>單一欄 (直排)</option>
+                            <option value="2">兩欄 (並排)</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="input-row">
                     <label>題數：<input type="number" id="count-placevalue" value="3" min="1" max="20" style="width:70px;" onchange="generateValuesForSection('placevalue')"></label>
@@ -537,6 +566,13 @@
                     <label style="cursor: pointer; font-weight: bold; color: #d63384;">
                         <input type="checkbox" id="shuffle-compare" onchange="renderWorksheet()">
                         小題順序隨機打亂
+                    </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-compare" onchange="renderWorksheet()">
+                            <option value="1">單一欄 (直排)</option>
+                            <option value="2" selected>兩欄 (並排)</option>
+                        </select>
                     </label>
                 </div>
                 
@@ -600,6 +636,13 @@
                         <input type="checkbox" id="shuffle-chinesenum" onchange="renderWorksheet()">
                         小題順序隨機打亂
                     </label>
+                    <label style="font-weight: bold; color: #198754;">
+                        版面：
+                        <select id="cols-chinesenum" onchange="renderWorksheet()">
+                            <option value="1">單一欄 (直排)</option>
+                            <option value="2" selected>兩欄 (並排)</option>
+                        </select>
+                    </label>
                 </div>
 
                 <div class="input-row" style="background: #eef2f5; padding: 6px 8px; border-radius: 4px;">
@@ -633,10 +676,11 @@
         </div>
 
         <div class="control-group">
-            <label><strong>版面配置：</strong>
-                <select id="layout-columns" onchange="renderWorksheet()">
-                    <option value="1">單一欄 (直排)</option>
-                    <option value="2">兩欄 (並排)</option>
+            <label style="color: #198754; font-weight: bold;"><strong>快速調整全部大題版面：</strong>
+                <select id="layout-columns-all" onchange="changeAllColumns(this.value)">
+                    <option value="">-- 請選擇 --</option>
+                    <option value="1">全部改為單一欄 (直排)</option>
+                    <option value="2">全部改為兩欄 (並排)</option>
                 </select>
             </label>
 
@@ -728,6 +772,18 @@
                 }
             }
             return result;
+        }
+
+        // 快速一鍵切換全部大題版面
+        function changeAllColumns(val) {
+            if (!val) return;
+            const types = ['blocks', 'coins', 'numberline', 'placevalue', 'compare', 'chinesenum'];
+            types.forEach(type => {
+                const el = document.getElementById(`cols-${type}`);
+                if (el) el.value = val;
+            });
+            renderWorksheet();
+            document.getElementById('layout-columns-all').value = "";
         }
 
         // 為單一大題重新生成數字
@@ -967,7 +1023,7 @@
 
                 if (blankIndices.includes(i)) {
                     // 填空括號
-                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（　　　　）</text>`;
+                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（    ）</text>`;
                 } else {
                     // 數字標籤
                     svgContent += `<text x="${x}" y="${lineY + 25}" font-size="14" font-weight="bold" text-anchor="middle" fill="#000">${val}</text>`;
@@ -1046,7 +1102,6 @@
 
             const gap = document.getElementById('item-gap').value;
             const orderOption = document.getElementById('section-order').value;
-            const colsOption = document.getElementById('layout-columns').value;
 
             let sectionsToDraw = [];
 
@@ -1059,6 +1114,7 @@
                     type: 'blocks',
                     title: document.getElementById('title-blocks').value || "看積木圖寫出數量",
                     showTable: document.getElementById('table-blocks').checked,
+                    cols: document.getElementById('cols-blocks').value,
                     items: itemsList
                 });
             }
@@ -1072,6 +1128,7 @@
                     type: 'coins',
                     title: document.getElementById('title-coins').value || "看錢幣與鈔票寫出總金額",
                     showTable: document.getElementById('table-coins').checked,
+                    cols: document.getElementById('cols-coins').value,
                     items: itemsList
                 });
             }
@@ -1085,6 +1142,7 @@
                     type: 'numberline',
                     title: document.getElementById('title-numberline').value || "觀察數線規律並填入正確的數",
                     showTable: document.getElementById('table-numberline').checked,
+                    cols: document.getElementById('cols-numberline').value,
                     items: itemsList
                 });
             }
@@ -1098,6 +1156,7 @@
                     type: 'placevalue',
                     title: document.getElementById('title-placevalue').value || "位值與數的組合與分解",
                     showTable: document.getElementById('table-placevalue').checked,
+                    cols: document.getElementById('cols-placevalue').value,
                     items: itemsList
                 });
             }
@@ -1111,6 +1170,7 @@
                     type: 'compare',
                     title: document.getElementById('title-compare').value || "比大小練習",
                     showTable: document.getElementById('table-compare').checked,
+                    cols: document.getElementById('cols-compare').value,
                     items: itemsList
                 });
             }
@@ -1124,6 +1184,7 @@
                     type: 'chinesenum',
                     title: document.getElementById('title-chinesenum').value || "數的讀法與寫法",
                     showTable: document.getElementById('table-chinesenum').checked,
+                    cols: document.getElementById('cols-chinesenum').value,
                     items: itemsList
                 });
             }
@@ -1302,7 +1363,7 @@
                     });
                 }
 
-                let listClass = colsOption === '2' ? "question-list cols-2" : "question-list";
+                let listClass = sec.cols === '2' ? "question-list cols-2" : "question-list";
                 let sectionTitleHtml = `<div class="section-title">${chineseNumbers[index]}、${sec.title}</div>`;
                 container.innerHTML += sectionTitleHtml + `<div class="${listClass}">${itemsHtml.join('')}</div>`;
             });
