@@ -1022,8 +1022,8 @@
                 svgContent += `<line x1="${x}" y1="${lineY - 6}" x2="${x}" y2="${lineY + 6}" stroke="#000" stroke-width="2"/>`;
 
                 if (blankIndices.includes(i)) {
-                    // 填空括號
-                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（    ）</text>`;
+                    // 填空括號 (加大空間，方便學生填寫數字)
+                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（          ）</text>`;
                 } else {
                     // 數字標籤
                     svgContent += `<text x="${x}" y="${lineY + 25}" font-size="14" font-weight="bold" text-anchor="middle" fill="#000">${val}</text>`;
