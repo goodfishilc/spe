@@ -1023,7 +1023,7 @@
 
                 if (blankIndices.includes(i)) {
                     // 填空括號 (加大空間，方便學生填寫數字)
-                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（　　　　　）</text>`;
+                    svgContent += `<text x="${x}" y="${lineY + 26}" font-size="14" font-weight="bold" text-anchor="middle">（　　　 　）</text>`;
                 } else {
                     // 數字標籤
                     svgContent += `<text x="${x}" y="${lineY + 25}" font-size="14" font-weight="bold" text-anchor="middle" fill="#000">${val}</text>`;
