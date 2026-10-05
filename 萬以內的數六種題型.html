@@ -1266,13 +1266,32 @@
 
                         if (qType === 'decompose_units') {
                             let unitPrompt = [];
-                            if (w > 0 || val >= 10000) unitPrompt.push(`（ <span class="answer-space"></span> ）個萬`);
-                            unitPrompt.push(`（ <span class="answer-space"></span> ）個千`);
-                            unitPrompt.push(`（ <span class="answer-space"></span> ）個百`);
-                            unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
-                            unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
 
-                            qText = `<b>${val}</b> 是 ${unitPrompt.join('')}。`;
+                            // 依題目的實際位數，從最高位開始顯示，不出現超過題目位數的位值。
+                            // 中間位即使是 0 仍會保留，例如 304 → 百、十、一。
+                            if (val >= 10000) {
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個萬`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個千`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個百`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+                            } else if (val >= 1000) {
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個千`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個百`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+                            } else if (val >= 100) {
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個百`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+                            } else if (val >= 10) {
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個十`);
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+                            } else {
+                                unitPrompt.push(`（ <span class="answer-space"></span> ）個一`);
+                            }
+
+                            qText = `<b>${val}</b> 是 ${unitPrompt.join('，')}。`;
                         } else if (qType === 'compose') {
                             let parts = [];
                             if (w > 0) parts.push(`<b>${w}</b>個萬`);
