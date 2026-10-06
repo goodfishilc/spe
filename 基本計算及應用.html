@@ -73,7 +73,7 @@
         background: transparent !important;
       }
       .ans-key-overlay {
-        color: #dc2626 !important; /* Red color for printed answer keys */
+        color: #dc2626 !important;
         font-weight: bold !important;
       }
     }
@@ -82,7 +82,6 @@
       display: none;
     }
 
-    /* Custom scrollbar for better visual quality */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -110,7 +109,7 @@
             國小數學基本運算練習產生器
             <span class="text-xs bg-indigo-500 text-indigo-100 font-medium px-2 py-0.5 rounded-full">100題庫旗艦版</span>
           </h1>
-          <p class="text-xs text-indigo-200">支援四則運算、錢幣圖解法、100題應用問題庫與A4列印排版</p>
+          <p class="text-xs text-indigo-200">支援四則運算、錢幣圖解法、應用題自由分欄與 A4 列印排版</p>
         </div>
       </div>
 
@@ -209,9 +208,9 @@
         </div>
       </div>
 
-      <!-- 3. Question Count & Shuffle Settings -->
+      <!-- 3. Question Count & Layout Settings -->
       <div class="space-y-3">
-        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">3. 大題題數與排序設定</label>
+        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">3. 大題題數與排版設定</label>
         
         <div class="space-y-2">
           <!-- Section 1 Count -->
@@ -232,13 +231,28 @@
             <input type="number" id="count-sec2" min="0" max="15" value="2" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
           </div>
 
-          <!-- Section 3 Count -->
-          <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-            <div>
-              <div class="text-sm font-bold text-slate-800">第三大題：應用問題</div>
-              <div class="text-[11px] text-slate-500">100 題生活情境應用題庫</div>
+          <!-- Section 3 Count & Columns -->
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-bold text-slate-800">第三大題：應用問題</div>
+                <div class="text-[11px] text-slate-500">100 題生活情境應用題庫</div>
+              </div>
+              <input type="number" id="count-sec3" min="0" max="15" value="3" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
             </div>
-            <input type="number" id="count-sec3" min="0" max="15" value="3" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
+            
+            <!-- 應用問題分欄數目選擇 -->
+            <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+              <label class="text-xs font-bold text-indigo-900 flex items-center gap-1">
+                <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+                應用問題分欄數目：
+              </label>
+              <select id="cols-sec3" onchange="generateWorksheet()" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500">
+                <option value="1">單欄 (1 欄)</option>
+                <option value="2" selected>雙欄 (2 欄)</option>
+                <option value="3">三欄 (3 欄)</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -371,12 +385,12 @@
   <script>
     // Global Application State
     let isAnswerKeyVisible = false;
-    let currentMode = 'online'; // 'online' or 'print'
+    let currentMode = 'online';
     let worksheetQuestions = [];
 
-    // Complete 100 Elementary Math Word Problems Database (25 +, 25 -, 25 *, 25 /)
+    // Complete 100 Elementary Math Word Problems Database
     const WORD_PROBLEMS_DB = [
-      // ----------------- ADDITION (25) -----------------
+      // ADDITION (25)
       { type: '+', text: '小明買了一本故事書花了 {n1} 元，又買了一支鋼筆花了 {n2} 元，請問小明一共花了多少元？', unit: '元' },
       { type: '+', text: '小華的存錢筒裡原本有 {n1} 元，這個月媽媽又給他 {n2} 元，現在存錢筒裡共有多少元？', unit: '元' },
       { type: '+', text: '班級圖書館原本有 {n1} 本圖書，學校今天又增添了 {n2} 本新書，現在圖書館共有幾本書？', unit: '本' },
@@ -403,7 +417,7 @@
       { type: '+', text: '烘焙坊做餅乾用掉了 {n1} 公克麵粉，做蛋糕用掉了 {n2} 公克麵粉，一共用了幾公克麵粉？', unit: '公克' },
       { type: '+', text: '市立動物園上午入園了 {n1} 人，下午入園了 {n2} 人，今天一共有多少人參觀動物園？', unit: '人' },
 
-      // ----------------- SUBTRACTION (25) -----------------
+      // SUBTRACTION (25)
       { type: '-', text: '姐姐原本有 {n1} 元，買了一本文具日記本花了 {n2} 元，姐姐還剩下多少元？', unit: '元' },
       { type: '-', text: '公車上原本有 {n1} 名乘客，到了捷運站有 {n2} 名乘客下車，現在車上還有幾名乘客？', unit: '名' },
       { type: '-', text: '烘焙坊今天烤了 {n1} 個菠蘿麵包，到了下午賣掉了 {n2} 個，還剩下幾個菠蘿麵包？', unit: '個' },
@@ -430,7 +444,7 @@
       { type: '-', text: '寵物店收容了 {n1} 隻流浪貓，有 {n2} 隻被好心人領養，還剩下幾隻流浪貓？', unit: '隻' },
       { type: '-', text: '小立原本有 {n1} 元零用錢，買文具花了 {n2} 元，小立現在還剩下多少錢？', unit: '元' },
 
-      // ----------------- MULTIPLICATION (25) -----------------
+      // MULTIPLICATION (25)
       { type: '*', text: '一盒巧克力有 {n1} 顆，媽媽買了 {n2} 盒準備送給朋友，一共有幾顆巧克力？', unit: '顆' },
       { type: '*', text: '學校體育課排隊，一排有 {n1} 位同學，排了 {n2} 排，一共有幾位同學？', unit: '位' },
       { type: '*', text: '遊樂園全票一張 {n1} 元，老師為班上學生購置了 {n2} 張門票，一共需要付多少元？', unit: '元' },
@@ -457,7 +471,7 @@
       { type: '*', text: '一份便當價格是 {n1} 元，公司訂購了 {n2} 份便當，一共需要支付多少元？', unit: '元' },
       { type: '*', text: '一雙襪子售價 {n1} 元，小麗買了 {n2} 雙，一共要花多少元？', unit: '元' },
 
-      // ----------------- DIVISION (25) -----------------
+      // DIVISION (25)
       { type: '/', text: '老師把 {n1} 顆糖果平均分給 {n2} 位表現優異的小朋友，每位小朋友可以分到幾顆糖果？', unit: '顆' },
       { type: '/', text: '一條長 {n1} 公分的繩子，平均剪成 {n2} 段，每一段繩子長幾公分？', unit: '公分' },
       { type: '/', text: '果農將 {n1} 顆水蜜桃平均裝成 {n2} 個禮盒，每盒裡面有幾顆水蜜桃？', unit: '顆' },
@@ -504,12 +518,11 @@
       if (count <= 0) return '';
 
       let items = '';
-      const displayCount = Math.min(count, 10); // Limit maximum display elements to avoid DOM overflow
+      const displayCount = Math.min(count, 10);
 
       for (let i = 0; i < displayCount; i++) {
         let svgContent = '';
         if (type === '1000') {
-          // NTD 1000 Note (Blue)
           svgContent = `
             <svg class="w-16 h-9 shadow-sm rounded border border-blue-400 inline-block" viewBox="0 0 120 65" fill="none">
               <rect width="120" height="65" rx="3" fill="#3b82f6"/>
@@ -519,7 +532,6 @@
               <circle cx="100" cy="45" r="8" fill="#1d4ed8"/>
             </svg>`;
         } else if (type === '100') {
-          // NTD 100 Note (Red)
           svgContent = `
             <svg class="w-14 h-8 shadow-sm rounded border border-red-400 inline-block" viewBox="0 0 110 60" fill="none">
               <rect width="110" height="60" rx="3" fill="#ef4444"/>
@@ -528,7 +540,6 @@
               <text x="55" y="35" font-size="13" fill="#fee2e2" font-weight="900" text-anchor="middle">壹佰圓</text>
             </svg>`;
         } else if (type === '50') {
-          // NTD 50 Coin (Gold)
           svgContent = `
             <svg class="w-9 h-9 inline-block" viewBox="0 0 40 40">
               <circle cx="20" cy="20" r="18" fill="#eab308" stroke="#ca8a04" stroke-width="2"/>
@@ -536,7 +547,6 @@
               <text x="20" y="24" font-size="13" font-weight="900" fill="#854d0e" text-anchor="middle" class="font-num">50</text>
             </svg>`;
         } else if (type === '10') {
-          // NTD 10 Coin (Silver/Bimetallic)
           svgContent = `
             <svg class="w-8 h-8 inline-block" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="16" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
@@ -544,14 +554,12 @@
               <text x="18" y="22" font-size="12" font-weight="900" fill="#334155" text-anchor="middle" class="font-num">10</text>
             </svg>`;
         } else if (type === '5') {
-          // NTD 5 Coin (Silver Small)
           svgContent = `
             <svg class="w-7 h-7 inline-block" viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="14" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
               <text x="16" y="20" font-size="11" font-weight="900" fill="#475569" text-anchor="middle" class="font-num">5</text>
             </svg>`;
         } else {
-          // NTD 1 Coin (Copper/Bronze)
           svgContent = `
             <svg class="w-6 h-6 inline-block" viewBox="0 0 28 28">
               <circle cx="14" cy="14" r="12" fill="#d97706" stroke="#b45309" stroke-width="1.5"/>
@@ -575,7 +583,6 @@
       `;
     }
 
-    // Breakdown monetary amount into NTD denominations
     function breakdownNTD(amount) {
       let rem = amount;
       const k1000 = Math.floor(rem / 1000); rem %= 1000;
@@ -599,8 +606,6 @@
       if (document.getElementById('op-sub').checked) ops.push('-');
       if (document.getElementById('op-mul').checked) ops.push('*');
       if (document.getElementById('op-div').checked) ops.push('/');
-      
-      // Fallback to Addition if user unchecks all boxes
       if (ops.length === 0) return ['+'];
       return ops;
     }
@@ -610,17 +615,14 @@
       return ops[Math.floor(Math.random() * ops.length)];
     }
 
-    // Generate single pair of math problem numbers based on selected digits & rules
     function generateSinglePair(op, d1, d2) {
       let n1 = getRandomByDigits(d1);
       let n2 = getRandomByDigits(d2);
 
       if (op === '-') {
-        // Ensure subtraction yields non-negative result
         if (n1 < n2) [n1, n2] = [n2, n1];
       } else if (op === '/') {
-        // Ensure exact division with integer quotient
-        n2 = Math.max(1, getRandomByDigits(Math.min(d2, 2))); // Controlled divisor
+        n2 = Math.max(1, getRandomByDigits(Math.min(d2, 2)));
         const quotient = Math.max(1, getRandomByDigits(d1));
         n1 = n2 * quotient;
       }
@@ -634,7 +636,6 @@
       return { n1, n2, op, ans };
     }
 
-    // Master Worksheet Generator Function
     function generateWorksheet() {
       const d1 = parseInt(document.getElementById('digits-num1').value);
       const d2 = parseInt(document.getElementById('digits-num2').value);
@@ -647,7 +648,6 @@
 
       worksheetQuestions = [];
 
-      // Generate Section 1: Vertical Calculation Questions
       for (let i = 0; i < count1; i++) {
         const op = getRandomOperator();
         worksheetQuestions.push({
@@ -657,7 +657,6 @@
         });
       }
 
-      // Generate Section 2: Coin Visual Representation Questions
       for (let i = 0; i < count2; i++) {
         const op = getRandomOperator();
         worksheetQuestions.push({
@@ -667,12 +666,10 @@
         });
       }
 
-      // Generate Section 3: Word Problems from 100 DB
       for (let i = 0; i < count3; i++) {
         const op = getRandomOperator();
         const pair = generateSinglePair(op, d1, d2);
         
-        // Filter DB templates by selected operation
         const matches = WORD_PROBLEMS_DB.filter(w => w.type === op);
         const tpl = matches[Math.floor(Math.random() * matches.length)];
         const text = tpl.text.replace('{n1}', pair.n1).replace('{n2}', pair.n2);
@@ -686,7 +683,6 @@
         });
       }
 
-      // Shuffle entire question pool if shuffle mode is checked
       if (isShuffle && worksheetQuestions.length > 0) {
         for (let i = worksheetQuestions.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -694,7 +690,6 @@
         }
       }
 
-      // Reset online grading results banner
       document.getElementById('online-result-modal').classList.add('hidden');
       document.getElementById('score-display').innerText = '______';
 
@@ -716,7 +711,6 @@
       }
 
       if (isShuffled) {
-        // Mixed Render Mode (Shuffled Questions)
         const secEl = document.createElement('section');
         secEl.className = 'space-y-6';
         secEl.innerHTML = `
@@ -737,7 +731,6 @@
         });
 
       } else {
-        // Categorized Section Render Mode
         const sec1Questions = worksheetQuestions.filter(q => q.section === 1);
         const sec2Questions = worksheetQuestions.filter(q => q.section === 2);
         const sec3Questions = worksheetQuestions.filter(q => q.section === 3);
@@ -786,8 +779,13 @@
           });
         }
 
-        // Section 3: Word Problems
+        // Section 3: Word Problems (支援動態多欄排版)
         if (sec3Questions.length > 0) {
+          const s3Cols = parseInt(document.getElementById('cols-sec3').value) || 1;
+          let gridColsClass = 'grid-cols-1';
+          if (s3Cols === 2) gridColsClass = 'grid-cols-1 md:grid-cols-2';
+          if (s3Cols === 3) gridColsClass = 'grid-cols-1 md:grid-cols-3';
+
           const s3 = document.createElement('section');
           s3.className = 'space-y-4 page-break-inside-avoid';
           s3.innerHTML = `
@@ -796,9 +794,9 @@
                 <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">3</span>
                 第三大題：情境應用練習
               </h3>
-              <span class="text-xs text-slate-500">請列出算式並寫出完整答案</span>
+              <span class="text-xs text-slate-500">請列出算式並寫出完整答案 (${s3Cols} 欄排版)</span>
             </div>
-            <div class="space-y-4" id="s3-list"></div>
+            <div class="grid ${gridColsClass} gap-4" id="s3-list"></div>
           `;
           container.appendChild(s3);
           const list = s3.querySelector('#s3-list');
@@ -811,7 +809,6 @@
       lucide.createIcons();
     }
 
-    // Generic Question Card Dispatcher for Shuffled Mode
     function renderQuestionCard(q, idx) {
       if (q.section === 1) return renderVerticalCard(q, idx);
       if (q.section === 2) return renderCoinCard(q, idx);
@@ -820,7 +817,7 @@
 
     function renderVerticalCard(q, idx) {
       const card = document.createElement('div');
-      card.className = 'p-3 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg flex flex-col items-center justify-between relative';
+      card.className = 'p-3 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg flex flex-col items-center justify-between relative page-break-inside-avoid';
 
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op);
 
@@ -862,7 +859,7 @@
 
     function renderCoinCard(q, idx) {
       const card = document.createElement('div');
-      card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-2 relative';
+      card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-2 relative page-break-inside-avoid';
 
       const c1 = breakdownNTD(q.n1);
       const c2 = breakdownNTD(q.n2);
@@ -929,26 +926,26 @@
 
     function renderWordCard(q, idx) {
       const card = document.createElement('div');
-      card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative';
+      card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative page-break-inside-avoid flex flex-col justify-between';
 
       card.innerHTML = `
         <div class="dynamic-question font-bold text-slate-800 leading-relaxed">
           <span class="font-num">(${idx + 1})</span> ${q.text}
         </div>
 
-        <div class="space-y-2 bg-white p-3 rounded-xl border border-slate-200">
-          <div class="flex items-center gap-2">
+        <div class="space-y-2 bg-white p-3 rounded-xl border border-slate-200 mt-auto">
+          <div class="flex items-center gap-1.5">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">算式：</span>
             <input type="text"
-              class="interactive-formula font-num w-full text-xs font-medium border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
-              placeholder="例如: ${q.n1} ${q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op)} ${q.n2} = ${q.ans}">
+              class="interactive-formula font-num w-full text-xs font-medium border-b border-slate-300 px-1 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+              placeholder="算式 (例如: ${q.n1} ${q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op)} ${q.n2} = ${q.ans})">
             <span class="hidden print-only text-xs w-full border-b border-dashed border-slate-300 h-4"></span>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：</span>
             <input type="number" data-idx="${idx}" data-ans="${q.ans}"
-              class="user-ans-input font-num w-28 text-xs font-bold border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+              class="user-ans-input font-num w-24 text-xs font-bold border-b border-slate-300 px-1 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
               placeholder="數字">
             <span class="text-xs font-bold text-slate-600">${q.unit}</span>
             <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-xs font-extrabold text-rose-600">
