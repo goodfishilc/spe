@@ -60,6 +60,20 @@
         break-inside: avoid;
         page-break-inside: avoid;
       }
+      /* 大題與題目容器允許跨頁；單張題目卡片保留原有避免拆頁規則。 */
+      #worksheet-content > section,
+      #worksheet-content > section > .grid,
+      #mixed-questions-list {
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+      /* 大題標題盡量與後面的第一列題目留在同一頁。 */
+      #worksheet-content > section > div:first-child {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        break-after: avoid;
+        page-break-after: avoid;
+      }
       .print-border {
         border: 1px solid #333 !important;
       }
@@ -75,6 +89,30 @@
       .ans-key-overlay {
         color: #dc2626 !important;
         font-weight: bold !important;
+      }
+
+      /* 應用題列印：依教師選擇的欄位數固定排版，不受螢幕斷點影響 */
+      .word-print-cols-1 {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px !important;
+      }
+      .word-print-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      .word-print-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+      }
+      .word-print-cols-1 .student-calc-space { min-height: 120px !important; }
+      .word-print-cols-2 .student-calc-space { min-height: 92px !important; }
+      .word-print-cols-3 .student-calc-space { min-height: 70px !important; }
+      .word-print-cols-2 .word-card,
+      .word-print-cols-3 .word-card {
+        padding: 10px !important;
+      }
+      .word-print-cols-3 .word-card {
+        font-size: 9pt !important;
       }
     }
 
@@ -874,16 +912,16 @@
           if (secQuestions.length === 0) return;
 
           const sEl = document.createElement('section');
-          sEl.className = 'space-y-4 page-break-inside-avoid';
+          sEl.className = 'space-y-4';
 
           let gridColsClass = 'grid-cols-1';
           if (sec.type === 'vertical') {
             gridColsClass = 'grid-cols-2 sm:grid-cols-3 gap-4';
           } else if (sec.type === 'word') {
             const cols = sec.cols || 1;
-            if (cols === 2) gridColsClass = 'grid-cols-1 md:grid-cols-2 gap-4';
-            else if (cols === 3) gridColsClass = 'grid-cols-1 md:grid-cols-3 gap-4';
-            else gridColsClass = 'grid-cols-1 gap-4';
+            if (cols === 2) gridColsClass = 'grid-cols-1 md:grid-cols-2 gap-4 word-print-cols-2';
+            else if (cols === 3) gridColsClass = 'grid-cols-1 md:grid-cols-3 gap-4 word-print-cols-3';
+            else gridColsClass = 'grid-cols-1 gap-4 word-print-cols-1';
           } else {
             gridColsClass = 'grid-cols-1 gap-4';
           }
@@ -1057,7 +1095,7 @@
 
     function renderWordCard(q, idx) {
       const card = document.createElement('div');
-      card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative page-break-inside-avoid flex flex-col justify-between';
+      card.className = 'word-card p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative page-break-inside-avoid flex flex-col justify-between';
 
       const showHint = q.showHint !== false;
       const showAnswer = q.showAnswer !== false;
@@ -1090,7 +1128,7 @@
         </div>
 
         <div class="w-full mt-2">
-            <div class="student-calc-space bg-white border border-slate-300 rounded-xl min-h-[120px] print:min-h-[120px] p-2">
+                    <div class="student-calc-space bg-white border border-slate-300 rounded-xl min-h-[96px] p-2">
             <div class="h-7 border-b border-dashed border-slate-200"></div>
             <div class="h-7 border-b border-dashed border-slate-200"></div>
             <div class="h-7"></div>
