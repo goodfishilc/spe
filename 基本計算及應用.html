@@ -309,7 +309,10 @@
         ops: ['+', '-'],
         d1: 2,
         d2: 2,
-        cols: 1
+        cols: 1,
+        showHint: true,
+        showAnswer: true,
+        showVerticalNumbers: true
       },
       {
         id: 'sec_2',
@@ -318,7 +321,10 @@
         ops: ['+', '-'],
         d1: 2,
         d2: 2,
-        cols: 1
+        cols: 1,
+        showHint: true,
+        showAnswer: true,
+        showVerticalNumbers: true
       },
       {
         id: 'sec_3',
@@ -327,7 +333,10 @@
         ops: ['+', '-', '*', '/'],
         d1: 2,
         d2: 2,
-        cols: 2
+        cols: 2,
+        showHint: true,
+        showAnswer: true,
+        showVerticalNumbers: true
       }
     ];
 
@@ -507,6 +516,30 @@
             </div>
           </div>
 
+          <!-- Vertical Calculation Display Options -->
+          <div class="${sec.type === 'vertical' ? 'block' : 'hidden'}">
+            <label class="block text-[11px] font-bold text-indigo-700 mb-1">直式計算區設定</label>
+            <label class="flex items-center space-x-2 cursor-pointer bg-indigo-50 p-2 rounded-lg border border-indigo-200 text-xs font-bold text-indigo-800">
+              <input type="checkbox" ${sec.showVerticalNumbers !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showVerticalNumbers', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+              <span>直式區顯示題目數字</span>
+            </label>
+          </div>
+
+          <!-- Word Problem Display Options -->
+          <div class="${isWord ? 'block' : 'hidden'}">
+            <label class="block text-[11px] font-bold text-indigo-700 mb-1">應用題顯示設定</label>
+            <div class="grid grid-cols-2 gap-2 bg-indigo-50 p-2 rounded-lg border border-indigo-200 text-xs font-bold text-indigo-800">
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${sec.showHint !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showHint', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>顯示提示（算式）</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${sec.showAnswer !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showAnswer', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>顯示「答：」</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Allowed Operators (Multi-checkbox) -->
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">3. 允許的運算符號 (可複選)</label>
@@ -567,7 +600,10 @@
         ops: ['+', '-'],
         d1: 2,
         d2: 2,
-        cols: 2
+        cols: 2,
+        showHint: true,
+        showAnswer: true,
+        showVerticalNumbers: true
       };
       sectionsData.push(newSec);
       renderSectionSettings();
@@ -607,9 +643,9 @@
 
     function resetSectionsToDefault() {
       sectionsData = [
-        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1 },
-        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1 },
-        { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/'], d1: 2, d2: 2, cols: 2 }
+        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true },
+        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true },
+        { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/'], d1: 2, d2: 2, cols: 2, showHint: true, showAnswer: true, showVerticalNumbers: true }
       ];
       renderSectionSettings();
       generateWorksheet();
@@ -766,6 +802,9 @@
             sectionTitle: secTitleStr,
             sectionType: sec.type,
             cols: sec.cols || 1,
+            showHint: sec.showHint !== false,
+            showAnswer: sec.showAnswer !== false,
+            showVerticalNumbers: sec.showVerticalNumbers !== false,
             ...pair
           };
 
@@ -883,37 +922,66 @@
       card.className = 'p-3 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg flex flex-col items-center justify-between relative page-break-inside-avoid';
 
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op);
+      const showVerticalNumbers = q.showVerticalNumbers !== false;
 
+      // 上方固定顯示橫式題目
+      const horizontalHTML = `
+        <div class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-center mb-2">
+          <span class="font-num dynamic-question text-lg font-black text-slate-900">
+            ${q.n1} ${opSym} ${q.n2} ＝
+          </span>
+        </div>`;
+
+      // 下方直式計算區：可選擇是否預先顯示題目數字
       let verticalHTML = '';
       if (q.op === '/') {
-        verticalHTML = `
-          <div class="font-num dynamic-question text-base font-bold text-slate-800 text-right pr-2 my-2">
-            <div class="border-b-2 border-slate-900 inline-block px-2">${q.n2} <span class="font-normal text-slate-400">)</span> ${q.n1}</div>
+        verticalHTML = showVerticalNumbers ? `
+          <div class="w-full min-h-[92px] flex items-start justify-center pt-3">
+            <div class="font-num dynamic-question text-base font-bold text-slate-800 text-right">
+              <div class="inline-flex items-start">
+                <span class="pr-1 pt-1">${q.n2}</span>
+                <span class="border-t-2 border-l-2 border-slate-900 min-w-[90px] min-h-[55px] px-2 pt-1 text-left">${q.n1}</span>
+              </div>
+            </div>
+          </div>` : `
+          <div class="w-full min-h-[92px] flex items-start justify-center pt-3">
+            <div class="inline-flex items-start">
+              <span class="w-8 h-7 mr-1"></span>
+              <span class="border-t-2 border-l-2 border-slate-900 min-w-[100px] min-h-[58px]"></span>
+            </div>
           </div>`;
       } else {
-        verticalHTML = `
-          <div class="font-num dynamic-question text-lg font-bold text-slate-800 leading-tight w-32 py-1">
-            <div class="text-right">${q.n1}</div>
-            <div class="text-right flex justify-between">
+        verticalHTML = showVerticalNumbers ? `
+          <div class="font-num dynamic-question text-lg font-bold text-slate-800 leading-tight w-36 py-2 min-h-[92px]">
+            <div class="text-right pr-1">${q.n1}</div>
+            <div class="text-right flex justify-between pr-1">
               <span>${opSym}</span>
               <span>${q.n2}</span>
             </div>
             <div class="border-b-2 border-slate-900 my-1"></div>
+            <div class="h-7"></div>
+          </div>` : `
+          <div class="font-num dynamic-question text-lg font-bold text-slate-800 leading-tight w-36 py-2 min-h-[92px]">
+            <div class="h-6"></div>
+            <div class="h-6"></div>
+            <div class="border-b-2 border-slate-900 my-1"></div>
+            <div class="h-7"></div>
           </div>`;
       }
 
       card.innerHTML = `
-        <div class="w-full text-xs font-bold text-slate-400 font-num">(${idx + 1})</div>
+        <div class="w-full text-xs font-bold text-slate-400 font-num mb-1">(${idx + 1})</div>
+        ${horizontalHTML}
         ${verticalHTML}
-        
-        <div class="w-full mt-2">
+
+        <div class="w-full mt-1 print:hidden">
           <input type="number" data-idx="${idx}" data-ans="${q.ans}"
             class="user-ans-input font-num w-full text-center font-bold text-base border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none ${currentMode === 'print' ? 'hidden' : ''}" 
             placeholder="填答">
           <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-center text-sm font-extrabold text-rose-600 pt-1 font-num">
-            答：${q.ans}
+            ${q.ans}
           </div>
-          <div class="hidden print-only text-center text-xs font-bold pt-2">答：______</div>
+          <div class="hidden print-only text-center text-xs font-bold pt-2">______</div>
         </div>
         <div class="feedback-icon hidden absolute top-2 right-2 text-lg font-black"></div>
       `;
@@ -978,9 +1046,9 @@
             class="user-ans-input font-num w-32 text-center font-bold text-sm border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
             placeholder="填寫答案">
           <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} font-num text-sm font-extrabold text-rose-600">
-            答：${q.ans}
+            ${q.ans}
           </div>
-          <span class="hidden print-only text-xs font-bold">答：__________</span>
+          <span class="hidden print-only text-xs font-bold">__________</span>
         </div>
         <div class="feedback-icon hidden absolute top-2 right-2 text-lg font-black"></div>
       `;
@@ -991,20 +1059,19 @@
       const card = document.createElement('div');
       card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative page-break-inside-avoid flex flex-col justify-between';
 
-      card.innerHTML = `
-        <div class="dynamic-question font-bold text-slate-800 leading-relaxed">
-          <span class="font-num">(${idx + 1})</span> ${q.text}
-        </div>
+      const showHint = q.showHint !== false;
+      const showAnswer = q.showAnswer !== false;
 
-        <div class="space-y-2 bg-white p-3 rounded-xl border border-slate-200 mt-auto">
+      const hintHTML = showHint ? `
           <div class="flex items-center gap-1.5">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">算式：</span>
             <input type="text"
               class="interactive-formula font-num w-full text-xs font-medium border-b border-slate-300 px-1 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
               placeholder="算式 (例如: ${q.n1} ${q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op)} ${q.n2} = ${q.ans})">
             <span class="hidden print-only text-xs w-full border-b border-dashed border-slate-300 h-4"></span>
-          </div>
+          </div>` : '';
 
+      const answerHTML = showAnswer ? `
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：</span>
             <input type="number" data-idx="${idx}" data-ans="${q.ans}"
@@ -1015,8 +1082,26 @@
               答：<span class="font-num">${q.ans}</span> ${q.unit}
             </div>
             <span class="hidden print-only text-xs font-bold">________ (${q.unit})</span>
+          </div>` : '';
+
+      card.innerHTML = `
+        <div class="dynamic-question font-bold text-slate-800 leading-relaxed">
+          <span class="font-num">(${idx + 1})</span> ${q.text}
+        </div>
+
+        <div class="w-full mt-2">
+            <div class="student-calc-space bg-white border border-slate-300 rounded-xl min-h-[120px] print:min-h-[120px] p-2">
+            <div class="h-7 border-b border-dashed border-slate-200"></div>
+            <div class="h-7 border-b border-dashed border-slate-200"></div>
+            <div class="h-7"></div>
           </div>
         </div>
+
+        ${(showHint || showAnswer) ? `
+        <div class="space-y-2 bg-white p-3 rounded-xl border border-slate-200 mt-auto">
+          ${hintHTML}
+          ${answerHTML}
+        </div>` : ''}
         <div class="feedback-icon hidden absolute top-2 right-2 text-lg font-black"></div>
       `;
       return card;
