@@ -501,6 +501,27 @@
       return n.toString();
     }
 
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+    }
+
+    function getSectionTitle(sec, index) {
+      return (sec.title || '').trim() || `第${toChineseNumber(index + 1)}大題：${getSectionTypeName(sec.type)}`;
+    }
+
+    function updateSectionTitle(id, value) {
+      const index = sectionsData.findIndex(sec => sec.id === id);
+      if (index < 0) return;
+      const sec = sectionsData[index];
+      sec.title = value;
+      const title = getSectionTitle(sec, index);
+      const heading = document.getElementById(`section-title-${id}`);
+      if (heading) heading.textContent = title;
+      worksheetQuestions.forEach(q => {
+        if (q.sectionId === id) q.sectionTitle = title;
+      });
+    }
+
     // Dynamic Section Management Functions
     function renderSectionSettings() {
       const container = document.getElementById('sections-config-list');
@@ -525,6 +546,15 @@
               <button onclick="removeSection('${sec.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-2 py-0.5 rounded hover:bg-rose-50 transition-colors">
                 刪除大題
               </button>` : ''}
+          </div>
+
+          <div>
+            <label for="title-${sec.id}" class="block text-[11px] font-bold text-slate-600 mb-1">大題標題（可自行修改）</label>
+            <input id="title-${sec.id}" type="text" value="${escapeHTML(sec.title || '')}"
+              placeholder="${escapeHTML(getSectionTitle({...sec, title: ''}, idx))}"
+              oninput="updateSectionTitle('${sec.id}', this.value)"
+              class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+            <p class="text-[11px] text-slate-500 mt-1">可輸入完整標題；留白時使用預設標題。修改標題不會更換題目。</p>
           </div>
 
           <!-- Section Type Select -->
@@ -828,7 +858,7 @@
       worksheetQuestions = [];
 
       sectionsData.forEach((sec, sIdx) => {
-        const secTitleStr = `第${toChineseNumber(sIdx + 1)}大題：${getSectionTypeName(sec.type)}`;
+        const secTitleStr = getSectionTitle(sec, sIdx);
 
         for (let i = 0; i < sec.count; i++) {
           const op = getRandomOperatorFromList(sec.ops);
@@ -930,7 +960,7 @@
             <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
               <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
                 <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">${sIdx + 1}</span>
-                第${toChineseNumber(sIdx + 1)}大題：${getSectionTypeName(sec.type)}
+                <span id="section-title-${sec.id}" style="overflow-wrap: anywhere; min-width: 0;">${escapeHTML(getSectionTitle(sec, sIdx))}</span>
               </h3>
               <span class="text-xs text-slate-500">共 ${secQuestions.length} 題</span>
             </div>
