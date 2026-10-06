@@ -107,9 +107,9 @@
         <div>
           <h1 class="text-xl font-black tracking-wide flex items-center gap-2">
             國小數學基本運算練習產生器
-            <span class="text-xs bg-indigo-500 text-indigo-100 font-medium px-2 py-0.5 rounded-full">100題庫旗艦版</span>
+            <span class="text-xs bg-indigo-500 text-indigo-100 font-medium px-2 py-0.5 rounded-full">自訂大題專業版</span>
           </h1>
-          <p class="text-xs text-indigo-200">支援四則運算、錢幣圖解法、應用題自由分欄與 A4 列印排版</p>
+          <p class="text-xs text-indigo-200">自由新增多個大題，個別設定題型、題數、運算與位數</p>
         </div>
       </div>
 
@@ -147,130 +147,50 @@
 
   <div class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- Left Sidebar: Teacher Settings Panel -->
-    <aside class="no-print lg:col-span-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 h-fit space-y-5">
+    <!-- Left Sidebar: Dynamic Section Settings Panel -->
+    <aside class="no-print lg:col-span-5 xl:col-span-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 h-fit space-y-5">
       
       <div class="flex items-center justify-between border-b pb-3 border-slate-100">
         <div class="flex items-center space-x-2 text-indigo-600">
           <i data-lucide="sliders" class="w-5 h-5"></i>
-          <h2 class="font-extrabold text-base">教師出題設定面板</h2>
+          <h2 class="font-extrabold text-base">教師出題管理面板</h2>
         </div>
-        <button onclick="generateWorksheet()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2.5 py-1 rounded-lg transition-colors">
-          重置出題
+        <button onclick="resetSectionsToDefault()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2.5 py-1 rounded-lg transition-colors">
+          重置預設大題
         </button>
       </div>
 
-      <!-- 1. Operators Selection -->
-      <div class="space-y-2">
-        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">1. 選擇包含的運算符號 (可複選)</label>
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
-            <input type="checkbox" id="op-add" checked onchange="generateWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
-            <span class="text-sm font-bold text-slate-700">加法 ( ＋ )</span>
-          </label>
-          <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
-            <input type="checkbox" id="op-sub" checked onchange="generateWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
-            <span class="text-sm font-bold text-slate-700">減法 ( － )</span>
-          </label>
-          <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
-            <input type="checkbox" id="op-mul" onchange="generateWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
-            <span class="text-sm font-bold text-slate-700">乘法 ( × )</span>
-          </label>
-          <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-colors">
-            <input type="checkbox" id="op-div" onchange="generateWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
-            <span class="text-sm font-bold text-slate-700">除法 ( ÷ )</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- 2. Digits Selection -->
-      <div class="space-y-2">
-        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">2. 數字位數選擇</label>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">第一個數 (位數)</label>
-            <select id="digits-num1" onchange="generateWorksheet()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-              <option value="1">1 位數 (1-9)</option>
-              <option value="2" selected>2 位數 (10-99)</option>
-              <option value="3">3 位數 (100-999)</option>
-              <option value="4">4 位數 (1000-9999)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">第二個數 (位數)</label>
-            <select id="digits-num2" onchange="generateWorksheet()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-              <option value="1">1 位數 (1-9)</option>
-              <option value="2" selected>2 位數 (10-99)</option>
-              <option value="3">3 位數 (100-999)</option>
-              <option value="4">4 位數 (1000-9999)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Question Count & Layout Settings -->
+      <!-- Dynamic Sections Container -->
       <div class="space-y-3">
-        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">3. 大題題數與排版設定</label>
-        
-        <div class="space-y-2">
-          <!-- Section 1 Count -->
-          <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-            <div>
-              <div class="text-sm font-bold text-slate-800">第一大題：直式計算</div>
-              <div class="text-[11px] text-slate-500">標準位數對齊直式題</div>
-            </div>
-            <input type="number" id="count-sec1" min="0" max="15" value="4" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
-          </div>
-
-          <!-- Section 2 Count -->
-          <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-            <div>
-              <div class="text-sm font-bold text-slate-800">第二大題：錢幣圖解法</div>
-              <div class="text-[11px] text-slate-500">台幣鈔票與硬幣視覺增刪</div>
-            </div>
-            <input type="number" id="count-sec2" min="0" max="15" value="2" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
-          </div>
-
-          <!-- Section 3 Count & Columns -->
-          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-sm font-bold text-slate-800">第三大題：應用問題</div>
-                <div class="text-[11px] text-slate-500">100 題生活情境應用題庫</div>
-              </div>
-              <input type="number" id="count-sec3" min="0" max="15" value="3" onchange="generateWorksheet()" class="w-14 text-center bg-white border border-slate-300 rounded-lg font-bold py-1 text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            
-            <!-- 應用問題分欄數目選擇 -->
-            <div class="flex items-center justify-between pt-2 border-t border-slate-200">
-              <label class="text-xs font-bold text-indigo-900 flex items-center gap-1">
-                <i data-lucide="columns" class="w-3.5 h-3.5"></i>
-                應用問題分欄數目：
-              </label>
-              <select id="cols-sec3" onchange="generateWorksheet()" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500">
-                <option value="1">單欄 (1 欄)</option>
-                <option value="2" selected>雙欄 (2 欄)</option>
-                <option value="3">三欄 (3 欄)</option>
-              </select>
-            </div>
-          </div>
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">大題配置清單</label>
+          <span id="section-count-tag" class="text-[11px] font-bold text-slate-400">共 3 大題</span>
         </div>
 
-        <!-- Shuffle Checkbox Switch -->
-        <div class="pt-1">
-          <label class="flex items-center space-x-2.5 p-3 bg-amber-50 rounded-xl border border-amber-200 cursor-pointer">
-            <input type="checkbox" id="chk-shuffle" onchange="generateWorksheet()" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
-            <span class="text-xs font-bold text-amber-900">隨機打亂所有題目順序 (混合出題)</span>
-          </label>
+        <div id="sections-config-list" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+          <!-- Dynamic section cards render here -->
         </div>
+
+        <!-- Add Section Button -->
+        <button onclick="addNewSection()" class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-2 border-dashed border-indigo-300 hover:border-indigo-400 font-extrabold rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>新增一大題</span>
+        </button>
       </div>
 
-      <!-- 4. Typography & Font Settings -->
+      <!-- Global Settings: Shuffle Checkbox -->
+      <div class="pt-2 border-t border-slate-100">
+        <label class="flex items-center space-x-2.5 p-3 bg-amber-50 rounded-xl border border-amber-200 cursor-pointer">
+          <input type="checkbox" id="chk-shuffle" onchange="generateWorksheet()" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
+          <span class="text-xs font-bold text-amber-900">隨機打亂所有題目順序 (跨大題混合測驗)</span>
+        </label>
+      </div>
+
+      <!-- Typography & Font Settings -->
       <div class="space-y-3 pt-2 border-t border-slate-100">
-        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">4. 版面與字型設定</label>
+        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">版面與字型設定</label>
         
         <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <!-- 標題字體大小 -->
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">卷頭標題大小</label>
             <select id="opt-size-title" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
@@ -281,7 +201,6 @@
             </select>
           </div>
 
-          <!-- 大題標題大小 -->
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">大題標題大小</label>
             <select id="opt-size-section" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
@@ -292,7 +211,6 @@
             </select>
           </div>
 
-          <!-- 題目文字大小 -->
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">題目內文大小</label>
             <select id="opt-size-question" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
@@ -303,15 +221,14 @@
             </select>
           </div>
 
-          <!-- 數字字型選擇 -->
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">數字字型造型</label>
             <select id="opt-font-num" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
-              <option value="'Fredoka', sans-serif" selected>Fredoka (圓潤可愛)</option>
-              <option value="'Comic Neue', cursive">Comic Neue (手寫風格)</option>
-              <option value="'Nunito', sans-serif">Nunito (標準圓體)</option>
-              <option value="'Courier New', monospace">Courier New (打字機等寬)</option>
-              <option value="'Noto Sans TC', sans-serif">Noto Sans (標準中文黑體)</option>
+              <option value="'Fredoka', sans-serif" selected>Fredoka (圓潤)</option>
+              <option value="'Comic Neue', cursive">Comic Neue (手寫)</option>
+              <option value="'Nunito', sans-serif">Nunito (圓體)</option>
+              <option value="'Courier New', monospace">Courier (等寬)</option>
+              <option value="'Noto Sans TC', sans-serif">Noto Sans (黑體)</option>
             </select>
           </div>
         </div>
@@ -335,7 +252,7 @@
     </aside>
 
     <!-- Main Worksheet Preview & Output Canvas -->
-    <main class="lg:col-span-8 bg-white rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 print-clean-bg print-border relative">
+    <main class="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 print-clean-bg print-border relative">
       
       <!-- Worksheet Printable Header -->
       <div id="worksheet-header" class="border-b-2 border-slate-900 pb-4 mb-6">
@@ -383,7 +300,37 @@
   </div>
 
   <script>
-    // Global Application State
+    // Dynamic Sections Data State
+    let sectionsData = [
+      {
+        id: 'sec_1',
+        type: 'vertical',
+        count: 4,
+        ops: ['+', '-'],
+        d1: 2,
+        d2: 2,
+        cols: 1
+      },
+      {
+        id: 'sec_2',
+        type: 'coin',
+        count: 2,
+        ops: ['+', '-'],
+        d1: 2,
+        d2: 2,
+        cols: 1
+      },
+      {
+        id: 'sec_3',
+        type: 'word',
+        count: 3,
+        ops: ['+', '-', '*', '/'],
+        d1: 2,
+        d2: 2,
+        cols: 2
+      }
+    ];
+
     let isAnswerKeyVisible = false;
     let currentMode = 'online';
     let worksheetQuestions = [];
@@ -499,6 +446,175 @@
       { type: '/', text: '巧克力工廠生產了 {n1} 塊巧克力，平均分裝成 {n2} 包，每包裡面有幾塊？', unit: '塊' }
     ];
 
+    // Number to Chinese Digit Converter
+    function toChineseNumber(n) {
+      const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+      if (n <= 10) return chars[n];
+      if (n < 20) return '十' + (n % 10 === 0 ? '' : chars[n % 10]);
+      return n.toString();
+    }
+
+    // Dynamic Section Management Functions
+    function renderSectionSettings() {
+      const container = document.getElementById('sections-config-list');
+      container.innerHTML = '';
+
+      document.getElementById('section-count-tag').innerText = `共 ${sectionsData.length} 大題`;
+
+      sectionsData.forEach((sec, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative transition-all hover:border-indigo-300';
+
+        const isWord = sec.type === 'word';
+
+        card.innerHTML = `
+          <!-- Section Card Header -->
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="font-black text-xs text-indigo-700 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-num">${idx + 1}</span>
+              第 ${toChineseNumber(idx + 1)} 大題設定
+            </span>
+            ${sectionsData.length > 1 ? `
+              <button onclick="removeSection('${sec.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-2 py-0.5 rounded hover:bg-rose-50 transition-colors">
+                刪除大題
+              </button>` : ''}
+          </div>
+
+          <!-- Section Type Select -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">1. 大題題型類型</label>
+            <select onchange="updateSection('${sec.id}', 'type', this.value)" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+              <option value="vertical" ${sec.type === 'vertical' ? 'selected' : ''}>直式計算題</option>
+              <option value="coin" ${sec.type === 'coin' ? 'selected' : ''}>錢幣圖解法</option>
+              <option value="word" ${sec.type === 'word' ? 'selected' : ''}>情境應用題</option>
+            </select>
+          </div>
+
+          <!-- Section Questions Count & Column Selection -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">2. 題數 (題)</label>
+              <input type="number" min="1" max="20" value="${sec.count}" onchange="updateSection('${sec.id}', 'count', parseInt(this.value) || 1)" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="${isWord ? 'block' : 'hidden'}">
+              <label class="block text-[11px] font-bold text-indigo-700 mb-1">應用題排版分欄</label>
+              <select onchange="updateSection('${sec.id}', 'cols', parseInt(this.value))" class="w-full bg-indigo-50 border border-indigo-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-800 focus:ring-2 focus:ring-indigo-500">
+                <option value="1" ${sec.cols === 1 ? 'selected' : ''}>單欄 (1 欄)</option>
+                <option value="2" ${sec.cols === 2 ? 'selected' : ''}>雙欄 (2 欄)</option>
+                <option value="3" ${sec.cols === 3 ? 'selected' : ''}>三欄 (3 欄)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Allowed Operators (Multi-checkbox) -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">3. 允許的運算符號 (可複選)</label>
+            <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 text-xs font-bold">
+              <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" ${sec.ops.includes('+') ? 'checked' : ''} onchange="toggleSectionOp('${sec.id}', '+')" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>＋</span>
+              </label>
+              <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" ${sec.ops.includes('-') ? 'checked' : ''} onchange="toggleSectionOp('${sec.id}', '-')" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>－</span>
+              </label>
+              <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" ${sec.ops.includes('*') ? 'checked' : ''} onchange="toggleSectionOp('${sec.id}', '*')" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>×</span>
+              </label>
+              <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" ${sec.ops.includes('/') ? 'checked' : ''} onchange="toggleSectionOp('${sec.id}', '/')" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>÷</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Number Digits Configuration -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">4. 第一數字 (位數)</label>
+              <select onchange="updateSection('${sec.id}', 'd1', parseInt(this.value))" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+                <option value="1" ${sec.d1 === 1 ? 'selected' : ''}>1 位數 (1-9)</option>
+                <option value="2" ${sec.d1 === 2 ? 'selected' : ''}>2 位數 (10-99)</option>
+                <option value="3" ${sec.d1 === 3 ? 'selected' : ''}>3 位數 (100-999)</option>
+                <option value="4" ${sec.d1 === 4 ? 'selected' : ''}>4 位數 (1000-9999)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">第二數字 (位數)</label>
+              <select onchange="updateSection('${sec.id}', 'd2', parseInt(this.value))" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+                <option value="1" ${sec.d2 === 1 ? 'selected' : ''}>1 位數 (1-9)</option>
+                <option value="2" ${sec.d2 === 2 ? 'selected' : ''}>2 位數 (10-99)</option>
+                <option value="3" ${sec.d2 === 3 ? 'selected' : ''}>3 位數 (100-999)</option>
+                <option value="4" ${sec.d2 === 4 ? 'selected' : ''}>4 位數 (1000-9999)</option>
+              </select>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function addNewSection() {
+      const newSec = {
+        id: 'sec_' + Date.now(),
+        type: 'vertical',
+        count: 3,
+        ops: ['+', '-'],
+        d1: 2,
+        d2: 2,
+        cols: 2
+      };
+      sectionsData.push(newSec);
+      renderSectionSettings();
+      generateWorksheet();
+    }
+
+    function removeSection(id) {
+      if (sectionsData.length <= 1) return;
+      sectionsData = sectionsData.filter(s => s.id !== id);
+      renderSectionSettings();
+      generateWorksheet();
+    }
+
+    function updateSection(id, key, val) {
+      const sec = sectionsData.find(s => s.id === id);
+      if (sec) {
+        sec[key] = val;
+        renderSectionSettings();
+        generateWorksheet();
+      }
+    }
+
+    function toggleSectionOp(id, op) {
+      const sec = sectionsData.find(s => s.id === id);
+      if (sec) {
+        if (sec.ops.includes(op)) {
+          if (sec.ops.length > 1) {
+            sec.ops = sec.ops.filter(o => o !== op);
+          }
+        } else {
+          sec.ops.push(op);
+        }
+        renderSectionSettings();
+        generateWorksheet();
+      }
+    }
+
+    function resetSectionsToDefault() {
+      sectionsData = [
+        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1 },
+        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1 },
+        { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/'], d1: 2, d2: 2, cols: 2 }
+      ];
+      renderSectionSettings();
+      generateWorksheet();
+    }
+
     // Dynamic Typography Updater
     function updateTypography() {
       const sizeTitle = document.getElementById('opt-size-title').value;
@@ -600,19 +716,9 @@
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function getSelectedOperators() {
-      const ops = [];
-      if (document.getElementById('op-add').checked) ops.push('+');
-      if (document.getElementById('op-sub').checked) ops.push('-');
-      if (document.getElementById('op-mul').checked) ops.push('*');
-      if (document.getElementById('op-div').checked) ops.push('/');
-      if (ops.length === 0) return ['+'];
-      return ops;
-    }
-
-    function getRandomOperator() {
-      const ops = getSelectedOperators();
-      return ops[Math.floor(Math.random() * ops.length)];
+    function getRandomOperatorFromList(opsList) {
+      if (!opsList || opsList.length === 0) return '+';
+      return opsList[Math.floor(Math.random() * opsList.length)];
     }
 
     function generateSinglePair(op, d1, d2) {
@@ -636,52 +742,43 @@
       return { n1, n2, op, ans };
     }
 
+    function getSectionTypeName(type) {
+      if (type === 'vertical') return '直式計算題';
+      if (type === 'coin') return '圖解思考題';
+      if (type === 'word') return '情境應用練習';
+      return '計算練習題';
+    }
+
     function generateWorksheet() {
-      const d1 = parseInt(document.getElementById('digits-num1').value);
-      const d2 = parseInt(document.getElementById('digits-num2').value);
-      
-      const count1 = parseInt(document.getElementById('count-sec1').value) || 0;
-      const count2 = parseInt(document.getElementById('count-sec2').value) || 0;
-      const count3 = parseInt(document.getElementById('count-sec3').value) || 0;
-
       const isShuffle = document.getElementById('chk-shuffle').checked;
-
       worksheetQuestions = [];
 
-      for (let i = 0; i < count1; i++) {
-        const op = getRandomOperator();
-        worksheetQuestions.push({
-          section: 1,
-          sectionTitle: '第一大題：直式計算題',
-          ...generateSinglePair(op, d1, d2)
-        });
-      }
+      sectionsData.forEach((sec, sIdx) => {
+        const secTitleStr = `第${toChineseNumber(sIdx + 1)}大題：${getSectionTypeName(sec.type)}`;
 
-      for (let i = 0; i < count2; i++) {
-        const op = getRandomOperator();
-        worksheetQuestions.push({
-          section: 2,
-          sectionTitle: '第二大題：錢幣圖解法',
-          ...generateSinglePair(op, d1, d2)
-        });
-      }
+        for (let i = 0; i < sec.count; i++) {
+          const op = getRandomOperatorFromList(sec.ops);
+          const pair = generateSinglePair(op, sec.d1, sec.d2);
 
-      for (let i = 0; i < count3; i++) {
-        const op = getRandomOperator();
-        const pair = generateSinglePair(op, d1, d2);
-        
-        const matches = WORD_PROBLEMS_DB.filter(w => w.type === op);
-        const tpl = matches[Math.floor(Math.random() * matches.length)];
-        const text = tpl.text.replace('{n1}', pair.n1).replace('{n2}', pair.n2);
+          let qObj = {
+            sectionId: sec.id,
+            sectionIndex: sIdx,
+            sectionTitle: secTitleStr,
+            sectionType: sec.type,
+            cols: sec.cols || 1,
+            ...pair
+          };
 
-        worksheetQuestions.push({
-          section: 3,
-          sectionTitle: '第三大題：情境應用練習',
-          ...pair,
-          text: text,
-          unit: tpl.unit
-        });
-      }
+          if (sec.type === 'word') {
+            const matches = WORD_PROBLEMS_DB.filter(w => w.type === op);
+            const tpl = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : WORD_PROBLEMS_DB[0];
+            qObj.text = tpl.text.replace('{n1}', pair.n1).replace('{n2}', pair.n2);
+            qObj.unit = tpl.unit;
+          }
+
+          worksheetQuestions.push(qObj);
+        }
+      });
 
       if (isShuffle && worksheetQuestions.length > 0) {
         for (let i = worksheetQuestions.length - 1; i > 0; i--) {
@@ -704,7 +801,7 @@
         container.innerHTML = `
           <div class="text-center py-12 text-slate-400">
             <i data-lucide="file-question" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-            <p class="font-bold text-sm">目前設定題數為 0 題，請在左側面板調整題數與出題條件。</p>
+            <p class="font-bold text-sm">目前無任何題目，請點擊左側「新增一大題」開始出題。</p>
           </div>`;
         lucide.createIcons();
         return;
@@ -717,7 +814,7 @@
           <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
             <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
               <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">混</span>
-              綜合題型 (隨機混合出題測驗)
+              綜合練習測驗 (跨大題隨機混合出題)
             </h3>
             <span class="text-xs text-slate-500">請仔細審題並算出正確解答</span>
           </div>
@@ -731,87 +828,53 @@
         });
 
       } else {
-        const sec1Questions = worksheetQuestions.filter(q => q.section === 1);
-        const sec2Questions = worksheetQuestions.filter(q => q.section === 2);
-        const sec3Questions = worksheetQuestions.filter(q => q.section === 3);
-
         let globalCounter = 0;
 
-        // Section 1: Vertical Math
-        if (sec1Questions.length > 0) {
-          const s1 = document.createElement('section');
-          s1.className = 'space-y-4 page-break-inside-avoid';
-          s1.innerHTML = `
-            <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-              <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">1</span>
-                第一大題：直式計算題
-              </h3>
-              <span class="text-xs text-slate-500">請對齊位數算出一正確解答</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" id="s1-grid"></div>
-          `;
-          container.appendChild(s1);
-          const grid = s1.querySelector('#s1-grid');
-          sec1Questions.forEach(q => {
-            grid.appendChild(renderVerticalCard(q, globalCounter++));
-          });
-        }
+        sectionsData.forEach((sec, sIdx) => {
+          const secQuestions = worksheetQuestions.filter(q => q.sectionId === sec.id);
+          if (secQuestions.length === 0) return;
 
-        // Section 2: Coin Visuals
-        if (sec2Questions.length > 0) {
-          const s2 = document.createElement('section');
-          s2.className = 'space-y-4 page-break-inside-avoid';
-          s2.innerHTML = `
-            <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-              <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">2</span>
-                第二大題：圖解法 (台幣錢幣增刪思考)
-              </h3>
-              <span class="text-xs text-slate-500">觀察錢幣數量變化完成計算</span>
-            </div>
-            <div class="space-y-4" id="s2-list"></div>
-          `;
-          container.appendChild(s2);
-          const list = s2.querySelector('#s2-list');
-          sec2Questions.forEach(q => {
-            list.appendChild(renderCoinCard(q, globalCounter++));
-          });
-        }
+          const sEl = document.createElement('section');
+          sEl.className = 'space-y-4 page-break-inside-avoid';
 
-        // Section 3: Word Problems (支援動態多欄排版)
-        if (sec3Questions.length > 0) {
-          const s3Cols = parseInt(document.getElementById('cols-sec3').value) || 1;
           let gridColsClass = 'grid-cols-1';
-          if (s3Cols === 2) gridColsClass = 'grid-cols-1 md:grid-cols-2';
-          if (s3Cols === 3) gridColsClass = 'grid-cols-1 md:grid-cols-3';
+          if (sec.type === 'vertical') {
+            gridColsClass = 'grid-cols-2 sm:grid-cols-3 gap-4';
+          } else if (sec.type === 'word') {
+            const cols = sec.cols || 1;
+            if (cols === 2) gridColsClass = 'grid-cols-1 md:grid-cols-2 gap-4';
+            else if (cols === 3) gridColsClass = 'grid-cols-1 md:grid-cols-3 gap-4';
+            else gridColsClass = 'grid-cols-1 gap-4';
+          } else {
+            gridColsClass = 'grid-cols-1 gap-4';
+          }
 
-          const s3 = document.createElement('section');
-          s3.className = 'space-y-4 page-break-inside-avoid';
-          s3.innerHTML = `
+          sEl.innerHTML = `
             <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
               <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">3</span>
-                第三大題：情境應用練習
+                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">${sIdx + 1}</span>
+                第${toChineseNumber(sIdx + 1)}大題：${getSectionTypeName(sec.type)}
               </h3>
-              <span class="text-xs text-slate-500">請列出算式並寫出完整答案 (${s3Cols} 欄排版)</span>
+              <span class="text-xs text-slate-500">共 ${secQuestions.length} 題</span>
             </div>
-            <div class="grid ${gridColsClass} gap-4" id="s3-list"></div>
+            <div class="grid ${gridColsClass}" id="sec-grid-${sec.id}"></div>
           `;
-          container.appendChild(s3);
-          const list = s3.querySelector('#s3-list');
-          sec3Questions.forEach(q => {
-            list.appendChild(renderWordCard(q, globalCounter++));
+
+          container.appendChild(sEl);
+          const grid = sEl.querySelector(`#sec-grid-${sec.id}`);
+
+          secQuestions.forEach(q => {
+            grid.appendChild(renderQuestionCard(q, globalCounter++));
           });
-        }
+        });
       }
 
       lucide.createIcons();
     }
 
     function renderQuestionCard(q, idx) {
-      if (q.section === 1) return renderVerticalCard(q, idx);
-      if (q.section === 2) return renderCoinCard(q, idx);
+      if (q.sectionType === 'vertical') return renderVerticalCard(q, idx);
+      if (q.sectionType === 'coin') return renderCoinCard(q, idx);
       return renderWordCard(q, idx);
     }
 
@@ -1044,6 +1107,7 @@
     }
 
     window.onload = function() {
+      renderSectionSettings();
       generateWorksheet();
       updateTypography();
     };
