@@ -7,18 +7,36 @@
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Noto Sans TC & Fredoka -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Noto Sans TC, Fredoka, Comic Neue, Nunito -->
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
+    :root {
+      --font-num-family: 'Fredoka', 'Courier New', monospace;
+      --font-size-title: 1.5rem;      /* 24px */
+      --font-size-section: 1rem;       /* 16px */
+      --font-size-question: 0.875rem;  /* 14px */
+    }
+
     body {
       font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
     .font-num {
-      font-family: 'Fredoka', 'Courier New', monospace;
+      font-family: var(--font-num-family);
+    }
+
+    /* 動態字體大小類別 */
+    .dynamic-title {
+      font-size: var(--font-size-title) !important;
+    }
+    .dynamic-section {
+      font-size: var(--font-size-section) !important;
+    }
+    .dynamic-question {
+      font-size: var(--font-size-question) !important;
     }
 
     /* Print Page Layout Settings for A4 Paper */
@@ -233,6 +251,58 @@
         </div>
       </div>
 
+      <!-- 4. Typography & Font Settings -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider">4. 版面與字型設定</label>
+        
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <!-- 標題字體大小 -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">卷頭標題大小</label>
+            <select id="opt-size-title" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
+              <option value="1.25rem">小 (20px)</option>
+              <option value="1.5rem" selected>標準 (24px)</option>
+              <option value="1.75rem">大 (28px)</option>
+              <option value="2rem">特大 (32px)</option>
+            </select>
+          </div>
+
+          <!-- 大題標題大小 -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">大題標題大小</label>
+            <select id="opt-size-section" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
+              <option value="0.875rem">小 (14px)</option>
+              <option value="1rem" selected>標準 (16px)</option>
+              <option value="1.125rem">大 (18px)</option>
+              <option value="1.25rem">特大 (20px)</option>
+            </select>
+          </div>
+
+          <!-- 題目文字大小 -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">題目內文大小</label>
+            <select id="opt-size-question" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
+              <option value="0.75rem">小 (12px)</option>
+              <option value="0.875rem" selected>標準 (14px)</option>
+              <option value="1rem">大 (16px)</option>
+              <option value="1.125rem">特大 (18px)</option>
+            </select>
+          </div>
+
+          <!-- 數字字型選擇 -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">數字字型造型</label>
+            <select id="opt-font-num" onchange="updateTypography()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold focus:ring-1 focus:ring-indigo-500">
+              <option value="'Fredoka', sans-serif" selected>Fredoka (圓潤可愛)</option>
+              <option value="'Comic Neue', cursive">Comic Neue (手寫風格)</option>
+              <option value="'Nunito', sans-serif">Nunito (標準圓體)</option>
+              <option value="'Courier New', monospace">Courier New (打字機等寬)</option>
+              <option value="'Noto Sans TC', sans-serif">Noto Sans (標準中文黑體)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <hr class="border-slate-100">
 
       <!-- Action Panel Buttons -->
@@ -257,12 +327,12 @@
       <div id="worksheet-header" class="border-b-2 border-slate-900 pb-4 mb-6">
         <div class="flex justify-between items-start mb-3">
           <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-wider">國小數學基本運算綜合練習單</h1>
+            <h1 class="dynamic-title text-2xl font-black text-slate-900 tracking-wider">國小數學基本運算綜合練習單</h1>
             <p class="text-xs text-slate-500 mt-1">單元：四則運算、圖解思考與生活情境應用題實作</p>
           </div>
           <div class="border-2 border-slate-900 rounded-xl p-2 px-4 text-center min-w-[110px]">
             <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">得分 / Score</span>
-            <span id="score-display" class="text-2xl font-black text-indigo-700 print:text-black">______</span>
+            <span id="score-display" class="font-num text-2xl font-black text-indigo-700 print:text-black">______</span>
           </div>
         </div>
 
@@ -290,7 +360,7 @@
             <p id="result-detail-text" class="text-xs text-indigo-700">答對題數：0 / 0</p>
           </div>
         </div>
-        <div id="result-score-tag" class="text-3xl font-black text-indigo-600">
+        <div id="result-score-tag" class="font-num text-3xl font-black text-indigo-600">
           0分
         </div>
       </div>
@@ -415,6 +485,20 @@
       { type: '/', text: '巧克力工廠生產了 {n1} 塊巧克力，平均分裝成 {n2} 包，每包裡面有幾塊？', unit: '塊' }
     ];
 
+    // Dynamic Typography Updater
+    function updateTypography() {
+      const sizeTitle = document.getElementById('opt-size-title').value;
+      const sizeSection = document.getElementById('opt-size-section').value;
+      const sizeQuestion = document.getElementById('opt-size-question').value;
+      const fontNum = document.getElementById('opt-font-num').value;
+
+      const root = document.documentElement;
+      root.style.setProperty('--font-size-title', sizeTitle);
+      root.style.setProperty('--font-size-section', sizeSection);
+      root.style.setProperty('--font-size-question', sizeQuestion);
+      root.style.setProperty('--font-num-family', fontNum);
+    }
+
     // Currency SVG Vector Generator for Taiwan NTD
     function createMoneySVG(type, value, count, isCrossed = false) {
       if (count <= 0) return '';
@@ -430,7 +514,7 @@
             <svg class="w-16 h-9 shadow-sm rounded border border-blue-400 inline-block" viewBox="0 0 120 65" fill="none">
               <rect width="120" height="65" rx="3" fill="#3b82f6"/>
               <rect x="5" y="5" width="110" height="55" rx="2" fill="#2563eb" stroke="#60a5fa" stroke-width="1"/>
-              <text x="10" y="22" font-size="12" fill="#ffffff" font-weight="bold">1000</text>
+              <text x="10" y="22" font-size="12" fill="#ffffff" font-weight="bold" class="font-num">1000</text>
               <text x="60" y="38" font-size="14" fill="#dbeafe" font-weight="900" text-anchor="middle">壹仟圓</text>
               <circle cx="100" cy="45" r="8" fill="#1d4ed8"/>
             </svg>`;
@@ -440,7 +524,7 @@
             <svg class="w-14 h-8 shadow-sm rounded border border-red-400 inline-block" viewBox="0 0 110 60" fill="none">
               <rect width="110" height="60" rx="3" fill="#ef4444"/>
               <rect x="5" y="5" width="100" height="50" rx="2" fill="#dc2626" stroke="#fca5a5" stroke-width="1"/>
-              <text x="8" y="20" font-size="11" fill="#ffffff" font-weight="bold">100</text>
+              <text x="8" y="20" font-size="11" fill="#ffffff" font-weight="bold" class="font-num">100</text>
               <text x="55" y="35" font-size="13" fill="#fee2e2" font-weight="900" text-anchor="middle">壹佰圓</text>
             </svg>`;
         } else if (type === '50') {
@@ -449,7 +533,7 @@
             <svg class="w-9 h-9 inline-block" viewBox="0 0 40 40">
               <circle cx="20" cy="20" r="18" fill="#eab308" stroke="#ca8a04" stroke-width="2"/>
               <circle cx="20" cy="20" r="14" fill="#fde047" stroke="#eab308" stroke-width="1"/>
-              <text x="20" y="24" font-size="13" font-weight="900" fill="#854d0e" text-anchor="middle">50</text>
+              <text x="20" y="24" font-size="13" font-weight="900" fill="#854d0e" text-anchor="middle" class="font-num">50</text>
             </svg>`;
         } else if (type === '10') {
           // NTD 10 Coin (Silver/Bimetallic)
@@ -457,21 +541,21 @@
             <svg class="w-8 h-8 inline-block" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="16" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
               <circle cx="18" cy="18" r="11" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1"/>
-              <text x="18" y="22" font-size="12" font-weight="900" fill="#334155" text-anchor="middle">10</text>
+              <text x="18" y="22" font-size="12" font-weight="900" fill="#334155" text-anchor="middle" class="font-num">10</text>
             </svg>`;
         } else if (type === '5') {
           // NTD 5 Coin (Silver Small)
           svgContent = `
             <svg class="w-7 h-7 inline-block" viewBox="0 0 32 32">
               <circle cx="16" cy="16" r="14" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
-              <text x="16" y="20" font-size="11" font-weight="900" fill="#475569" text-anchor="middle">5</text>
+              <text x="16" y="20" font-size="11" font-weight="900" fill="#475569" text-anchor="middle" class="font-num">5</text>
             </svg>`;
         } else {
           // NTD 1 Coin (Copper/Bronze)
           svgContent = `
             <svg class="w-6 h-6 inline-block" viewBox="0 0 28 28">
               <circle cx="14" cy="14" r="12" fill="#d97706" stroke="#b45309" stroke-width="1.5"/>
-              <text x="14" y="18" font-size="10" font-weight="900" fill="#78350f" text-anchor="middle">1</text>
+              <text x="14" y="18" font-size="10" font-weight="900" fill="#78350f" text-anchor="middle" class="font-num">1</text>
             </svg>`;
         }
 
@@ -486,7 +570,7 @@
       return `
         <div class="inline-flex flex-wrap items-center gap-1 my-1 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200">
           ${items}
-          ${count > 10 ? `<span class="text-xs text-slate-600 font-bold px-1">× ${count}</span>` : ''}
+          ${count > 10 ? `<span class="font-num text-xs text-slate-600 font-bold px-1">× ${count}</span>` : ''}
         </div>
       `;
     }
@@ -637,8 +721,8 @@
         secEl.className = 'space-y-6';
         secEl.innerHTML = `
           <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-            <h3 class="text-base font-extrabold text-indigo-950 flex items-center gap-2">
-              <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">混</span>
+            <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
+              <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">混</span>
               綜合題型 (隨機混合出題測驗)
             </h3>
             <span class="text-xs text-slate-500">請仔細審題並算出正確解答</span>
@@ -666,8 +750,8 @@
           s1.className = 'space-y-4 page-break-inside-avoid';
           s1.innerHTML = `
             <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-              <h3 class="text-base font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
+              <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">1</span>
                 第一大題：直式計算題
               </h3>
               <span class="text-xs text-slate-500">請對齊位數算出一正確解答</span>
@@ -687,8 +771,8 @@
           s2.className = 'space-y-4 page-break-inside-avoid';
           s2.innerHTML = `
             <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-              <h3 class="text-base font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+              <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">2</span>
                 第二大題：圖解法 (台幣錢幣增刪思考)
               </h3>
               <span class="text-xs text-slate-500">觀察錢幣數量變化完成計算</span>
@@ -708,8 +792,8 @@
           s3.className = 'space-y-4 page-break-inside-avoid';
           s3.innerHTML = `
             <div class="border-b-2 border-indigo-600 pb-2 flex justify-between items-center">
-              <h3 class="text-base font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span>
+              <h3 class="dynamic-section font-extrabold text-indigo-950 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-num">3</span>
                 第三大題：情境應用練習
               </h3>
               <span class="text-xs text-slate-500">請列出算式並寫出完整答案</span>
@@ -743,12 +827,12 @@
       let verticalHTML = '';
       if (q.op === '/') {
         verticalHTML = `
-          <div class="font-num text-base font-bold text-slate-800 text-right pr-2 my-2">
+          <div class="font-num dynamic-question text-base font-bold text-slate-800 text-right pr-2 my-2">
             <div class="border-b-2 border-slate-900 inline-block px-2">${q.n2} <span class="font-normal text-slate-400">)</span> ${q.n1}</div>
           </div>`;
       } else {
         verticalHTML = `
-          <div class="font-num text-lg font-bold text-slate-800 leading-tight w-32 py-1">
+          <div class="font-num dynamic-question text-lg font-bold text-slate-800 leading-tight w-32 py-1">
             <div class="text-right">${q.n1}</div>
             <div class="text-right flex justify-between">
               <span>${opSym}</span>
@@ -759,14 +843,14 @@
       }
 
       card.innerHTML = `
-        <div class="w-full text-xs font-bold text-slate-400">(${idx + 1})</div>
+        <div class="w-full text-xs font-bold text-slate-400 font-num">(${idx + 1})</div>
         ${verticalHTML}
         
         <div class="w-full mt-2">
           <input type="number" data-idx="${idx}" data-ans="${q.ans}"
-            class="user-ans-input w-full text-center font-bold text-base border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none ${currentMode === 'print' ? 'hidden' : ''}" 
+            class="user-ans-input font-num w-full text-center font-bold text-base border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none ${currentMode === 'print' ? 'hidden' : ''}" 
             placeholder="填答">
-          <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-center text-sm font-extrabold text-rose-600 pt-1">
+          <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-center text-sm font-extrabold text-rose-600 pt-1 font-num">
             答：${q.ans}
           </div>
           <div class="hidden print-only text-center text-xs font-bold pt-2">答：______</div>
@@ -790,13 +874,13 @@
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <div class="text-xs font-bold text-slate-500 mb-1">原本的錢幣 (${q.n1} 元)：</div>
+              <div class="text-xs font-bold text-slate-500 mb-1">原本的錢幣 (<span class="font-num">${q.n1}</span> 元)：</div>
               ${createMoneySVG('1000', 1000, c1.k1000)} ${createMoneySVG('100', 100, c1.h100)}
               ${createMoneySVG('50', 50, c1.c50)} ${createMoneySVG('10', 10, c1.c10)}
               ${createMoneySVG('5', 5, c1.c5)} ${createMoneySVG('1', 1, c1.c1)}
             </div>
             <div class="border-t md:border-t-0 md:border-l border-dashed border-slate-200 pt-2 md:pt-0 md:pl-3">
-              <div class="text-xs font-bold text-emerald-600 mb-1">＋ 增加的錢幣 (${q.n2} 元)：</div>
+              <div class="text-xs font-bold text-emerald-600 mb-1">＋ 增加的錢幣 (<span class="font-num">${q.n2}</span> 元)：</div>
               ${createMoneySVG('1000', 1000, c2.k1000)} ${createMoneySVG('100', 100, c2.h100)}
               ${createMoneySVG('50', 50, c2.c50)} ${createMoneySVG('10', 10, c2.c10)}
               ${createMoneySVG('5', 5, c2.c5)} ${createMoneySVG('1', 1, c2.c1)}
@@ -805,7 +889,7 @@
       } else if (q.op === '-') {
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-1">原本錢幣 (${q.n1}元) 劃掉扣除 (${q.n2}元)：</div>
+            <div class="text-xs font-bold text-slate-500 mb-1">原本錢幣 (<span class="font-num">${q.n1}</span>元) 劃掉扣除 (<span class="font-num">${q.n2}</span>元)：</div>
             ${createMoneySVG('1000', 1000, c1.k1000 - c2.k1000)} ${createMoneySVG('1000', 1000, c2.k1000, true)}
             ${createMoneySVG('100', 100, c1.h100 - c2.h100)} ${createMoneySVG('100', 100, c2.h100, true)}
             ${createMoneySVG('50', 50, c1.c50 - c2.c50)} ${createMoneySVG('50', 50, c2.c50, true)}
@@ -816,7 +900,7 @@
       } else {
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-1">第一個數對應錢幣 (${q.n1} 元)：</div>
+            <div class="text-xs font-bold text-slate-500 mb-1">第一個數對應錢幣 (<span class="font-num">${q.n1}</span> 元)：</div>
             ${createMoneySVG('1000', 1000, c1.k1000)} ${createMoneySVG('100', 100, c1.h100)}
             ${createMoneySVG('50', 50, c1.c50)} ${createMoneySVG('10', 10, c1.c10)}
             ${createMoneySVG('5', 5, c1.c5)} ${createMoneySVG('1', 1, c1.c1)}
@@ -824,16 +908,16 @@
       }
 
       card.innerHTML = `
-        <div class="text-sm font-bold text-slate-800">
-          (${idx + 1}) 圖解思考題： ${q.n1} ${opSym} ${q.n2} = ?
+        <div class="dynamic-question font-bold text-slate-800">
+          <span class="font-num">(${idx + 1})</span> 圖解思考題： <span class="font-num">${q.n1} ${opSym} ${q.n2}</span> = ?
         </div>
         ${coinVisual}
         <div class="flex items-center gap-3 pt-1">
           <span class="text-xs font-bold text-slate-600">計算結果：</span>
           <input type="number" data-idx="${idx}" data-ans="${q.ans}"
-            class="user-ans-input w-32 text-center font-bold text-sm border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+            class="user-ans-input font-num w-32 text-center font-bold text-sm border border-slate-300 rounded-lg py-1 bg-white focus:ring-2 focus:ring-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
             placeholder="填寫答案">
-          <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-sm font-extrabold text-rose-600">
+          <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} font-num text-sm font-extrabold text-rose-600">
             答：${q.ans}
           </div>
           <span class="hidden print-only text-xs font-bold">答：__________</span>
@@ -848,15 +932,15 @@
       card.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200 print-clean-bg space-y-3 relative';
 
       card.innerHTML = `
-        <div class="text-sm font-bold text-slate-800 leading-relaxed">
-          (${idx + 1}) ${q.text}
+        <div class="dynamic-question font-bold text-slate-800 leading-relaxed">
+          <span class="font-num">(${idx + 1})</span> ${q.text}
         </div>
 
         <div class="space-y-2 bg-white p-3 rounded-xl border border-slate-200">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">算式：</span>
             <input type="text"
-              class="interactive-formula w-full text-xs font-medium border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+              class="interactive-formula font-num w-full text-xs font-medium border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
               placeholder="例如: ${q.n1} ${q.op === '*' ? '×' : (q.op === '/' ? '÷' : q.op)} ${q.n2} = ${q.ans}">
             <span class="hidden print-only text-xs w-full border-b border-dashed border-slate-300 h-4"></span>
           </div>
@@ -864,11 +948,11 @@
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：</span>
             <input type="number" data-idx="${idx}" data-ans="${q.ans}"
-              class="user-ans-input w-28 text-xs font-bold border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+              class="user-ans-input font-num w-28 text-xs font-bold border-b border-slate-300 px-2 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
               placeholder="數字">
             <span class="text-xs font-bold text-slate-600">${q.unit}</span>
             <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-xs font-extrabold text-rose-600">
-              答：${q.ans} ${q.unit}
+              答：<span class="font-num">${q.ans}</span> ${q.unit}
             </div>
             <span class="hidden print-only text-xs font-bold">________ (${q.unit})</span>
           </div>
@@ -964,6 +1048,7 @@
 
     window.onload = function() {
       generateWorksheet();
+      updateTypography();
     };
   </script>
 </body>
