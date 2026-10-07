@@ -91,7 +91,6 @@
 
       .word-print-cols-1 {
         grid-template-columns: minmax(0, 1fr) !important;
-        gap: 14px !important;
       }
       .word-print-cols-2 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -144,7 +143,7 @@
             國小數學基本運算練習產生器
             <span class="text-xs bg-indigo-500 text-indigo-100 font-medium px-2 py-0.5 rounded-full">自訂大題專業版</span>
           </h1>
-          <p class="text-xs text-indigo-200">自由新增多個大題，個別設定題型、題數、運算與位數（含估算題型）</p>
+          <p class="text-xs text-indigo-200">自由新增多個大題，個別設定題型、題數、運算、取數法與數線輔助</p>
         </div>
       </div>
 
@@ -294,7 +293,7 @@
         <div class="flex justify-between items-start mb-3">
           <div>
             <h1 class="dynamic-title text-2xl font-black text-slate-900 tracking-wider">國小數學基本運算綜合練習單</h1>
-            <p class="text-xs text-slate-500 mt-1">單元：四則運算、估算思考、圖解思考與生活情境應用題實作</p>
+            <p class="text-xs text-slate-500 mt-1">單元：四則運算、估算概數、圖解思考與生活情境應用題實作</p>
           </div>
           <div class="border-2 border-slate-900 rounded-xl p-2 px-4 text-center min-w-[110px]">
             <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">得分 / Score</span>
@@ -347,7 +346,10 @@
         cols: 1,
         showHint: true,
         showAnswer: true,
-        showVerticalNumbers: true
+        showVerticalNumbers: true,
+        useRoundMethod: true,
+        roundMethod: 'round',
+        showNumberLine: true
       },
       {
         id: 'sec_2',
@@ -359,7 +361,10 @@
         cols: 1,
         showHint: true,
         showAnswer: true,
-        showVerticalNumbers: true
+        showVerticalNumbers: true,
+        useRoundMethod: true,
+        roundMethod: 'round',
+        showNumberLine: true
       },
       {
         id: 'sec_3',
@@ -371,7 +376,10 @@
         cols: 2,
         showHint: true,
         showAnswer: true,
-        showVerticalNumbers: true
+        showVerticalNumbers: true,
+        useRoundMethod: true,
+        roundMethod: 'round',
+        showNumberLine: true
       }
     ];
 
@@ -379,34 +387,109 @@
     let currentMode = 'online';
     let worksheetQuestions = [];
 
-    // Complete 125 Elementary Math Word Problems Database (Including 25 Estimation Problems)
+    // Complete 125 Elementary Math Word Problems Database
     const WORD_PROBLEMS_DB = [
-      // ESTIMATION / ESTIMATED WORD PROBLEMS (25 題估算題庫)
-      { type: '~', text: '小明買了故事書 {n1} 元與畫冊 {n2} 元，請用四捨五入法取概數到百位，估算他大約一共花了多少元？', unit: '元' },
-      { type: '~', text: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，先取概數到百位後，估算圖書館大約有多少本書？', unit: '本' },
-      { type: '~', text: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，將兩數用四捨五入法取概數到十位，估算媽媽大約還剩多少元？', unit: '元' },
-      { type: '~', text: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，請將人數先取概數到百位，估算今天大約有多少人入園？', unit: '人' },
-      { type: '~', text: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，先取概數到十位後，估算果園還剩下大約幾顆蘋果？', unit: '顆' },
-      { type: '~', text: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，先取概數到百位，估算兩人一共存了大約多少元？', unit: '元' },
-      { type: '~', text: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，請將金額取概數到百位，估算他大約還差多少元？', unit: '元' },
-      { type: '~', text: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，先取概數到十位，估算店裡大約還剩幾個麵包？', unit: '個' },
-      { type: '~', text: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，取概數到千位後，估算這兩天大約有多少人參觀？', unit: '人' },
-      { type: '~', text: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，取概數到百位，估算總花費大約是多少元？', unit: '元' },
-      { type: '~', text: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，請先取概數到十位，估算今天大約載客幾人次？', unit: '人次' },
-      { type: '~', text: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，先取概數到十位，估算水果店大約還剩下多少公斤？', unit: '公斤' },
-      { type: '~', text: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，將張數四捨五入取概數到十位，估算兩人相差大約幾張郵票？', unit: '張' },
-      { type: '~', text: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，先取概數到百位，估算兩場一共賣出大約幾張票？', unit: '張' },
-      { type: '~', text: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，先取概數到百位，估算小麗比小明大約多跑多少公尺？', unit: '公尺' },
-      { type: '~', text: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，取概數到十位後，估算她大約還有多少頁沒看？', unit: '頁' },
-      { type: '~', text: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，先取概數到百位，估算農場大約還留存幾顆？', unit: '顆' },
-      { type: '~', text: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，取概數到百位後，估算全天大約有多少人參加？', unit: '人' },
-      { type: '~', text: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，取概數到百位估算，存錢筒大約還剩多少元？', unit: '元' },
-      { type: '~', text: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，將數量先取概數到百位，估算果園大約還剩幾顆水蜜桃？', unit: '顆' },
-      { type: '~', text: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，先取概數到千位，估算這兩天大約共生產多少個零件？', unit: '個' },
-      { type: '~', text: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，四捨五入取概數到百位，估算兩班大約載幾人？', unit: '人' },
-      { type: '~', text: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，取概數到千位，估算兩專櫃大約共賣多少元？', unit: '元' },
-      { type: '~', text: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，先取概數到百位，估算小明大約還需要繳多少元？', unit: '元' },
-      { type: '~', text: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，取概數到十位，估算物資大約還剩下多少份？', unit: '份' },
+      // ESTIMATION / ESTIMATED WORD PROBLEMS (25 題估算題庫，支援指定取數法與無取數法兩種語法)
+      { type: '~', 
+        textWithMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，請用{method}取概數到{scale}，估算他大約一共花了多少元？', 
+        textNoMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，他大約花了{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，用{method}取概數到{scale}後，估算圖書館大約有多少本書？', 
+        textNoMethod: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，圖書館大約有{targetUnit}書？', 
+        unit: '本' },
+      { type: '~', 
+        textWithMethod: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，用{method}取概數到{scale}，估算媽媽大約還剩多少元？', 
+        textNoMethod: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，媽媽大約還剩下{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，請用{method}取概數到{scale}，估算今天大約有多少人入園？', 
+        textNoMethod: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，今天大約有{targetUnit}入園？', 
+        unit: '人' },
+      { type: '~', 
+        textWithMethod: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，用{method}取概數到{scale}後，估算果園還剩下大約幾顆蘋果？', 
+        textNoMethod: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，果園大約還剩{targetUnit}蘋果？', 
+        unit: '顆' },
+      { type: '~', 
+        textWithMethod: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，用{method}取概數到{scale}，估算兩人一共存了大約多少元？', 
+        textNoMethod: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，兩人一共存了大約{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，用{method}取概數到{scale}，估算他大約還差多少元？', 
+        textNoMethod: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，他大約還差{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，用{method}取概數到{scale}，估算店裡大約還剩幾個麵包？', 
+        textNoMethod: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，店裡大約還剩下{targetUnit}麵包？', 
+        unit: '個' },
+      { type: '~', 
+        textWithMethod: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，用{method}取概數到{scale}後，估算這兩天大約有多少人參觀？', 
+        textNoMethod: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，這兩天大約有{targetUnit}參觀？', 
+        unit: '人' },
+      { type: '~', 
+        textWithMethod: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，用{method}取概數到{scale}，估算總花費大約是多少元？', 
+        textNoMethod: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，總花費大約是{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，用{method}取概數到{scale}，估算今天大約載客幾人次？', 
+        textNoMethod: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，今天大約載客{targetUnit}？', 
+        unit: '人次' },
+      { type: '~', 
+        textWithMethod: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，用{method}取概數到{scale}，估算水果店大約還剩下多少公斤？', 
+        textNoMethod: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，水果店大約還剩{targetUnit}？', 
+        unit: '公斤' },
+      { type: '~', 
+        textWithMethod: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，用{method}取概數到{scale}，估算兩人相差大約幾張郵票？', 
+        textNoMethod: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，兩人相差大約{targetUnit}郵票？', 
+        unit: '張' },
+      { type: '~', 
+        textWithMethod: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，用{method}取概數到{scale}，估算兩場一共賣出大約幾張票？', 
+        textNoMethod: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，兩場大約賣出{targetUnit}票？', 
+        unit: '張' },
+      { type: '~', 
+        textWithMethod: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，用{method}取概數到{scale}，估算小麗比小明大約多跑多少公尺？', 
+        textNoMethod: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，小麗比小明大約多跑{targetUnit}？', 
+        unit: '公尺' },
+      { type: '~', 
+        textWithMethod: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，用{method}取概數到{scale}後，估算她大約還有多少頁沒看？', 
+        textNoMethod: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，她大約還有{targetUnit}沒看？', 
+        unit: '頁' },
+      { type: '~', 
+        textWithMethod: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，用{method}取概數到{scale}，估算農場大約還留存幾顆？', 
+        textNoMethod: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，農場大約還留存{targetUnit}？', 
+        unit: '顆' },
+      { type: '~', 
+        textWithMethod: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，用{method}取概數到{scale}後，估算全天大約有多少人參加？', 
+        textNoMethod: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，全天大約有{targetUnit}參加？', 
+        unit: '人' },
+      { type: '~', 
+        textWithMethod: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，用{method}取概數到{scale}估算，存錢筒大約還剩多少元？', 
+        textNoMethod: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，存錢筒大約還剩{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，用{method}取概數到{scale}，估算果園大約還剩幾顆水蜜桃？', 
+        textNoMethod: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，果園大約還剩{targetUnit}水蜜桃？', 
+        unit: '顆' },
+      { type: '~', 
+        textWithMethod: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，用{method}取概數到{scale}，估算這兩天大約共生產多少個零件？', 
+        textNoMethod: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，這兩天大約共生產{targetUnit}零件？', 
+        unit: '個' },
+      { type: '~', 
+        textWithMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，用{method}取概數到{scale}，估算兩班大約載幾人？', 
+        textNoMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，兩班大約共載幾{targetUnit}？', 
+        unit: '人' },
+      { type: '~', 
+        textWithMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，用{method}取概數到{scale}，估算兩專櫃大約共賣多少元？', 
+        textNoMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，兩專櫃大約賣{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，用{method}取概數到{scale}，估算小明大約還需要繳多少元？', 
+        textNoMethod: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，小明大約還需要繳{targetUnit}？', 
+        unit: '元' },
+      { type: '~', 
+        textWithMethod: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，用{method}取概數到{scale}，估算物資大約還剩下多少份？', 
+        textNoMethod: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，物資大約還剩下{targetUnit}？', 
+        unit: '份' },
 
       // ADDITION (25)
       { type: '+', text: '小明買了一本故事書花了 {n1} 元，又買了一支鋼筆花了 {n2} 元，請問小明一共花了多少元？', unit: '元' },
@@ -529,10 +612,111 @@
       return String(value).replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
     }
 
-    function roundToScale(num) {
-      if (num >= 1000) return Math.round(num / 1000) * 1000;
-      if (num >= 100) return Math.round(num / 100) * 100;
-      return Math.round(num / 10) * 10;
+    // Generic Rounding Helper with roundMethod support
+    function roundToScale(num, method = 'round') {
+      let scale = 10;
+      if (num >= 10000) scale = 10000;
+      else if (num >= 1000) scale = 1000;
+      else if (num >= 100) scale = 100;
+
+      if (method === 'floor') return Math.floor(num / scale) * scale;
+      if (method === 'ceil') return Math.ceil(num / scale) * scale;
+      return Math.round(num / scale) * scale;
+    }
+
+    function getScaleName(num) {
+      if (num >= 10000) return '萬位';
+      if (num >= 1000) return '千位';
+      if (num >= 100) return '百位';
+      return '十位';
+    }
+
+    function getTargetUnitText(num, unit) {
+      if (num >= 10000) return `幾萬${unit}`;
+      if (num >= 1000) return `幾千${unit}`;
+      if (num >= 100) return `幾百${unit}`;
+      return `幾十${unit}`;
+    }
+
+    // Dynamic SVG Number Line Generator for Estimation Problems
+    function createNumberLineSVG(n1, n2, method = 'round') {
+      const est1 = roundToScale(n1, method);
+      const est2 = roundToScale(n2, method);
+
+      const maxVal = Math.max(n1, n2, est1, est2);
+      const minVal = Math.min(n1, n2, est1, est2);
+
+      let step = 10;
+      if (maxVal >= 10000) step = 5000;
+      else if (maxVal >= 1000) step = 500;
+      else if (maxVal >= 100) step = 50;
+
+      const minBound = Math.max(0, Math.floor((minVal - step) / step) * step);
+      const maxBound = Math.ceil((maxVal + step) / step) * step;
+      const range = maxBound - minBound || 100;
+
+      const ticks = [];
+      const tickCount = 5;
+      const interval = range / (tickCount - 1);
+
+      for (let i = 0; i < tickCount; i++) {
+        ticks.push(Math.round(minBound + i * interval));
+      }
+
+      const svgWidth = 380;
+      const lineLeft = 30;
+      const lineRight = 350;
+      const lineWidth = lineRight - lineLeft;
+
+      function getX(val) {
+        return lineLeft + ((val - minBound) / range) * lineWidth;
+      }
+
+      const x1 = getX(n1);
+      const x1Est = getX(est1);
+
+      let ticksHTML = '';
+      ticks.forEach(t => {
+        const tx = getX(t);
+        ticksHTML += `
+          <line x1="${tx}" y1="35" x2="${tx}" y2="45" stroke="#475569" stroke-width="1.5" />
+          <text x="${tx}" y="60" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" class="font-num">${t}</text>
+        `;
+      });
+
+      let arrowHTML = '';
+      if (Math.abs(x1 - x1Est) > 2) {
+        const midX = (x1 + x1Est) / 2;
+        arrowHTML = `
+          <path d="M ${x1} 30 Q ${midX} 12 ${x1Est} 30" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="3,3" />
+          <polygon points="${x1Est},30 ${x1Est > x1 ? x1Est-5 : x1Est+5},26 ${x1Est > x1 ? x1Est-5 : x1Est+5},34" fill="#f97316" />
+        `;
+      }
+
+      return `
+        <div class="w-full my-2 bg-slate-100/90 p-2.5 rounded-xl border border-slate-200">
+          <div class="text-[11px] font-bold text-slate-500 mb-1 flex items-center justify-between">
+            <span>估算輔助數線圖：</span>
+            <span class="text-[10px] text-slate-400">藍點：原數 ${n1} ➜ 橘線：概數 ${est1}</span>
+          </div>
+          <svg class="w-full h-16" viewBox="0 0 ${svgWidth} 70">
+            <!-- Main Horizontal Line -->
+            <line x1="${lineLeft - 10}" y1="40" x2="${lineRight + 10}" y2="40" stroke="#334155" stroke-width="2" />
+            <polygon points="${lineRight + 12},40 ${lineRight + 6},36 ${lineRight + 6},44" fill="#334155" />
+            <polygon points="${lineLeft - 12},40 ${lineLeft - 6},36 ${lineLeft - 6},44" fill="#334155" />
+
+            <!-- Scale Ticks -->
+            ${ticksHTML}
+
+            <!-- Number Point 1 -->
+            <circle cx="${x1}" cy="40" r="4.5" fill="#2563eb" />
+            <text x="${x1}" y="24" font-size="11" font-weight="900" fill="#1e40af" text-anchor="middle" class="font-num">${n1}</text>
+
+            <!-- Curved Estimation Arc -->
+            ${arrowHTML}
+          </svg>
+        </div>
+      `;
     }
 
     function getSectionTitle(sec, index) {
@@ -564,6 +748,7 @@
         card.className = 'p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative transition-all hover:border-indigo-300';
 
         const isWord = sec.type === 'word';
+        const hasEstimateOp = sec.ops.includes('~');
 
         card.innerHTML = `
           <!-- Section Card Header -->
@@ -665,6 +850,30 @@
             </div>
           </div>
 
+          <!-- Estimation Configuration Options (Shown if Estimation Operator is Selected) -->
+          <div class="${(hasEstimateOp) ? 'space-y-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200' : 'hidden'}">
+            <label class="block text-[11px] font-bold text-amber-900">估算取數法進階設定</label>
+            
+            <label class="flex items-center space-x-2 cursor-pointer text-xs font-bold text-amber-900">
+              <input type="checkbox" ${sec.useRoundMethod !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'useRoundMethod', this.checked)" class="w-3.5 h-3.5 text-amber-600 rounded">
+              <span>指定取數法名稱 (否則自動顯示最接近幾百/幾千)</span>
+            </label>
+
+            <div class="${sec.useRoundMethod !== false ? 'block' : 'hidden'} pt-1">
+              <label class="block text-[10px] font-bold text-amber-800 mb-1">取數演算法：</label>
+              <select onchange="updateSection('${sec.id}', 'roundMethod', this.value)" class="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+                <option value="round" ${sec.roundMethod === 'round' ? 'selected' : ''}>四捨五入法</option>
+                <option value="floor" ${sec.roundMethod === 'floor' ? 'selected' : ''}>無條件捨去法</option>
+                <option value="ceil" ${sec.roundMethod === 'ceil' ? 'selected' : ''}>無條件進入法</option>
+              </select>
+            </div>
+
+            <label class="flex items-center space-x-2 cursor-pointer text-xs font-bold text-amber-900 pt-1 border-t border-amber-200/60">
+              <input type="checkbox" ${sec.showNumberLine !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showNumberLine', this.checked)" class="w-3.5 h-3.5 text-amber-600 rounded">
+              <span>在估算題下方自動顯示輔助數線圖</span>
+            </label>
+          </div>
+
           <!-- Number Digits Configuration -->
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -705,7 +914,10 @@
         cols: 2,
         showHint: true,
         showAnswer: true,
-        showVerticalNumbers: true
+        showVerticalNumbers: true,
+        useRoundMethod: true,
+        roundMethod: 'round',
+        showNumberLine: true
       };
       sectionsData.push(newSec);
       renderSectionSettings();
@@ -745,9 +957,9 @@
 
     function resetSectionsToDefault() {
       sectionsData = [
-        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true },
-        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true },
-        { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/', '~'], d1: 3, d2: 3, cols: 2, showHint: true, showAnswer: true, showVerticalNumbers: true }
+        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
+        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
+        { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/', '~'], d1: 3, d2: 3, cols: 2, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true }
       ];
       renderSectionSettings();
       generateWorksheet();
@@ -859,7 +1071,7 @@
       return opsList[Math.floor(Math.random() * opsList.length)];
     }
 
-    function generateSinglePair(op, d1, d2) {
+    function generateSinglePair(op, d1, d2, roundMethod = 'round') {
       let n1 = getRandomByDigits(d1);
       let n2 = getRandomByDigits(d2);
 
@@ -877,8 +1089,8 @@
       if (op === '*') ans = n1 * n2;
       if (op === '/') ans = n1 / n2;
       if (op === '~') {
-        const est1 = roundToScale(n1);
-        const est2 = roundToScale(n2);
+        const est1 = roundToScale(n1, roundMethod);
+        const est2 = roundToScale(n2, roundMethod);
         ans = est1 >= est2 ? est1 - est2 : est1 + est2;
       }
 
@@ -901,7 +1113,8 @@
 
         for (let i = 0; i < sec.count; i++) {
           const op = getRandomOperatorFromList(sec.ops);
-          const pair = generateSinglePair(op, sec.d1, sec.d2);
+          const roundMethod = sec.roundMethod || 'round';
+          const pair = generateSinglePair(op, sec.d1, sec.d2, roundMethod);
 
           let qObj = {
             sectionId: sec.id,
@@ -912,13 +1125,37 @@
             showHint: sec.showHint !== false,
             showAnswer: sec.showAnswer !== false,
             showVerticalNumbers: sec.showVerticalNumbers !== false,
+            useRoundMethod: sec.useRoundMethod !== false,
+            roundMethod: roundMethod,
+            showNumberLine: sec.showNumberLine !== false,
             ...pair
           };
 
           if (sec.type === 'word') {
             const matches = WORD_PROBLEMS_DB.filter(w => w.type === op);
             const tpl = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : WORD_PROBLEMS_DB[0];
-            qObj.text = tpl.text.replace('{n1}', pair.n1).replace('{n2}', pair.n2);
+            
+            if (op === '~') {
+              const methodNameMap = { 'round': '四捨五入法', 'floor': '無條件捨去法', 'ceil': '無條件進入法' };
+              const methodName = methodNameMap[roundMethod] || '四捨五入法';
+              const scaleName = getScaleName(pair.n1);
+              const targetUnit = getTargetUnitText(pair.n1, tpl.unit || '個');
+
+              if (sec.useRoundMethod !== false) {
+                qObj.text = tpl.textWithMethod
+                  .replace('{n1}', pair.n1)
+                  .replace('{n2}', pair.n2)
+                  .replace('{method}', methodName)
+                  .replace('{scale}', scaleName);
+              } else {
+                qObj.text = tpl.textNoMethod
+                  .replace('{n1}', pair.n1)
+                  .replace('{n2}', pair.n2)
+                  .replace('{targetUnit}', targetUnit);
+              }
+            } else {
+              qObj.text = tpl.text.replace('{n1}', pair.n1).replace('{n2}', pair.n2);
+            }
             qObj.unit = tpl.unit;
           }
 
@@ -1166,13 +1403,18 @@
 
       const showHint = q.showHint !== false;
       const showAnswer = q.showAnswer !== false;
+      const showNumberLine = q.showNumberLine !== false;
 
-      const est1 = roundToScale(q.n1);
-      const est2 = roundToScale(q.n2);
+      const roundMethod = q.roundMethod || 'round';
+      const est1 = roundToScale(q.n1, roundMethod);
+      const est2 = roundToScale(q.n2, roundMethod);
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : (q.op === '~' ? (est1 >= est2 ? '-' : '+') : q.op));
+      
       const placeholderText = q.op === '~' 
         ? `算式 (例如: ${est1} ${opSym} ${est2} ≈ ${q.ans})` 
         : `算式 (例如: ${q.n1} ${opSym} ${q.n2} = ${q.ans})`;
+
+      const numberLineHTML = (q.op === '~' && showNumberLine) ? createNumberLineSVG(q.n1, q.n2, roundMethod) : '';
 
       const hintHTML = showHint ? `
           <div class="flex items-center gap-1.5">
@@ -1200,6 +1442,8 @@
         <div class="dynamic-question font-bold text-slate-800 leading-relaxed">
           <span class="font-num">(${idx + 1})</span> ${q.text}
         </div>
+
+        ${numberLineHTML}
 
         <div class="w-full mt-2">
           <div class="student-calc-space bg-white border border-slate-300 rounded-xl min-h-[96px] p-2">
