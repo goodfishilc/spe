@@ -389,7 +389,7 @@
 
     // Complete 125 Elementary Math Word Problems Database
     const WORD_PROBLEMS_DB = [
-      // ESTIMATION / ESTIMATED WORD PROBLEMS (25 題估算題庫，支援指定取數法與無取數法兩種語法)
+      // ESTIMATION / ESTIMATED WORD PROBLEMS (25 題估算題庫)
       { type: '~', 
         textWithMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，請用{method}取概數到{scale}，估算他大約一共花了多少元？', 
         textNoMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，他大約花了{targetUnit}？', 
@@ -476,7 +476,7 @@
         unit: '個' },
       { type: '~', 
         textWithMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，用{method}取概數到{scale}，估算兩班大約載幾人？', 
-        textNoMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，兩班大約共載幾{targetUnit}？', 
+        textNoMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，兩班大約載{targetUnit}？', 
         unit: '人' },
       { type: '~', 
         textWithMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，用{method}取概數到{scale}，估算兩專櫃大約共賣多少元？', 
@@ -600,7 +600,6 @@
       { type: '/', text: '巧克力工廠生產了 {n1} 塊巧克力，平均分裝成 {n2} 包，每包裡面有幾塊？', unit: '塊' }
     ];
 
-    // Number to Chinese Digit Converter
     function toChineseNumber(n) {
       const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
       if (n <= 10) return chars[n];
@@ -612,7 +611,6 @@
       return String(value).replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
     }
 
-    // Generic Rounding Helper with roundMethod support
     function roundToScale(num, method = 'round') {
       let scale = 10;
       if (num >= 10000) scale = 10000;
@@ -638,82 +636,101 @@
       return `幾十${unit}`;
     }
 
-    // Dynamic SVG Number Line Generator for Estimation Problems
-    function createNumberLineSVG(n1, n2, method = 'round') {
-      const est1 = roundToScale(n1, method);
-      const est2 = roundToScale(n2, method);
-
-      const maxVal = Math.max(n1, n2, est1, est2);
-      const minVal = Math.min(n1, n2, est1, est2);
+    // Dynamic SVG Number Line Generator - Centered around answer showing 5 clean unit ticks
+    function createNumberLineSVG(n1, n2, ans, roundMethod = 'round') {
+      const est1 = roundToScale(n1, roundMethod);
+      const est2 = roundToScale(n2, roundMethod);
 
       let step = 10;
-      if (maxVal >= 10000) step = 5000;
-      else if (maxVal >= 1000) step = 500;
-      else if (maxVal >= 100) step = 50;
+      if (ans >= 10000 || n1 >= 10000) step = 10000;
+      else if (ans >= 1000 || n1 >= 1000) step = 1000;
+      else if (ans >= 100 || n1 >= 100) step = 100;
 
-      const minBound = Math.max(0, Math.floor((minVal - step) / step) * step);
-      const maxBound = Math.ceil((maxVal + step) / step) * step;
-      const range = maxBound - minBound || 100;
+      // Ensure center focus around answer (show 2 units before and 2 units after)
+      let centerVal = roundToScale(ans, 'round');
+      if (centerVal < step * 2) centerVal = step * 2;
 
-      const ticks = [];
-      const tickCount = 5;
-      const interval = range / (tickCount - 1);
+      const ticks = [
+        centerVal - step * 2,
+        centerVal - step,
+        centerVal,
+        centerVal + step,
+        centerVal + step * 2
+      ];
 
-      for (let i = 0; i < tickCount; i++) {
-        ticks.push(Math.round(minBound + i * interval));
-      }
+      const minBound = ticks[0];
+      const maxBound = ticks[4];
+      const range = maxBound - minBound || (step * 4);
 
       const svgWidth = 380;
-      const lineLeft = 30;
-      const lineRight = 350;
+      const lineLeft = 35;
+      const lineRight = 345;
       const lineWidth = lineRight - lineLeft;
 
       function getX(val) {
-        return lineLeft + ((val - minBound) / range) * lineWidth;
+        let clamped = Math.max(minBound - step*0.5, Math.min(maxBound + step*0.5, val));
+        return lineLeft + ((clamped - minBound) / range) * lineWidth;
       }
 
       const x1 = getX(n1);
       const x1Est = getX(est1);
+      const x2 = getX(n2);
+      const x2Est = getX(est2);
 
       let ticksHTML = '';
       ticks.forEach(t => {
         const tx = getX(t);
+        const isAnswerTick = (t === ans);
         ticksHTML += `
-          <line x1="${tx}" y1="35" x2="${tx}" y2="45" stroke="#475569" stroke-width="1.5" />
-          <text x="${tx}" y="60" font-size="10" font-weight="bold" fill="#64748b" text-anchor="middle" class="font-num">${t}</text>
+          <line x1="${tx}" y1="35" x2="${tx}" y2="45" stroke="${isAnswerTick ? '#dc2626' : '#475569'}" stroke-width="${isAnswerTick ? '2.5' : '1.5'}" />
+          <text x="${tx}" y="60" font-size="10" font-weight="${isAnswerTick ? '900' : 'bold'}" fill="${isAnswerTick ? '#dc2626' : '#64748b'}" text-anchor="middle" class="font-num">${t}</text>
         `;
       });
 
-      let arrowHTML = '';
+      let arrow1HTML = '';
       if (Math.abs(x1 - x1Est) > 2) {
-        const midX = (x1 + x1Est) / 2;
-        arrowHTML = `
-          <path d="M ${x1} 30 Q ${midX} 12 ${x1Est} 30" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="3,3" />
-          <polygon points="${x1Est},30 ${x1Est > x1 ? x1Est-5 : x1Est+5},26 ${x1Est > x1 ? x1Est-5 : x1Est+5},34" fill="#f97316" />
+        const midX1 = (x1 + x1Est) / 2;
+        arrow1HTML = `
+          <path d="M ${x1} 30 Q ${midX1} 10 ${x1Est} 30" fill="none" stroke="#f97316" stroke-width="1.8" stroke-dasharray="3,3" />
+          <polygon points="${x1Est},30 ${x1Est > x1 ? x1Est-4 : x1Est+4},26 ${x1Est > x1 ? x1Est-4 : x1Est+4},34" fill="#f97316" />
+        `;
+      }
+
+      let arrow2HTML = '';
+      if (Math.abs(x2 - x2Est) > 2) {
+        const midX2 = (x2 + x2Est) / 2;
+        arrow2HTML = `
+          <path d="M ${x2} 30 Q ${midX2} 14 ${x2Est} 30" fill="none" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="3,3" />
+          <polygon points="${x2Est},30 ${x2Est > x2 ? x2Est-4 : x2Est+4},26 ${x2Est > x2 ? x2Est-4 : x2Est+4},34" fill="#a855f7" />
         `;
       }
 
       return `
         <div class="w-full my-2 bg-slate-100/90 p-2.5 rounded-xl border border-slate-200">
           <div class="text-[11px] font-bold text-slate-500 mb-1 flex items-center justify-between">
-            <span>估算輔助數線圖：</span>
-            <span class="text-[10px] text-slate-400">藍點：原數 ${n1} ➜ 橘線：概數 ${est1}</span>
+            <span>估算數線圖（呈現前後完整單位刻度）：</span>
+            <span class="text-[10px] text-slate-400">藍/紫點：原數字 ➜ 橘/紫虛線：估算概數</span>
           </div>
           <svg class="w-full h-16" viewBox="0 0 ${svgWidth} 70">
             <!-- Main Horizontal Line -->
-            <line x1="${lineLeft - 10}" y1="40" x2="${lineRight + 10}" y2="40" stroke="#334155" stroke-width="2" />
-            <polygon points="${lineRight + 12},40 ${lineRight + 6},36 ${lineRight + 6},44" fill="#334155" />
-            <polygon points="${lineLeft - 12},40 ${lineLeft - 6},36 ${lineLeft - 6},44" fill="#334155" />
+            <line x1="${lineLeft - 15}" y1="40" x2="${lineRight + 15}" y2="40" stroke="#334155" stroke-width="2" />
+            <polygon points="${lineRight + 17},40 ${lineRight + 10},36 ${lineRight + 10},44" fill="#334155" />
+            <polygon points="${lineLeft - 17},40 ${lineLeft - 10},36 ${lineLeft - 10},44" fill="#334155" />
 
             <!-- Scale Ticks -->
             ${ticksHTML}
 
             <!-- Number Point 1 -->
-            <circle cx="${x1}" cy="40" r="4.5" fill="#2563eb" />
-            <text x="${x1}" y="24" font-size="11" font-weight="900" fill="#1e40af" text-anchor="middle" class="font-num">${n1}</text>
+            <circle cx="${x1}" cy="40" r="4" fill="#2563eb" />
+            <text x="${x1}" y="23" font-size="10" font-weight="900" fill="#1e40af" text-anchor="middle" class="font-num">${n1}</text>
 
-            <!-- Curved Estimation Arc -->
-            ${arrowHTML}
+            <!-- Number Point 2 -->
+            <circle cx="${x2}" cy="40" r="4" fill="#9333ea" />
+            <text x="${x2}" y="23" font-size="10" font-weight="900" fill="#7e22ce" text-anchor="middle" class="font-num">${n2}</text>
+
+            <!-- Arcs -->
+            ${arrow1HTML}
+            ${arrow2HTML}
           </svg>
         </div>
       `;
@@ -852,7 +869,7 @@
 
           <!-- Estimation Configuration Options (Shown if Estimation Operator is Selected) -->
           <div class="${(hasEstimateOp) ? 'space-y-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200' : 'hidden'}">
-            <label class="block text-[11px] font-bold text-amber-900">估算取數法進階設定</label>
+            <label class="block text-[11px] font-bold text-amber-900">估算取數法與數線設定</label>
             
             <label class="flex items-center space-x-2 cursor-pointer text-xs font-bold text-amber-900">
               <input type="checkbox" ${sec.useRoundMethod !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'useRoundMethod', this.checked)" class="w-3.5 h-3.5 text-amber-600 rounded">
@@ -870,7 +887,7 @@
 
             <label class="flex items-center space-x-2 cursor-pointer text-xs font-bold text-amber-900 pt-1 border-t border-amber-200/60">
               <input type="checkbox" ${sec.showNumberLine !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showNumberLine', this.checked)" class="w-3.5 h-3.5 text-amber-600 rounded">
-              <span>在估算題下方自動顯示輔助數線圖</span>
+              <span>顯示最接近前後兩個單位的估算數線</span>
             </label>
           </div>
 
@@ -1414,7 +1431,7 @@
         ? `算式 (例如: ${est1} ${opSym} ${est2} ≈ ${q.ans})` 
         : `算式 (例如: ${q.n1} ${opSym} ${q.n2} = ${q.ans})`;
 
-      const numberLineHTML = (q.op === '~' && showNumberLine) ? createNumberLineSVG(q.n1, q.n2, roundMethod) : '';
+      const numberLineHTML = (q.op === '~' && showNumberLine) ? createNumberLineSVG(q.n1, q.n2, q.ans, roundMethod) : '';
 
       const hintHTML = showHint ? `
           <div class="flex items-center gap-1.5">
