@@ -212,6 +212,20 @@
         </button>
       </div>
 
+      <!-- Worksheet Header Customization -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <label class="block text-xs font-extrabold text-slate-500">學習單卷頭文字設定</label>
+        <div>
+          <label for="worksheet-main-title-input" class="block text-[11px] font-bold text-slate-600 mb-1">大標題</label>
+          <input id="worksheet-main-title-input" type="text" value="北成國小學習教室數學練習單" oninput="updateWorksheetHeader()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label for="worksheet-subtitle-input" class="block text-[11px] font-bold text-slate-600 mb-1">次標題</label>
+          <input id="worksheet-subtitle-input" type="text" value="單元：四則運算、估算概數、圖解思考與生活情境應用題實作" oninput="updateWorksheetHeader()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <p class="text-[11px] text-slate-500">輸入後即時更新預覽與列印內容；清空欄位可隱藏對應標題。</p>
+      </div>
+
       <!-- Global Settings: Shuffle Checkbox -->
       <div class="pt-2 border-t border-slate-100">
         <label class="flex items-center space-x-2.5 p-3 bg-amber-50 rounded-xl border border-amber-200 cursor-pointer">
@@ -292,8 +306,8 @@
       <div id="worksheet-header" class="border-b-2 border-slate-900 pb-4 mb-6">
         <div class="flex justify-between items-start mb-3">
           <div>
-            <h1 class="dynamic-title text-2xl font-black text-slate-900 tracking-wider">北成國小學習教室數學基本運算綜合練習單</h1>
-            <p class="text-xs text-slate-500 mt-1">單元：四則運算、估算概數、圖解思考與生活情境應用題實作</p>
+            <h1 id="worksheet-main-title" class="dynamic-title text-2xl font-black text-slate-900 tracking-wider">國小數學基本運算綜合練習單</h1>
+            <p id="worksheet-subtitle" class="text-xs text-slate-500 mt-1">單元：四則運算、估算概數、圖解思考與生活情境應用題實作</p>
           </div>
           <div class="border-2 border-slate-900 rounded-xl p-2 px-4 text-center min-w-[110px]">
             <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">得分 / Score</span>
@@ -392,103 +406,103 @@
       // ESTIMATION / ESTIMATED WORD PROBLEMS (25 題估算題庫)
       { type: '~', 
         textWithMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，請用{method}取概數到{scale}，估算他大約一共花了多少元？', 
-        textNoMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，他大約花了{targetUnit}？', 
+        textNoMethod: '小明買了故事書 {n1} 元與畫冊 {n2} 元，他大約一共花了多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，用{method}取概數到{scale}後，估算圖書館大約有多少本書？', 
-        textNoMethod: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，圖書館大約有{targetUnit}書？', 
+        textNoMethod: '學校圖書館原本有書籍 {n1} 本，新購買了 {n2} 本，圖書館大約共有幾本書（以最接近{targetUnit}估算）？', 
         unit: '本' },
       { type: '~', 
         textWithMethod: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，用{method}取概數到{scale}，估算媽媽大約還剩多少元？', 
-        textNoMethod: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，媽媽大約還剩下{targetUnit}？', 
+        textNoMethod: '媽媽帶了 {n1} 元去超市，買食材花了 {n2} 元，媽媽大約還剩下多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，請用{method}取概數到{scale}，估算今天大約有多少人入園？', 
-        textNoMethod: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，今天大約有{targetUnit}入園？', 
+        textNoMethod: '遊樂園早上入園 {n1} 人，下午入園 {n2} 人，今天大約有多少人入園（以最接近{targetUnit}估算）？', 
         unit: '人' },
       { type: '~', 
         textWithMethod: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，用{method}取概數到{scale}後，估算果園還剩下大約幾顆蘋果？', 
-        textNoMethod: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，果園大約還剩{targetUnit}蘋果？', 
+        textNoMethod: '一箱蘋果原本有 {n1} 顆，賣出 {n2} 顆，果園大約還剩幾顆蘋果（以最接近{targetUnit}估算）？', 
         unit: '顆' },
       { type: '~', 
         textWithMethod: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，用{method}取概數到{scale}，估算兩人一共存了大約多少元？', 
-        textNoMethod: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，兩人一共存了大約{targetUnit}？', 
+        textNoMethod: '哥哥存了 {n1} 元，妹妹存了 {n2} 元，兩人一共存了大約多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，用{method}取概數到{scale}，估算他大約還差多少元？', 
-        textNoMethod: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，他大約還差{targetUnit}？', 
+        textNoMethod: '小華想買一部 {n1} 元的腳踏車，他已經存了 {n2} 元，他大約還差多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，用{method}取概數到{scale}，估算店裡大約還剩幾個麵包？', 
-        textNoMethod: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，店裡大約還剩下{targetUnit}麵包？', 
+        textNoMethod: '麵包店今天烤了 {n1} 個麵包，賣掉 {n2} 個，店裡大約還剩下幾個麵包（以最接近{targetUnit}估算）？', 
         unit: '個' },
       { type: '~', 
         textWithMethod: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，用{method}取概數到{scale}後，估算這兩天大約有多少人參觀？', 
-        textNoMethod: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，這兩天大約有{targetUnit}參觀？', 
+        textNoMethod: '展覽會第一天參觀人數為 {n1} 人，第二天為 {n2} 人，這兩天大約有多少人參觀（以最接近{targetUnit}估算）？', 
         unit: '人' },
       { type: '~', 
         textWithMethod: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，用{method}取概數到{scale}，估算總花費大約是多少元？', 
-        textNoMethod: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，總花費大約是{targetUnit}？', 
+        textNoMethod: '學校採購桌椅，第一批花了 {n1} 元，第二批花了 {n2} 元，總花費大約是多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，用{method}取概數到{scale}，估算今天大約載客幾人次？', 
-        textNoMethod: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，今天大約載客{targetUnit}？', 
+        textNoMethod: '一輛公車早上載客 {n1} 人次，下午載客 {n2} 人次，今天大約載客幾人次（以最接近{targetUnit}估算）？', 
         unit: '人次' },
       { type: '~', 
         textWithMethod: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，用{method}取概數到{scale}，估算水果店大約還剩下多少公斤？', 
-        textNoMethod: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，水果店大約還剩{targetUnit}？', 
+        textNoMethod: '水果店運進 {n1} 公斤西瓜，賣出 {n2} 公斤，水果店大約還剩幾公斤（以最接近{targetUnit}估算）？', 
         unit: '公斤' },
       { type: '~', 
         textWithMethod: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，用{method}取概數到{scale}，估算兩人相差大約幾張郵票？', 
-        textNoMethod: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，兩人相差大約{targetUnit}郵票？', 
+        textNoMethod: '小強收集郵票 {n1} 張，弟弟收集 {n2} 張，兩人相差大約幾張郵票（以最接近{targetUnit}估算）？', 
         unit: '張' },
       { type: '~', 
         textWithMethod: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，用{method}取概數到{scale}，估算兩場一共賣出大約幾張票？', 
-        textNoMethod: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，兩場大約賣出{targetUnit}票？', 
+        textNoMethod: '電影院場次 A 賣出 {n1} 張票，場次 B 賣出 {n2} 張票，兩場大約賣出幾張票（以最接近{targetUnit}估算）？', 
         unit: '張' },
       { type: '~', 
         textWithMethod: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，用{method}取概數到{scale}，估算小麗比小明大約多跑多少公尺？', 
-        textNoMethod: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，小麗比小明大約多跑{targetUnit}？', 
+        textNoMethod: '小麗每天跑 {n1} 公尺，小明每天跑 {n2} 公尺，小麗比小明大約多跑多少公尺（以最接近{targetUnit}估算）？', 
         unit: '公尺' },
       { type: '~', 
         textWithMethod: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，用{method}取概數到{scale}後，估算她大約還有多少頁沒看？', 
-        textNoMethod: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，她大約還有{targetUnit}沒看？', 
+        textNoMethod: '一本小說有 {n1} 頁，小紅已經看了 {n2} 頁，她大約還有多少頁沒看（以最接近{targetUnit}估算）？', 
         unit: '頁' },
       { type: '~', 
         textWithMethod: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，用{method}取概數到{scale}，估算農場大約還留存幾顆？', 
-        textNoMethod: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，農場大約還留存{targetUnit}？', 
+        textNoMethod: '農場採收高麗菜 {n1} 顆，運往北部 {n2} 顆，農場大約還留存幾顆（以最接近{targetUnit}估算）？', 
         unit: '顆' },
       { type: '~', 
         textWithMethod: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，用{method}取概數到{scale}後，估算全天大約有多少人參加？', 
-        textNoMethod: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，全天大約有{targetUnit}參加？', 
+        textNoMethod: '體育館活動上午參加人數 {n1} 人，下午 {n2} 人，全天大約有多少人參加（以最接近{targetUnit}估算）？', 
         unit: '人' },
       { type: '~', 
         textWithMethod: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，用{method}取概數到{scale}估算，存錢筒大約還剩多少元？', 
-        textNoMethod: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，存錢筒大約還剩{targetUnit}？', 
+        textNoMethod: '小立的存錢筒裡有 {n1} 元，買了玩具模型花掉 {n2} 元，存錢筒大約還剩多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，用{method}取概數到{scale}，估算果園大約還剩幾顆水蜜桃？', 
-        textNoMethod: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，果園大約還剩{targetUnit}水蜜桃？', 
+        textNoMethod: '果園採收水蜜桃 {n1} 顆，裝箱賣出 {n2} 顆，果園大約還剩幾顆水蜜桃（以最接近{targetUnit}估算）？', 
         unit: '顆' },
       { type: '~', 
         textWithMethod: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，用{method}取概數到{scale}，估算這兩天大約共生產多少個零件？', 
-        textNoMethod: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，這兩天大約共生產{targetUnit}零件？', 
+        textNoMethod: '工廠昨天生產 {n1} 個零件，今天生產 {n2} 個，這兩天大約共生產多少個零件（以最接近{targetUnit}估算）？', 
         unit: '個' },
       { type: '~', 
         textWithMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，用{method}取概數到{scale}，估算兩班大約載幾人？', 
-        textNoMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，兩班大約載{targetUnit}？', 
+        textNoMethod: '高鐵列車第一班載了 {n1} 名乘客，第二班載了 {n2} 名乘客，兩班大約共載幾人（以最接近{targetUnit}估算）？', 
         unit: '人' },
       { type: '~', 
         textWithMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，用{method}取概數到{scale}，估算兩專櫃大約共賣多少元？', 
-        textNoMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，兩專櫃大約賣{targetUnit}？', 
+        textNoMethod: '百貨公司週年慶，專櫃 A 營業額 {n1} 元，專櫃 B 營業額 {n2} 元，兩專櫃大約共賣多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，用{method}取概數到{scale}，估算小明大約還需要繳多少元？', 
-        textNoMethod: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，小明大約還需要繳{targetUnit}？', 
+        textNoMethod: '學校畢業旅行，費用為 {n1} 元，小明已經繳了 {n2} 元，小明大約還需要繳多少元（以最接近{targetUnit}估算）？', 
         unit: '元' },
       { type: '~', 
         textWithMethod: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，用{method}取概數到{scale}，估算物資大約還剩下多少份？', 
-        textNoMethod: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，物資大約還剩下{targetUnit}？', 
+        textNoMethod: '志工團隊準備了 {n1} 份物資，發放給災民 {n2} 份，物資大約還剩下多少份（以最接近{targetUnit}估算）？', 
         unit: '份' },
 
       // ADDITION (25)
@@ -980,6 +994,17 @@
       ];
       renderSectionSettings();
       generateWorksheet();
+    }
+
+    function updateWorksheetHeader() {
+      const mainTitle = document.getElementById('worksheet-main-title-input').value;
+      const subtitle = document.getElementById('worksheet-subtitle-input').value;
+      const titleElement = document.getElementById('worksheet-main-title');
+      const subtitleElement = document.getElementById('worksheet-subtitle');
+      titleElement.textContent = mainTitle;
+      subtitleElement.textContent = subtitle;
+      titleElement.classList.toggle('hidden', mainTitle.trim() === '');
+      subtitleElement.classList.toggle('hidden', subtitle.trim() === '');
     }
 
     // Dynamic Typography Updater
@@ -1567,6 +1592,7 @@
       renderSectionSettings();
       generateWorksheet();
       updateTypography();
+      updateWorksheetHeader();
     };
   </script>
 </body>
