@@ -140,7 +140,7 @@
         </div>
         <div>
           <h1 class="text-xl font-black tracking-wide flex items-center gap-2">
-            國小數學基本運算練習產生器
+            國小數學基本運算練習網頁產生器
             <span class="text-xs bg-indigo-500 text-indigo-100 font-medium px-2 py-0.5 rounded-full">自訂大題專業版</span>
           </h1>
           <p class="text-xs text-indigo-200">自由新增多個大題，個別設定題型、題數、運算、取數法與數線輔助</p>
@@ -362,6 +362,7 @@
         showHint: true,
         showAnswer: true,
         showVerticalNumbers: true,
+        showPlaceValueTable: true,
         useRoundMethod: true,
         roundMethod: 'round',
         showNumberLine: true
@@ -374,7 +375,9 @@
         d1: 2,
         d2: 2,
         cols: 1,
-        coinIconMode: 'add', // 新增錢幣圖示顯示選項：'none' (不顯示), 'add' (顯示加法圖示), 'sub' (顯示減法圖示)
+        showCoinNone: false,
+        showCoinAdd: true,
+        showCoinSub: true,
         showHint: true,
         showAnswer: true,
         showVerticalNumbers: true,
@@ -652,17 +655,13 @@
       return `幾十${unit}`;
     }
 
-    // Dynamic SVG Number Line Generator - Centered around answer showing 5 clean unit ticks
+    // Dynamic SVG Number Line Generator (取消數據座標點及箭頭提示，僅提供標準空白刻度數線)
     function createNumberLineSVG(n1, n2, ans, roundMethod = 'round') {
-      const est1 = roundToScale(n1, roundMethod);
-      const est2 = roundToScale(n2, roundMethod);
-
       let step = 10;
       if (ans >= 10000 || n1 >= 10000) step = 10000;
       else if (ans >= 1000 || n1 >= 1000) step = 1000;
       else if (ans >= 100 || n1 >= 100) step = 100;
 
-      // Ensure center focus around answer (show 2 units before and 2 units after)
       let centerVal = roundToScale(ans, 'round');
       if (centerVal < step * 2) centerVal = step * 2;
 
@@ -688,44 +687,19 @@
         return lineLeft + ((clamped - minBound) / range) * lineWidth;
       }
 
-      const x1 = getX(n1);
-      const x1Est = getX(est1);
-      const x2 = getX(n2);
-      const x2Est = getX(est2);
-
       let ticksHTML = '';
       ticks.forEach(t => {
         const tx = getX(t);
-        const isAnswerTick = (t === ans);
         ticksHTML += `
-          <line x1="${tx}" y1="35" x2="${tx}" y2="45" stroke="${isAnswerTick ? '#dc2626' : '#475569'}" stroke-width="${isAnswerTick ? '2.5' : '1.5'}" />
-          <text x="${tx}" y="60" font-size="10" font-weight="${isAnswerTick ? '900' : 'bold'}" fill="${isAnswerTick ? '#dc2626' : '#64748b'}" text-anchor="middle" class="font-num">${t}</text>
+          <line x1="${tx}" y1="35" x2="${tx}" y2="45" stroke="#334155" stroke-width="1.5" />
+          <text x="${tx}" y="60" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle" class="font-num">${t}</text>
         `;
       });
-
-      let arrow1HTML = '';
-      if (Math.abs(x1 - x1Est) > 2) {
-        const midX1 = (x1 + x1Est) / 2;
-        arrow1HTML = `
-          <path d="M ${x1} 30 Q ${midX1} 10 ${x1Est} 30" fill="none" stroke="#f97316" stroke-width="1.8" stroke-dasharray="3,3" />
-          <polygon points="${x1Est},30 ${x1Est > x1 ? x1Est-4 : x1Est+4},26 ${x1Est > x1 ? x1Est-4 : x1Est+4},34" fill="#f97316" />
-        `;
-      }
-
-      let arrow2HTML = '';
-      if (Math.abs(x2 - x2Est) > 2) {
-        const midX2 = (x2 + x2Est) / 2;
-        arrow2HTML = `
-          <path d="M ${x2} 30 Q ${midX2} 14 ${x2Est} 30" fill="none" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="3,3" />
-          <polygon points="${x2Est},30 ${x2Est > x2 ? x2Est-4 : x2Est+4},26 ${x2Est > x2 ? x2Est-4 : x2Est+4},34" fill="#a855f7" />
-        `;
-      }
 
       return `
         <div class="w-full my-2 bg-slate-100/90 p-2.5 rounded-xl border border-slate-200">
           <div class="text-[11px] font-bold text-slate-500 mb-1 flex items-center justify-between">
-            <span>估算數線圖（呈現前後完整單位刻度）：</span>
-            <span class="text-[10px] text-slate-400">藍/紫點：原數字 ➜ 橘/紫虛線：估算概數</span>
+            <span>估算數線圖：</span>
           </div>
           <svg class="w-full h-16" viewBox="0 0 ${svgWidth} 70">
             <!-- Main Horizontal Line -->
@@ -735,18 +709,6 @@
 
             <!-- Scale Ticks -->
             ${ticksHTML}
-
-            <!-- Number Point 1 -->
-            <circle cx="${x1}" cy="40" r="4" fill="#2563eb" />
-            <text x="${x1}" y="23" font-size="10" font-weight="900" fill="#1e40af" text-anchor="middle" class="font-num">${n1}</text>
-
-            <!-- Number Point 2 -->
-            <circle cx="${x2}" cy="40" r="4" fill="#9333ea" />
-            <text x="${x2}" y="23" font-size="10" font-weight="900" fill="#7e22ce" text-anchor="middle" class="font-num">${n2}</text>
-
-            <!-- Arcs -->
-            ${arrow1HTML}
-            ${arrow2HTML}
           </svg>
         </div>
       `;
@@ -782,6 +744,7 @@
 
         const isWord = sec.type === 'word';
         const isCoin = sec.type === 'coin';
+        const isVertical = sec.type === 'vertical';
         const hasEstimateOp = sec.ops.includes('~');
 
         card.innerHTML = `
@@ -833,23 +796,38 @@
             </div>
           </div>
 
-          <!-- Coin Section Options -->
+          <!-- Coin Section Display Options -->
           <div class="${isCoin ? 'block' : 'hidden'}">
-            <label class="block text-[11px] font-bold text-indigo-700 mb-1">錢幣圖示顯示選項</label>
-            <select onchange="updateSection('${sec.id}', 'coinIconMode', this.value)" class="w-full bg-indigo-50 border border-indigo-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-800 focus:ring-2 focus:ring-indigo-500">
-              <option value="none" ${sec.coinIconMode === 'none' ? 'selected' : ''}>不顯示 (提供學生畫圖框)</option>
-              <option value="add" ${sec.coinIconMode === 'add' || !sec.coinIconMode ? 'selected' : ''}>顯示加法圖示 (顯示兩個數據圖示)</option>
-              <option value="sub" ${sec.coinIconMode === 'sub' ? 'selected' : ''}>顯示減法圖示 (顯示被減數數據圖示)</option>
-            </select>
+            <label class="block text-[11px] font-bold text-indigo-700 mb-1">錢幣圖示顯示選項 (可獨立選擇)</label>
+            <div class="space-y-1.5 bg-indigo-50 p-2.5 rounded-lg border border-indigo-200 text-xs font-bold text-indigo-900">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" ${sec.showCoinNone ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showCoinNone', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>不顯示圖示 (統一顯示學生繪圖框)</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" ${sec.showCoinAdd !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showCoinAdd', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>顯示加法圖示 (加法題呈現兩個數據圖示)</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" ${sec.showCoinSub !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showCoinSub', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>顯示減法圖示 (減法題只呈現被減數圖示)</span>
+              </label>
+            </div>
           </div>
 
           <!-- Vertical Calculation Display Options -->
-          <div class="${sec.type === 'vertical' ? 'block' : 'hidden'}">
+          <div class="${isVertical ? 'block' : 'hidden'}">
             <label class="block text-[11px] font-bold text-indigo-700 mb-1">直式計算區設定</label>
-            <label class="flex items-center space-x-2 cursor-pointer bg-indigo-50 p-2 rounded-lg border border-indigo-200 text-xs font-bold text-indigo-800">
-              <input type="checkbox" ${sec.showVerticalNumbers !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showVerticalNumbers', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
-              <span>直式區顯示題目數字</span>
-            </label>
+            <div class="space-y-1.5 bg-indigo-50 p-2.5 rounded-lg border border-indigo-200 text-xs font-bold text-indigo-800">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" ${sec.showVerticalNumbers !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showVerticalNumbers', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>直式區顯示題目數字</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" ${sec.showPlaceValueTable !== false ? 'checked' : ''} onchange="updateSection('${sec.id}', 'showPlaceValueTable', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                <span>直式顯示位值表 (千/百/十/個位網格)</span>
+              </label>
+            </div>
           </div>
 
           <!-- Word Problem Display Options -->
@@ -894,7 +872,7 @@
             </div>
           </div>
 
-          <!-- Estimation Configuration Options (Shown if Estimation Operator is Selected) -->
+          <!-- Estimation Configuration Options -->
           <div class="${(hasEstimateOp) ? 'space-y-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200' : 'hidden'}">
             <label class="block text-[11px] font-bold text-amber-900">估算取數法與數線設定</label>
             
@@ -956,10 +934,13 @@
         d1: 2,
         d2: 2,
         cols: 2,
-        coinIconMode: 'add',
+        showCoinNone: false,
+        showCoinAdd: true,
+        showCoinSub: true,
         showHint: true,
         showAnswer: true,
         showVerticalNumbers: true,
+        showPlaceValueTable: true,
         useRoundMethod: true,
         roundMethod: 'round',
         showNumberLine: true
@@ -1002,8 +983,8 @@
 
     function resetSectionsToDefault() {
       sectionsData = [
-        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
-        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, coinIconMode: 'add', showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
+        { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, showPlaceValueTable: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
+        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showCoinNone: false, showCoinAdd: true, showCoinSub: true, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
         { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/', '~'], d1: 3, d2: 3, cols: 2, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true }
       ];
       renderSectionSettings();
@@ -1036,7 +1017,7 @@
     }
 
     // Currency SVG Vector Generator for Taiwan NTD
-    function createMoneySVG(type, value, count, isCrossed = false) {
+    function createMoneySVG(type, value, count) {
       if (count <= 0) return '';
 
       let items = '';
@@ -1090,9 +1071,8 @@
         }
 
         items += `
-          <div class="relative inline-flex items-center justify-center m-0.5 ${isCrossed ? 'opacity-40' : ''}">
+          <div class="relative inline-flex items-center justify-center m-0.5">
             ${svgContent}
-            ${isCrossed ? '<span class="absolute inset-0 flex items-center justify-center text-red-600 font-black text-2xl drop-shadow">✕</span>' : ''}
           </div>
         `;
       }
@@ -1178,10 +1158,13 @@
             sectionTitle: secTitleStr,
             sectionType: sec.type,
             cols: sec.cols || 1,
-            coinIconMode: sec.coinIconMode || 'add',
+            showCoinNone: sec.showCoinNone === true,
+            showCoinAdd: sec.showCoinAdd !== false,
+            showCoinSub: sec.showCoinSub !== false,
             showHint: sec.showHint !== false,
             showAnswer: sec.showAnswer !== false,
             showVerticalNumbers: sec.showVerticalNumbers !== false,
+            showPlaceValueTable: sec.showPlaceValueTable !== false,
             useRoundMethod: sec.useRoundMethod !== false,
             roundMethod: roundMethod,
             showNumberLine: sec.showNumberLine !== false,
@@ -1324,6 +1307,7 @@
 
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : (q.op === '~' ? '≈' : q.op));
       const showVerticalNumbers = q.showVerticalNumbers !== false;
+      const showPlaceValueTable = q.showPlaceValueTable !== false;
 
       const horizontalHTML = `
         <div class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-center mb-2">
@@ -1333,6 +1317,7 @@
         </div>`;
 
       let verticalHTML = '';
+
       if (q.op === '/') {
         verticalHTML = showVerticalNumbers ? `
           <div class="w-full min-h-[92px] flex items-start justify-center pt-3">
@@ -1349,6 +1334,53 @@
               <span class="border-t-2 border-l-2 border-slate-900 min-w-[100px] min-h-[58px]"></span>
             </div>
           </div>`;
+      } else if (showPlaceValueTable) {
+        const placeNames = ['個', '十', '百', '千', '萬'];
+        const maxVal = Math.max(q.n1, q.n2, q.ans || 0);
+        const digitsCount = Math.max(2, maxVal.toString().length);
+        
+        const headers = placeNames.slice(0, digitsCount).reverse();
+        const gridCols = digitsCount + 1;
+
+        const strN1 = q.n1.toString().padStart(digitsCount, ' ');
+        const strN2 = q.n2.toString().padStart(digitsCount, ' ');
+
+        let headerCells = `<div class="py-1 border-r border-slate-300 font-bold text-slate-400"></div>`;
+        headers.forEach(h => {
+          headerCells += `<div class="py-1 text-slate-600 font-extrabold text-[11px] border-r last:border-r-0 border-slate-200">${h}</div>`;
+        });
+
+        let n1Cells = `<div class="py-1 border-r border-slate-300 font-bold"></div>`;
+        for (let i = 0; i < digitsCount; i++) {
+          const char = showVerticalNumbers ? (strN1[i] === ' ' ? '' : strN1[i]) : '';
+          n1Cells += `<div class="py-1 text-slate-900 font-black border-r last:border-r-0 border-slate-100">${char}</div>`;
+        }
+
+        let n2Cells = `<div class="py-1 border-r border-slate-300 font-bold text-indigo-600">${opSym}</div>`;
+        for (let i = 0; i < digitsCount; i++) {
+          const char = showVerticalNumbers ? (strN2[i] === ' ' ? '' : strN2[i]) : '';
+          n2Cells += `<div class="py-1 text-slate-900 font-black border-r last:border-r-0 border-slate-100">${char}</div>`;
+        }
+
+        verticalHTML = `
+          <div class="w-full my-1 flex justify-center">
+            <div class="inline-block bg-white rounded-xl border border-slate-300 overflow-hidden text-center shadow-sm font-num text-base min-w-[150px]">
+              <div class="grid grid-cols-${gridCols} bg-slate-100/90 border-b border-slate-300">
+                ${headerCells}
+              </div>
+              <div class="grid grid-cols-${gridCols} border-b border-slate-100">
+                ${n1Cells}
+              </div>
+              <div class="grid grid-cols-${gridCols} border-b-2 border-slate-900">
+                ${n2Cells}
+              </div>
+              <div class="grid grid-cols-${gridCols} h-8">
+                <div class="border-r border-slate-300"></div>
+                ${Array(digitsCount).fill('<div class="border-r last:border-r-0 border-slate-100"></div>').join('')}
+              </div>
+            </div>
+          </div>`;
+
       } else {
         verticalHTML = showVerticalNumbers ? `
           <div class="font-num dynamic-question text-lg font-bold text-slate-800 leading-tight w-36 py-2 min-h-[92px]">
@@ -1394,18 +1426,18 @@
       const c1 = breakdownNTD(q.n1);
       const c2 = breakdownNTD(q.n2);
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : (q.op === '~' ? '≈' : q.op));
-      const coinIconMode = q.coinIconMode || 'add';
 
       let coinVisual = '';
 
-      if (coinIconMode === 'none') {
-        // 不顯示圖示：提供一個大圖框讓學生自行畫圖
+      const isShowAdd = (q.op === '+' && q.showCoinAdd);
+      const isShowSub = (q.op === '-' && q.showCoinSub);
+
+      if (q.showCoinNone || (!isShowAdd && !isShowSub)) {
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-dashed border-slate-300 min-h-[110px] flex flex-col justify-between">
             <span class="text-xs text-slate-400 font-bold">請在框內畫出錢幣圖示解題：</span>
           </div>`;
-      } else if (coinIconMode === 'add') {
-        // 顯示加法圖示：將兩個數據圖示都顯示
+      } else if (isShowAdd) {
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -1421,17 +1453,13 @@
               ${createMoneySVG('5', 5, c2.c5)} ${createMoneySVG('1', 1, c2.c1)}
             </div>
           </div>`;
-      } else if (coinIconMode === 'sub') {
-        // 顯示減法圖示：顯示被減數數據圖示 (並顯示劃掉扣除效果)
+      } else if (isShowSub) {
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-1">被減數錢幣 (<span class="font-num">${q.n1}</span> 元) 劃掉扣除 (<span class="font-num">${q.n2}</span> 元)：</div>
-            ${createMoneySVG('1000', 1000, c1.k1000 - c2.k1000)} ${createMoneySVG('1000', 1000, c2.k1000, true)}
-            ${createMoneySVG('100', 100, c1.h100 - c2.h100)} ${createMoneySVG('100', 100, c2.h100, true)}
-            ${createMoneySVG('50', 50, c1.c50 - c2.c50)} ${createMoneySVG('50', 50, c2.c50, true)}
-            ${createMoneySVG('10', 10, c1.c10 - c2.c10)} ${createMoneySVG('10', 10, c2.c10, true)}
-            ${createMoneySVG('5', 5, c1.c5 - c2.c5)} ${createMoneySVG('5', 5, c2.c5, true)}
-            ${createMoneySVG('1', 1, c1.c1 - c2.c1)} ${createMoneySVG('1', 1, c2.c1, true)}
+            <div class="text-xs font-bold text-slate-500 mb-1">被減數錢幣 (<span class="font-num">${q.n1}</span> 元)：</div>
+            ${createMoneySVG('1000', 1000, c1.k1000)} ${createMoneySVG('100', 100, c1.h100)}
+            ${createMoneySVG('50', 50, c1.c50)} ${createMoneySVG('10', 10, c1.c10)}
+            ${createMoneySVG('5', 5, c1.c5)} ${createMoneySVG('1', 1, c1.c1)}
           </div>`;
       }
 
