@@ -655,7 +655,7 @@
       return `幾十${unit}`;
     }
 
-    // Dynamic SVG Number Line Generator (已取消數據座標點及箭頭提示，僅提供標準空白刻度數線)
+    // Dynamic SVG Number Line Generator
     function createNumberLineSVG(n1, n2, ans, roundMethod = 'round') {
       let step = 10;
       if (ans >= 10000 || n1 >= 10000) step = 10000;
@@ -1463,7 +1463,6 @@
           </div>`;
       }
 
-      // 移除 "圖解思考題：" 的文字，直接顯示算式
       card.innerHTML = `
         <div class="dynamic-question font-bold text-slate-800">
           <span class="font-num">(${idx + 1})</span> <span class="font-num">${q.n1} ${opSym} ${q.n2}</span> = ?
@@ -1512,17 +1511,17 @@
             <span class="hidden print-only text-xs w-full border-b border-dashed border-slate-300 h-4"></span>
           </div>` : '';
 
+      // 刪除 "大約" 及單位的提示文字，讓學生自行書寫
       const answerHTML = showAnswer ? `
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：大約</span>
-            <input type="number" data-idx="${idx}" data-ans="${q.ans}"
-              class="user-ans-input font-num w-24 text-xs font-bold border-b border-slate-300 px-1 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
-              placeholder="數字">
-            <span class="text-xs font-bold text-slate-600">${q.unit}</span>
+            <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：</span>
+            <input type="text" data-idx="${idx}" data-ans="${q.ans}"
+              class="user-ans-input font-num w-36 text-xs font-bold border-b border-slate-300 px-1 py-0.5 focus:outline-none focus:border-indigo-500 ${currentMode === 'print' ? 'hidden' : ''}" 
+              placeholder="請填寫答案與單位">
             <div class="ans-key-overlay ${isAnswerKeyVisible ? 'block' : 'hidden'} text-xs font-extrabold text-rose-600">
-              答：大約 <span class="font-num">${q.ans}</span> ${q.unit}
+              答：<span class="font-num">${q.ans}</span> ${q.unit || ''}
             </div>
-            <span class="hidden print-only text-xs font-bold">________ (${q.unit})</span>
+            <span class="hidden print-only text-xs font-bold">________________</span>
           </div>` : '';
 
       card.innerHTML = `
