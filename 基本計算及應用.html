@@ -655,7 +655,7 @@
       return `幾十${unit}`;
     }
 
-    // Dynamic SVG Number Line Generator (取消數據座標點及箭頭提示，僅提供標準空白刻度數線)
+    // Dynamic SVG Number Line Generator (已取消數據座標點及箭頭提示，僅提供標準空白刻度數線)
     function createNumberLineSVG(n1, n2, ans, roundMethod = 'round') {
       let step = 10;
       if (ans >= 10000 || n1 >= 10000) step = 10000;
@@ -1463,9 +1463,10 @@
           </div>`;
       }
 
+      // 移除 "圖解思考題：" 的文字，直接顯示算式
       card.innerHTML = `
         <div class="dynamic-question font-bold text-slate-800">
-          <span class="font-num">(${idx + 1})</span> 圖解思考題： <span class="font-num">${q.n1} ${opSym} ${q.n2}</span> = ?
+          <span class="font-num">(${idx + 1})</span> <span class="font-num">${q.n1} ${opSym} ${q.n2}</span> = ?
         </div>
         ${coinVisual}
         <div class="flex items-center gap-3 pt-1">
