@@ -374,6 +374,7 @@
         d1: 2,
         d2: 2,
         cols: 1,
+        coinIconMode: 'add', // 新增錢幣圖示顯示選項：'none' (不顯示), 'add' (顯示加法圖示), 'sub' (顯示減法圖示)
         showHint: true,
         showAnswer: true,
         showVerticalNumbers: true,
@@ -780,6 +781,7 @@
         card.className = 'p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative transition-all hover:border-indigo-300';
 
         const isWord = sec.type === 'word';
+        const isCoin = sec.type === 'coin';
         const hasEstimateOp = sec.ops.includes('~');
 
         card.innerHTML = `
@@ -829,6 +831,16 @@
                 <option value="3" ${sec.cols === 3 ? 'selected' : ''}>三欄 (3 欄)</option>
               </select>
             </div>
+          </div>
+
+          <!-- Coin Section Options -->
+          <div class="${isCoin ? 'block' : 'hidden'}">
+            <label class="block text-[11px] font-bold text-indigo-700 mb-1">錢幣圖示顯示選項</label>
+            <select onchange="updateSection('${sec.id}', 'coinIconMode', this.value)" class="w-full bg-indigo-50 border border-indigo-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-800 focus:ring-2 focus:ring-indigo-500">
+              <option value="none" ${sec.coinIconMode === 'none' ? 'selected' : ''}>不顯示 (提供學生畫圖框)</option>
+              <option value="add" ${sec.coinIconMode === 'add' || !sec.coinIconMode ? 'selected' : ''}>顯示加法圖示 (顯示兩個數據圖示)</option>
+              <option value="sub" ${sec.coinIconMode === 'sub' ? 'selected' : ''}>顯示減法圖示 (顯示被減數數據圖示)</option>
+            </select>
           </div>
 
           <!-- Vertical Calculation Display Options -->
@@ -944,6 +956,7 @@
         d1: 2,
         d2: 2,
         cols: 2,
+        coinIconMode: 'add',
         showHint: true,
         showAnswer: true,
         showVerticalNumbers: true,
@@ -990,7 +1003,7 @@
     function resetSectionsToDefault() {
       sectionsData = [
         { id: 'sec_1', type: 'vertical', count: 4, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
-        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
+        { id: 'sec_2', type: 'coin', count: 2, ops: ['+', '-'], d1: 2, d2: 2, cols: 1, coinIconMode: 'add', showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true },
         { id: 'sec_3', type: 'word', count: 3, ops: ['+', '-', '*', '/', '~'], d1: 3, d2: 3, cols: 2, showHint: true, showAnswer: true, showVerticalNumbers: true, useRoundMethod: true, roundMethod: 'round', showNumberLine: true }
       ];
       renderSectionSettings();
@@ -1165,6 +1178,7 @@
             sectionTitle: secTitleStr,
             sectionType: sec.type,
             cols: sec.cols || 1,
+            coinIconMode: sec.coinIconMode || 'add',
             showHint: sec.showHint !== false,
             showAnswer: sec.showAnswer !== false,
             showVerticalNumbers: sec.showVerticalNumbers !== false,
@@ -1380,10 +1394,18 @@
       const c1 = breakdownNTD(q.n1);
       const c2 = breakdownNTD(q.n2);
       const opSym = q.op === '*' ? '×' : (q.op === '/' ? '÷' : (q.op === '~' ? '≈' : q.op));
+      const coinIconMode = q.coinIconMode || 'add';
 
       let coinVisual = '';
 
-      if (q.op === '+') {
+      if (coinIconMode === 'none') {
+        // 不顯示圖示：提供一個大圖框讓學生自行畫圖
+        coinVisual = `
+          <div class="bg-white p-3 rounded-xl border border-dashed border-slate-300 min-h-[110px] flex flex-col justify-between">
+            <span class="text-xs text-slate-400 font-bold">請在框內畫出錢幣圖示解題：</span>
+          </div>`;
+      } else if (coinIconMode === 'add') {
+        // 顯示加法圖示：將兩個數據圖示都顯示
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -1399,24 +1421,17 @@
               ${createMoneySVG('5', 5, c2.c5)} ${createMoneySVG('1', 1, c2.c1)}
             </div>
           </div>`;
-      } else if (q.op === '-') {
+      } else if (coinIconMode === 'sub') {
+        // 顯示減法圖示：顯示被減數數據圖示 (並顯示劃掉扣除效果)
         coinVisual = `
           <div class="bg-white p-3 rounded-xl border border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-1">原本錢幣 (<span class="font-num">${q.n1}</span>元) 劃掉扣除 (<span class="font-num">${q.n2}</span>元)：</div>
+            <div class="text-xs font-bold text-slate-500 mb-1">被減數錢幣 (<span class="font-num">${q.n1}</span> 元) 劃掉扣除 (<span class="font-num">${q.n2}</span> 元)：</div>
             ${createMoneySVG('1000', 1000, c1.k1000 - c2.k1000)} ${createMoneySVG('1000', 1000, c2.k1000, true)}
             ${createMoneySVG('100', 100, c1.h100 - c2.h100)} ${createMoneySVG('100', 100, c2.h100, true)}
             ${createMoneySVG('50', 50, c1.c50 - c2.c50)} ${createMoneySVG('50', 50, c2.c50, true)}
             ${createMoneySVG('10', 10, c1.c10 - c2.c10)} ${createMoneySVG('10', 10, c2.c10, true)}
             ${createMoneySVG('5', 5, c1.c5 - c2.c5)} ${createMoneySVG('5', 5, c2.c5, true)}
             ${createMoneySVG('1', 1, c1.c1 - c2.c1)} ${createMoneySVG('1', 1, c2.c1, true)}
-          </div>`;
-      } else {
-        coinVisual = `
-          <div class="bg-white p-3 rounded-xl border border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-1">第一個數對應錢幣 (<span class="font-num">${q.n1}</span> 元)：</div>
-            ${createMoneySVG('1000', 1000, c1.k1000)} ${createMoneySVG('100', 100, c1.h100)}
-            ${createMoneySVG('50', 50, c1.c50)} ${createMoneySVG('10', 10, c1.c10)}
-            ${createMoneySVG('5', 5, c1.c5)} ${createMoneySVG('1', 1, c1.c1)}
           </div>`;
       }
 
