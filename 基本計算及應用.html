@@ -171,6 +171,11 @@
           <span>列印題目卷</span>
         </button>
 
+        <button onclick="exportToGoogleDoc()" class="px-3.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1.5">
+          <i data-lucide="file-output" class="w-4 h-4"></i>
+          <span>轉出至 Google Doc</span>
+        </button>
+
         <button onclick="triggerPrint(true)" class="px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1.5">
           <i data-lucide="file-check" class="w-4 h-4"></i>
           <span>列印解答頁</span>
@@ -301,7 +306,7 @@
     </aside>
 
     <!-- Main Worksheet Preview & Output Canvas -->
-    <main class="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 print-clean-bg print-border relative">
+    <main id="printable-worksheet" class="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 print-clean-bg print-border relative">
       
       <!-- Worksheet Printable Header -->
       <div id="worksheet-header" class="border-b-2 border-slate-900 pb-4 mb-6">
@@ -1511,7 +1516,6 @@
             <span class="hidden print-only text-xs w-full border-b border-dashed border-slate-300 h-4"></span>
           </div>` : '';
 
-      // 刪除 "大約" 及單位的提示文字，讓學生自行書寫
       const answerHTML = showAnswer ? `
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-xs font-bold text-slate-500 whitespace-nowrap">答：</span>
@@ -1629,6 +1633,37 @@
       if (showAnswerKey && !prevAnsState) {
         isAnswerKeyVisible = false;
         document.querySelectorAll('.ans-key-overlay').forEach(el => el.classList.add('hidden'));
+      }
+    }
+
+    // 匯出至 Google Doc 處理函式 (剪貼簿 HTML 格式化串接)
+    async function exportToGoogleDoc() {
+      const element = document.getElementById('printable-worksheet');
+      if (!element) return;
+
+      // 取得考卷主體內容之 HTML
+      const htmlContent = element.outerHTML;
+
+      try {
+        // 使用 Modern Clipboard API 寫入 Rich Text Format (HTML)
+        const blobInput = new Blob([`
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"></head>
+          <body>${htmlContent}</body>
+          </html>
+        `], { type: 'text/html' });
+
+        const data = [new ClipboardItem({ 'text/html': blobInput })];
+        await navigator.clipboard.write(data);
+
+        // 彈出成功通知並開啟 Google Docs 新建頁面
+        if (confirm('試卷內容已成功複製至剪貼簿！\n\n按下「確定」將會為您開啟 Google Doc 空白文件，在新頁面中按 Ctrl + V (或 Cmd + V) 即可完成貼上。')) {
+          window.open('https://docs.google.com/document/create', '_blank');
+        }
+      } catch (err) {
+        console.error('複製至剪貼簿失敗：', err);
+        alert('複製失敗，請手動選取學習單區域進行複製。');
       }
     }
 
