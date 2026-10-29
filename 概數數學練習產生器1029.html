@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>國小概數數學練習產生器</title><style>
+:root{font-family:'Microsoft JhengHei',system-ui,sans-serif;color:#223044;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1160px;margin:auto;padding:22px}header{background:#254c91;color:white;padding:22px;border-radius:15px;margin-bottom:18px}h1{margin:0 0 8px;font-size:27px}h2{font-size:21px;margin:0 0 15px}.panel,.sheet{background:white;border-radius:13px;padding:20px;margin-bottom:18px;box-shadow:0 3px 14px #18365a12}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px;font-weight:600}select,input{padding:10px;border:1px solid #cad5e4;border-radius:8px;background:white;font-size:15px}label.check{display:inline-flex;gap:7px;align-items:center;margin-right:16px;font-weight:500}input[type=checkbox]{width:17px;height:17px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}button{border:0;border-radius:9px;padding:11px 18px;font-weight:bold;cursor:pointer;background:#2755a1;color:white}button.secondary{background:#e6edf9;color:#234781}.muted{color:#63758e;font-size:13px;line-height:1.7}.question{border:1px solid #dce4ef;border-radius:10px;padding:16px;margin:12px 0;break-inside:avoid;page-break-inside:avoid}.qhead{font-size:18px;line-height:1.7}.answer{margin-top:10px;color:#52647a}.answerkey{background:#eff7f0;padding:12px;border-radius:8px;margin-top:15px}.numberline{width:100%;max-width:850px;display:block;margin:10px auto 0}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs button{background:#e7edf7;color:#23477c}.tabs button.active{background:#2854a0;color:white}.hide{display:none!important}.status{font-size:14px;color:#506782;margin-top:10px}.pill{display:inline-block;background:#eaf0fb;padding:3px 9px;border-radius:15px;font-size:12px;margin-left:8px}.print-title{display:block;text-align:center;margin-bottom:16px}.print-title h2{font-size:23px;margin:0 0 12px}.student-info{text-align:left;font-size:15px}.answer-input{border:0;border-bottom:1px solid #8b9bad;border-radius:0;width:110px;padding:3px 5px}.line-editor{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:8px;padding:10px;background:#f3f6fb;border-radius:8px}.line-editor label{display:flex;flex-direction:column;font-size:12px;gap:3px}.line-editor input{width:110px;padding:6px;font-size:13px}.line-error{color:#b42318;font-size:13px}.group-heading{grid-column:1/-1;margin:18px 0 4px;font-size:20px;border-bottom:2px solid #cad7ea;padding-bottom:6px}.mixed-output{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mixed-output .group-heading{grid-column:1/-1}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.two-col{grid-template-columns:1fr}}@media print{@page{size:A4;margin:13mm}body{background:white}.wrap{max-width:none;padding:0}header,.panel,.tabs,.actions,.status,.answerkey,.line-editor{display:none!important}.sheet{box-shadow:none;padding:0;margin:0}.print-title{display:block;margin-bottom:16px}.question{border:0;border-bottom:1px solid #ddd;border-radius:0;margin:0;padding:12px 0}.qhead{font-size:15px}.numberline{max-width:100%;height:auto}.answer{margin-top:8px}.two-col{gap:10px}.sheet>h2{display:none}.group-heading{break-after:avoid;page-break-after:avoid}} #mixedSections{display:grid;gap:10px;margin:12px 0}.mixed-section{display:flex;flex-wrap:wrap;align-items:end;gap:9px;border:1px solid #d5dfee;background:#f8faff;border-radius:10px;padding:12px}.mixed-section .field{min-width:145px;flex:1}.mixed-section .section-number{font-weight:700;min-width:55px;padding-bottom:9px}.mixed-section button{padding:9px 12px}.mixed-section button:disabled{opacity:.35;cursor:not-allowed}@media print{#mixedOptions{display:none!important}}
+/* 學習單字體設定：螢幕與列印共用 */
+.sheet{--font-main:'Microsoft JhengHei',sans-serif;--font-group:'Microsoft JhengHei',sans-serif;--font-question:'Microsoft JhengHei',sans-serif;--size-main:23px;--size-group:20px;--size-question:18px}
+.sheet .print-title h2{font-family:var(--font-main);font-size:var(--size-main)}
+.sheet .group-heading,.sheet #sheetTitle{font-family:var(--font-group);font-size:var(--size-group)}
+.sheet .qhead,.sheet .answer{font-family:var(--font-question);font-size:var(--size-question)}
+@media print{.sheet .qhead,.sheet .answer{font-size:var(--size-question)}.sheet .group-heading,.sheet #sheetTitle{font-size:var(--size-group)}.sheet .print-title h2{font-size:var(--size-main)}}
+
+/* 學習單各區塊行高，預覽與列印共用 */
+.sheet .print-title h2{line-height:var(--line-main,1.5)}
+.sheet .student-info{line-height:var(--line-main,1.5)}
+.sheet .group-heading,.sheet #sheetTitle{line-height:var(--line-group,1.5)}
+.sheet .qhead,.sheet .answer{line-height:var(--line-question,1.7)}
+/* 學生資料與主標題同步套用字型及字級 */
+.sheet .student-info{font-family:var(--font-main);font-size:var(--size-main);line-height:var(--line-main,1.5);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-top:12px}
+.sheet .student-info span{white-space:nowrap}
+/* 每題保留一致且可調整的書寫區，預覽與列印相同 */
+.sheet{--writing-space:68px}
+.sheet .question .answer{min-height:var(--writing-space);padding-top:12px;margin-top:14px;box-sizing:border-box}
+.sheet .answer-line{display:inline-block;min-width:48%;border-bottom:1px solid #9ca9ba;line-height:1.8;color:transparent;user-select:none}
+@media print{.sheet .student-info{font-family:var(--font-main);font-size:var(--size-main)}.sheet .question .answer{min-height:var(--writing-space);padding-top:12px;margin-top:14px}.sheet .answer-line{border-bottom:1px solid #9ca9ba}}
+</style></head><body><div class="wrap"><header><h1>國小概數數學練習產生器</h1><div>數線練習・概數提取・概數應用｜可產生題目、查看解答、列印學習單</div></header>
+<section class="panel"><div class="tabs"><button class="active" data-tab="line">① 數線練習</button><button data-tab="extract">② 概數提取</button><button data-tab="apply">③ 概數應用（100題題庫）</button><button data-tab="mixed">④ 綜合練習</button></div>
+<div class="grid"><label class="field">取概數的位數<select id="place"><option value="10">十位</option><option value="100">百位</option><option value="1000" selected>千位</option><option value="10000">萬位</option></select></label><label class="field">題目數字位數<select id="digits"><option value="2">2位數</option><option value="3">3位數</option><option value="4" selected>4位數</option><option value="5">5位數</option><option value="6">6位數</option><option value="7">7位數</option></select></label><label class="field">取概數方法<select id="round"><option value="nearest">四捨五入</option><option value="floor">無條件捨去</option><option value="ceil">無條件進入</option></select></label><label class="field">產生題數（可手動輸入 1～100）<input id="count" type="number" min="1" max="100" step="1" value="10"></label><label class="field">題目排列<select id="columns"><option value="1">單欄</option><option value="2">雙欄</option></select></label></div>
+<div id="lineOptions" style="margin-top:15px"><div class="grid"><label class="field">數線每格跨距（標示位置模式）<select id="step"><option value="auto">依位數自動</option><option value="1">1</option><option value="10">10</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="1000">1000</option><option value="5000">5000</option><option value="10000">10000</option></select></label><label class="field">數線刻度數（標示位置模式）<select id="ticks"><option>5</option><option selected>7</option><option>9</option><option>11</option></select></label><label class="field">練習方式<select id="lineMode"><option value="mark">依數字標示數線位置</option><option value="read">依箭頭判斷大約是多少</option></select></label></div><p class="muted">依箭頭判斷概數時，數線會依題目自動調整：十位3點、百位5點、千位7點、萬位9點；仍可於每題下方手動修改數線。</p></div>
+<div id="mixedOptions" class="hide" style="margin-top:15px"><strong>綜合練習－自訂大題</strong><p class="muted">可新增、刪除或調整大題順序；每一大題可獨立設定題型、取概數位數、題目數字位數、取概數方法、小題數與單雙欄排列。全部最多100小題。</p><div id="mixedSections"></div><div class="actions"><button type="button" id="addMixedSection" class="secondary">＋ 新增大題</button><span id="mixedTotal" class="muted"></span></div></div><div id="applyOptions" class="hide" style="margin-top:15px"><div style="margin-bottom:12px"><strong>運算選項：</strong><label class="check"><input type="checkbox" class="op" value="+" checked>加法</label><label class="check"><input type="checkbox" class="op" value="-" checked>減法</label><label class="check"><input type="checkbox" class="op" value="×" checked>乘法</label><label class="check"><input type="checkbox" class="op" value="÷" checked>除法</label></div><div class="grid"><label class="field">應用題數線顯示<select id="applyLine"><option value="none">不顯示數線</option><option value="plain">只有直線（含刻度）</option><option value="hint">配合題目內容（運算提示）</option><option value="near" selected>接近答案的數線</option></select></label><label class="field">題庫出題方式<select id="bankMode"><option value="random">從100題題庫隨機抽題</option><option value="order">依題庫順序出題</option></select></label></div><p class="muted">接近答案模式：例如 810－290 → 800－300 ≈ 500，數線自動顯示 500～900（每格100）。加減法可顯示起點、終點及箭頭；乘除法以分組、等分提示。</p></div>
+<div class="grid" style="margin-top:15px"><label class="field">數線刻度數據設定<select id="manualLine"><option value="auto">自動產生</option><option value="manual">手動設定起點、終點、跨距</option></select></label><label class="field">數線起點<input id="manualMin" type="number" value="500" step="any" disabled></label><label class="field">數線終點<input id="manualMax" type="number" value="900" step="any" disabled></label><label class="field">每格跨距<input id="manualStep" type="number" value="100" min="0.000001" step="any" disabled></label></div><p class="muted">可設定整份學習單的數線範圍；產生題目後，也能在每一題下方獨立修改起點、終點及跨距，並即時更新圖案。列印時不顯示調整工具。</p><div class="actions"><button id="generate">產生練習題</button><button id="toggleAnswers" class="secondary">顯示解答</button><button id="print" class="secondary">列印學習單</button><button id="exportGoogleDocs" class="secondary" type="button">匯出成 Google 文件</button><button id="refreshBank" class="secondary hide">重新建立100題題庫</button></div><div id="status" class="status"></div><p class="muted">Google 文件匯出：按下後會準備可編輯的學習單並開啟 Google 文件；依提示貼上即可。若瀏覽器不允許複製，會提供可上傳至 Google 雲端硬碟的檔案。數線將轉成圖片，版面可能因 Google 文件排版而略有差異。</p></section>
+<section class="panel" id="typographyPanel"><h2>學習單字型與字體大小</h2><p class="muted">可分別調整學習單主標題、大題標題及題目內容，設定立即套用預覽與列印。注音字型須已安裝於目前電腦，才會顯示該字型的注音效果。</p><div class="grid">
+<label class="field">學習單主標題字型<select id="fontMain"></select></label><label class="field">主標題字體大小（pt）<input id="sizeMain" type="number" min="10" max="60" value="18"></label>
+<label class="field">大題標題字型<select id="fontGroup"></select></label><label class="field">大題標題字體大小（pt）<input id="sizeGroup" type="number" min="10" max="60" value="16"></label>
+<label class="field">題目內容字型<select id="fontQuestion"></select></label><label class="field">題目內容字體大小（pt）<input id="sizeQuestion" type="number" min="10" max="60" value="14"></label></div>
+<div class="grid" style="margin-top:12px">
+<label class="field">主標題及班級姓名日期行高（倍）<input id="lineMain" type="number" min="1" max="3.5" step="0.1" value="1.5"></label>
+<label class="field">大題標題行高（倍）<input id="lineGroup" type="number" min="1" max="3.5" step="0.1" value="1.5"></label>
+<label class="field">題目內容與答案行高（倍）<input id="lineQuestion" type="number" min="1" max="3.5" step="0.1" value="1.7"></label>
+</div><p class="muted">行高為字體大小的倍數，數值越大行距越寬；設定立即同步套用學習單預覽與 A4 列印。</p>
+<div class="grid" style="margin-top:12px"><label class="field">每題學生書寫空間（px）<input id="writingSpace" type="number" min="35" max="240" step="5" value="68"></label></div><p class="muted">書寫空間會平均套用到每一小題，預覽與列印同步調整。</p><p class="muted">注音字型選項：教育部標準楷書（非自動注音）、芫荽、注音字型（本機安裝）、文鼎注音字型（本機安裝）。選擇字型不等於自動為文字加注音；需使用具注音顯示功能的字型與相容的文字格式。</p></section><section class="sheet"><div class="print-title"><h2>宜蘭縣北成國小學習教室數學學習單</h2><div class="student-info"><span>班級：____________</span><span>姓名：____________</span><span>日期：____________</span></div></div><h2 id="sheetTitle">數線練習</h2><div id="questions"></div><div id="answerKey" class="answerkey hide"></div></section></div>
+<script>
+'use strict';const $=id=>document.getElementById(id);let tab='line',showAnswers=false,bank=[],current=[];const names={10:'十',100:'百',1000:'千',10000:'萬'};const numberForDigits=(digits)=>rand(10**(digits-1),10**digits-1);const digitNumber=(digits,p)=>{const lo=Math.max(10**(digits-1),p),hi=10**digits-1;return lo<=hi?rand(lo,hi):numberForDigits(digits)};const fmt=n=>Number(n).toLocaleString('zh-TW');const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;const choose=a=>a[rand(0,a.length-1)];const roundTo=(n,p,mode)=>mode==='floor'?Math.floor(n/p)*p:mode==='ceil'?Math.ceil(n/p)*p:Math.round(n/p)*p;const shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=rand(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// 依題目原始數字的位數，完整列出取概數後應回答的位值（例：四位數取十位→幾千幾百幾十）。
+const placeWords=['','十','百','千','萬','十萬','百萬'];
+function questionPlaceWords(digits,p){
+ const lowest=Math.round(Math.log10(p));
+ const highest=Math.max(lowest,Math.min(6,Number(digits)-1));
+ return Array.from({length:highest-lowest+1},(_,i)=>'幾'+placeWords[highest-i]).join('');
+}
+function svgLine(min,max,step,{point=null,labels=true,hint=null}={}){const W=780,H=hint?145:112,L=55,R=35,Y=hint?89:62;let n=Math.round((max-min)/step);n=Math.max(1,Math.min(n,40));let x=v=>L+(v-min)/(max-min)*(W-L-R);let s=`<svg class="numberline" viewBox="0 0 ${W} ${H}" role="img" aria-label="數線從${min}到${max}，每格${step}"><defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#426ca6"/></marker></defs><line x1="${L-15}" y1="${Y}" x2="${W-R+15}" y2="${Y}" stroke="#293d55" stroke-width="2" marker-end="url(#arrow)"/>`;for(let i=0;i<=n;i++){let v=min+i*step,px=x(v);s+=`<line x1="${px}" x2="${px}" y1="${Y-9}" y2="${Y+9}" stroke="#293d55" stroke-width="2"/>${labels?`<text x="${px}" y="${Y+29}" font-size="14" text-anchor="middle" fill="#263a53">${fmt(v)}</text>`:''}`;}if(point!==null){s+=`<line x1="${x(point)}" x2="${x(point)}" y1="${Y-29}" y2="${Y-12}" stroke="#c25136" stroke-width="2"/><path d="M${x(point)-6} ${Y-29}L${x(point)+6} ${Y-29}L${x(point)} ${Y-15}Z" fill="#c25136"/>`;}if(hint){let {a,b,result,op}=hint;let xa=x(a),xr=x(result);if(a>=min&&a<=max&&result>=min&&result<=max){s+=`<path d="M${xa} ${Y-16} Q${(xa+xr)/2} ${Y-76} ${xr} ${Y-16}" fill="none" stroke="#347b67" stroke-width="2.5" marker-end="url(#arrow)"/><text x="${(xa+xr)/2}" y="${Y-66}" text-anchor="middle" font-size="16" fill="#206853">${esc(op)} ${fmt(b)}</text>`;}else{s+=`<text x="${W/2}" y="20" text-anchor="middle" font-size="15" fill="#206853">${esc(op)} ${fmt(b)}（概數運算）</text>`;}}return s+'</svg>'}
+function rangeFor(center,p,steps=4){let step=p;let min=Math.floor(center/step)*step;min=Math.max(0,min-step*2);let max=min+step*steps;return {min,max,step}}
+function makeLine(p,cfg={}){
+ const digits=Number(cfg.digits??$('digits').value),lo=10**(digits-1),hi=10**digits-1;
+ const read=$('lineMode').value==='read';
+ // 讀取箭頭：十位3點、百位5點、千位7點、萬位9點。
+ // 預設兩端為相鄰的概數整數倍；刻度平均分配。
+ let target=rand(lo,hi),min,max,step;
+ if(read){
+   min=Math.floor(target/p)*p;
+   max=min+p;
+   const segments=({10:2,100:4,1000:6,10000:8})[p];
+   step=p/segments;
+   // 當目標恰在端點時，仍保留合理的數線範圍。
+ }else{
+   step=$('step').value==='auto'?p:Number($('step').value);
+   const n=Number($('ticks').value)-1;
+   const maxBase=Math.floor((hi-n*step)/step)*step;
+   const minBase=Math.ceil(lo/step)*step;
+   const base=maxBase>=minBase?rand(Math.ceil(minBase/step),Math.floor(maxBase/step))*step:Math.floor(lo/step)*step;
+   min=base;max=base+n*step;
+   target=Math.min(hi,Math.max(lo,Math.round(base+rand(0,n*10)/10*step)));
+ }
+ const rounded=roundTo(target,p,'nearest');
+ return {text:read?`請問這個數字大約是${questionPlaceWords(digits,p)}？`:`請在數線上標示 ${fmt(target)} 的位置：`,
+ svg:svgLine(min,max,step,{point:read?target:null}),
+ answer:read?`約 ${fmt(rounded)}`:fmt(target),
+ kind:'line',lineSpec:{min,max,step,point:read?target:null}};
+}
+function makeExtract(p,mode,cfg={}){let digits=Number(cfg.digits??$('digits').value),v=digitNumber(digits,p);let unit=choose(['元','公尺','公斤','人']);let ans=roundTo(v,p,mode)/p;let phr=mode==='nearest'?'大約':mode==='floor'?'無條件捨去後':'無條件進入後';return{text:`${fmt(v)}${unit}${phr}是${questionPlaceWords(digits,p)}${unit}？`,answer:`${fmt(roundTo(v,p,mode))}${unit}`,kind:'extract'}}
+const contexts={'+':[['圖書館原有','本書，又買進','本，合計大約有多少本？'],['學校上午募得','元，下午募得','元，合計大約多少元？'],['兩個倉庫分別有','公斤及','公斤物資，總共大約多少公斤？']],'-':[['商店原有','元，花掉','元，還剩大約多少元？'],['運動會預計售出','張票，已售出','張，還差大約多少張？'],['倉庫原有','公斤米，運走','公斤，約剩多少公斤？']], '×':[['每箱有','個物品，共有','箱，大約有多少個？'],['每張門票','元，賣出','張，大約收入多少元？']], '÷':[['共有','個物品，每箱裝','個，大約需要幾箱？'],['共有','元，平均分給','人，每人大約分得多少元？']]};
+function makeApplication(p,mode,op,cfg={}){let digits=Number(cfg.digits??$('digits').value),a,b,lo=10**(digits-1),hi=10**digits-1;
+if(op==='+' ){a=numberForDigits(digits);b=numberForDigits(digits)}
+else if(op==='-'){a=numberForDigits(digits);b=numberForDigits(digits);if(a<b)[a,b]=[b,a]}
+else if(op==='×'){a=numberForDigits(digits);b=rand(2,9)}
+else{b=rand(2,9);let quotient=rand(Math.max(1,Math.ceil(lo/b)),Math.floor(hi/b));a=quotient*b;}
+let aa=roundTo(a,p,mode),bb=(op==='+'||op==='-')?roundTo(b,p,mode):b;
+let result=op==='+'?aa+bb:op==='-'?aa-bb:op==='×'?aa*bb:aa/bb;
+let real=op==='+'?a+b:op==='-'?a-b:op==='×'?a*b:a/b;
+let template=choose(contexts[op]);let text=`${template[0]}${fmt(a)}${template[1]}${fmt(b)}${template[2]}`;
+let lineMode=cfg.applyLine??$('applyLine').value,svg='';
+if(lineMode!=='none'){
+ let lower=Math.max(0,Math.min(aa,result)),upper=Math.max(aa,result);let step=p;
+ if(lineMode==='plain'){lower=Math.max(0,result-2*p);upper=lower+6*p}
+ else{lower=Math.max(0,Math.floor(lower/p)*p-(lineMode==='near'?0:p));upper=Math.ceil(upper/p)*p+p;}
+ if(upper<=lower)upper=lower+4*p;
+ if((upper-lower)/step>12){step=Math.ceil((upper-lower)/10/p)*p;lower=Math.floor(lower/step)*step;upper=Math.ceil(upper/step)*step;}
+ upper=lower+Math.max(4,Math.ceil((upper-lower)/step))*step;
+ let hint=(lineMode==='hint'||lineMode==='near')?{a:aa,b:bb,result,op}:null;
+ svg=svgLine(lower,upper,step,{hint});
+}
+return {text,svg,lineSpec:svg?{min:Number((svg.match(/aria-label="數線從(-?[\d.]+)到/)||[])[1]),max:Number((svg.match(/到(-?[\d.]+)，每格/)||[])[1]),step:Number((svg.match(/每格(-?[\d.]+)"/)||[])[1]),hint:(lineMode==='hint'||lineMode==='near')?{a:aa,b:bb,result,op}:null}:null,answer:`${fmt(a)} ${op} ${fmt(b)} ≈ ${fmt(aa)} ${op} ${fmt(bb)} = ${fmt(result)}（實際值：${Number(real.toFixed(2)).toLocaleString('zh-TW')}）`,kind:'apply',op,a,b,aa,bb,result}}
+function createBank(){const p=Number($('place').value),mode=$('round').value;let ops=[...document.querySelectorAll('.op:checked')].map(e=>e.value);if(!ops.length){alert('請至少勾選一種運算。');return false;}bank=[];for(let i=0;i<100;i++)bank.push(makeApplication(p,mode,ops[i%ops.length]));shuffle(bank);return true}
+const sectionTypes={line:'數線練習',extract:'概數提取',apply:'概數應用'};
+const chineseNumber=n=>{const chars='零一二三四五六七八九';if(n<=10)return n===10?'十':chars[n];if(n<20)return '十'+chars[n%10];if(n<100)return chars[Math.floor(n/10)]+'十'+(n%10?chars[n%10]:'');return String(n)};
+function defaultSection(type='line',count=4){return {type,count,place:$('place').value,digits:$('digits').value,round:$('round').value,columns:$('columns').value};}
+let mixedSections=[defaultSection('line'),defaultSection('extract'),defaultSection('apply')];
+const options=(values,selected)=>values.map(([v,t])=>`<option value="${v}" ${String(selected)===String(v)?'selected':''}>${t}</option>`).join('');
+function drawMixedSections(){const el=$('mixedSections');el.innerHTML=mixedSections.map((sec,i)=>`<div class="mixed-section" data-index="${i}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));align-items:end"><span class="section-number" style="grid-column:1/-1">第${chineseNumber(i+1)}大題</span><label class="field">題型<select data-key="type">${options([['line','數線練習'],['extract','概數提取'],['apply','概數應用']],sec.type)}</select></label><label class="field">取概數位數<select data-key="place">${options([['10','十位'],['100','百位'],['1000','千位'],['10000','萬位']],sec.place)}</select></label><label class="field">題目數字位數<select data-key="digits">${options([2,3,4,5,6,7].map(n=>[String(n),n+'位數']),sec.digits)}</select></label><label class="field">取概數方法<select data-key="round">${options([['nearest','四捨五入'],['floor','無條件捨去'],['ceil','無條件進入']],sec.round)}</select></label><label class="field">產生題數<input data-key="count" type="number" min="1" max="100" value="${sec.count}"></label><label class="field">題目排列<select data-key="columns">${options([['1','單欄'],['2','雙欄']],sec.columns)}</select></label><button type="button" class="secondary mixed-up" ${i===0?'disabled':''}>↑ 上移</button><button type="button" class="secondary mixed-down" ${i===mixedSections.length-1?'disabled':''}>↓ 下移</button><button type="button" class="secondary mixed-remove">刪除</button></div>`).join('');el.querySelectorAll('.mixed-section').forEach(node=>{const i=Number(node.dataset.index);node.querySelectorAll('[data-key]').forEach(control=>{const update=e=>{mixedSections[i][control.dataset.key]=e.target.value;updateMixedTotal()};control.addEventListener('change',update);if(control.dataset.key==='count')control.addEventListener('input',update)});node.querySelector('.mixed-remove').addEventListener('click',()=>{mixedSections.splice(i,1);drawMixedSections()});node.querySelector('.mixed-up').addEventListener('click',()=>{[mixedSections[i-1],mixedSections[i]]=[mixedSections[i],mixedSections[i-1]];drawMixedSections()});node.querySelector('.mixed-down').addEventListener('click',()=>{[mixedSections[i+1],mixedSections[i]]=[mixedSections[i],mixedSections[i+1]];drawMixedSections()})});updateMixedTotal()}
+function updateMixedTotal(){let total=mixedSections.reduce((s,x)=>s+(Number(x.count)||0),0);$('mixedTotal').textContent=`目前 ${mixedSections.length} 大題，共 ${total} 小題（上限100題）`;}
+$('addMixedSection').addEventListener('click',()=>{if(mixedSections.length>=30){alert('最多可設定30大題。');return;}mixedSections.push(defaultSection('line',3));drawMixedSections()});drawMixedSections();
+function render(){const p=Number($('place').value),mode=$('round').value,count=Math.max(1,Math.min(100,Math.floor(Number($('count').value)||10)));$('count').value=count;
+if(tab==='mixed'){if(!mixedSections.length){alert('請先新增至少一個大題。');return;}let total=0;for(const sec of mixedSections){const n=Number(sec.count);if(!Number.isInteger(n)||n<1||n>100){alert('每一大題的小題數請輸入1～100的整數。');return;}total+=n;}if(total>100){alert('綜合練習全部小題合計不可超過100題。');return;}}
+if((tab==='apply'||(tab==='mixed'&&mixedSections.some(s=>s.type==='apply')))&&bank.length===0&&!createBank())return;
+if(tab==='mixed'){current=mixedSections.flatMap((sec,i)=>{const n=Number(sec.count),sp=Number(sec.place),sm=sec.round;let questions;if(sec.type==='line')questions=Array.from({length:n},()=>makeLine(sp,sec));else if(sec.type==='extract')questions=Array.from({length:n},()=>makeExtract(sp,sm,sec));else{const ops=[...document.querySelectorAll('.op:checked')].map(e=>e.value);if(!ops.length)return [];const localBank=Array.from({length:100},(_,j)=>makeApplication(sp,sm,ops[j%ops.length],sec));questions=$('bankMode').value==='order'?localBank.slice(0,n):shuffle(localBank).slice(0,n);}return questions.map(q=>({...q,sectionIndex:i,sectionColumns:sec.columns,sectionTitle:`${chineseNumber(i+1)}、${sectionTypes[sec.type]}`}))})}else current=tab==='line'?Array.from({length:count},()=>makeLine(p)):tab==='extract'?Array.from({length:count},()=>makeExtract(p,mode)):$('bankMode').value==='order'?bank.slice(0,count):shuffle([...bank]).slice(0,count);
+if($('manualLine').value==='manual'){const min=Number($('manualMin').value),max=Number($('manualMax').value),step=Number($('manualStep').value);if(!Number.isFinite(min)||!Number.isFinite(max)||!Number.isFinite(step)||step<=0||max<=min||(max-min)/step>40){alert('數線設定有誤：終點須大於起點、跨距須大於0，且刻度格數不可超過40。');return;}current.forEach(q=>{if(q.lineSpec){q.lineSpec={...q.lineSpec,min,max,step};q.svg=svgLine(min,max,step,{point:q.lineSpec.point,hint:q.lineSpec.hint})}})}$('sheetTitle').textContent={line:'數線練習',extract:'概數提取',apply:'概數應用',mixed:'綜合練習'}[tab]+(tab==='mixed'?'｜各大題獨立設定':`｜${$('digits').value}位數｜取至${names[p]}位｜${$('round').selectedOptions[0].text}`);$('questions').className=tab==='mixed'?'mixed-output':($('columns').value==='2'?'two-col':'');$('questions').innerHTML=current.map((q,i)=>`${tab==='mixed'&&(i===0||current[i-1].sectionIndex!==q.sectionIndex)?`<h3 class="group-heading">${esc(q.sectionTitle)}</h3>`:''}<article class="question" ${tab==='mixed'?`style="grid-column:${q.sectionColumns==='2'?'auto':'1/-1'}"`:''}><div class="qhead"><strong>${tab==='mixed'?current.slice(0,i+1).filter(x=>x.sectionIndex===q.sectionIndex).length:i+1}.</strong> ${esc(q.text)}</div><div class="line-preview">${q.svg||''}</div>${q.lineSpec?`<div class="line-editor" data-index="${i}"><label>起點<input type="number" step="any" data-part="min" value="${q.lineSpec.min}"></label><label>終點<input type="number" step="any" data-part="max" value="${q.lineSpec.max}"></label><label>每格跨距<input type="number" min="0.000001" step="any" data-part="step" value="${q.lineSpec.step}"></label><button type="button" class="secondary update-line">更新本題數線</button><span class="line-error"></span></div>`:''}<div class="answer">答：<span class="answer-line">____________________________</span></div></article>`).join('');document.querySelectorAll('.update-line').forEach(btn=>btn.addEventListener('click',()=>{const editor=btn.closest('.line-editor'),idx=Number(editor.dataset.index),q=current[idx],values={};editor.querySelectorAll('input').forEach(input=>values[input.dataset.part]=Number(input.value));const {min,max,step}=values;const err=editor.querySelector('.line-error');if(!Number.isFinite(min)||!Number.isFinite(max)||!Number.isFinite(step)||step<=0||max<=min||(max-min)/step>40||Math.abs((max-min)/step-Math.round((max-min)/step))>0.00001){err.textContent='請確認終點大於起點、跨距能整除範圍，且最多40格。';return;}err.textContent='';q.lineSpec={...q.lineSpec,...values};q.svg=svgLine(min,max,step,{point:q.lineSpec.point,hint:q.lineSpec.hint});editor.parentElement.querySelector('.line-preview').innerHTML=q.svg;}));$('answerKey').innerHTML='<strong>教師解答</strong><div>'+current.map((q,i)=>`<p>${i+1}. ${esc(q.answer)}</p>`).join('')+'</div>';$('answerKey').classList.toggle('hide',!showAnswers);$('status').textContent=`已產生 ${current.length} 題${tab==='apply'||tab==='mixed'?'（應用題題庫共100題）':''}。列印時不會顯示教師解答。`}
+function setTab(t){tab=t;document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));$('lineOptions').classList.toggle('hide',t!=='line'&&t!=='mixed');$('applyOptions').classList.toggle('hide',t!=='apply'&&t!=='mixed');$('mixedOptions').classList.toggle('hide',t!=='mixed');$('refreshBank').classList.toggle('hide',t!=='apply'&&t!=='mixed');render()}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));$('generate').addEventListener('click',()=>{if(tab==='apply'||tab==='mixed')bank=[];render()});$('refreshBank').addEventListener('click',()=>{bank=[];render()});$('toggleAnswers').addEventListener('click',()=>{showAnswers=!showAnswers;$('toggleAnswers').textContent=showAnswers?'隱藏解答':'顯示解答';$('answerKey').classList.toggle('hide',!showAnswers)});$('print').addEventListener('click',()=>window.print());['place','digits','round','count','columns','step','ticks','lineMode','applyLine','bankMode','manualLine','manualMin','manualMax','manualStep'].forEach(id=>$(id).addEventListener('change',()=>{if(id==='manualLine'){const enabled=$('manualLine').value==='manual';['manualMin','manualMax','manualStep'].forEach(k=>$(k).disabled=!enabled);}if(['place','digits','round'].includes(id))bank=[];if(id==='applyLine'&&(tab==='apply'||tab==='mixed'))bank=[];render()}));document.querySelectorAll('.op').forEach(el=>el.addEventListener('change',()=>{bank=[];if(tab==='apply'||tab==='mixed')render()}));render();
+
+// 字型設定僅影響學習單，不影響教師操作介面。
+const fontChoices=[
+ ['Microsoft JhengHei','微軟正黑體'],['Noto Sans TC','思源黑體／Noto Sans TC'],
+ ['Noto Serif TC','思源宋體／Noto Serif TC'],['DFKai-SB','標楷體'],
+ ['BpmfGenRyuMin','芫荽（需安裝）'],['Bopomofo','注音字型（需安裝）'],
+ ['AR PL UKai TW MBE','文鼎楷體（需安裝）'],['Arial','Arial']
+];
+function updateTypography(){
+ const sheet=document.querySelector('.sheet');
+ for(const [part,id,fallback] of [['main','lineMain',1.5],['group','lineGroup',1.5],['question','lineQuestion',1.7]]){
+  const n=Number(document.getElementById(id).value);
+  sheet.style.setProperty('--line-'+part,String(Number.isFinite(n)&&n>=1&&n<=3.5?n:fallback));
+ }
+ sheet.style.setProperty('--writing-space',Math.min(240,Math.max(35,Number(document.getElementById('writingSpace').value)||68))+'px');
+ for(const [part,fontId,sizeId] of [['main','fontMain','sizeMain'],['group','fontGroup','sizeGroup'],['question','fontQuestion','sizeQuestion']]){
+  const chosen=document.getElementById(fontId).value.replace(/['"\\]/g,'');
+  const size=Math.min(60,Math.max(10,Number(document.getElementById(sizeId).value)||14));
+  sheet.style.setProperty('--font-'+part,"'"+chosen+"','Microsoft JhengHei',sans-serif");
+  sheet.style.setProperty('--size-'+part,size+'pt');
+ }
+}
+for(const id of ['fontMain','fontGroup','fontQuestion']){
+ const el=document.getElementById(id);
+ el.innerHTML=fontChoices.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('');
+ el.value='Microsoft JhengHei';el.addEventListener('change',updateTypography);
+}
+document.getElementById('writingSpace').addEventListener('input',updateTypography);
+for(const id of ['lineMain','lineGroup','lineQuestion'])document.getElementById(id).addEventListener('input',updateTypography);
+for(const id of ['sizeMain','sizeGroup','sizeQuestion'])document.getElementById(id).addEventListener('input',updateTypography);
+updateTypography();
+
+// Google 文件：無須 API 金鑰。將學習單複製為富文字，再開啟 Google 文件供貼上。
+// 由於瀏覽器無法未經 Google 授權直接寫入使用者的雲端文件，這裡保留必要的貼上步驟。
+async function googleDocsHtml(){
+ const source=document.querySelector('.sheet'), clone=source.cloneNode(true);
+ clone.querySelectorAll('.line-editor,.answerkey,#sheetTitle').forEach(el=>el.remove());
+ const q=clone.querySelector('#questions');
+ q.className='';q.removeAttribute('id');
+ q.querySelectorAll('.question').forEach(el=>{el.style.cssText='margin:0 0 16px;padding:8px 0;page-break-inside:avoid;';el.removeAttribute('class')});
+ q.querySelectorAll('.group-heading').forEach(el=>{el.style.cssText='font-weight:bold;margin:18px 0 8px;';el.removeAttribute('class')});
+ const cs=getComputedStyle(source);
+ const font=(name)=>cs.getPropertyValue('--font-'+name).trim()||'Microsoft JhengHei';
+ const size=(name)=>cs.getPropertyValue('--size-'+name).trim()||'16pt';
+ const line=(name)=>cs.getPropertyValue('--line-'+name).trim()||'1.5';
+ const title=clone.querySelector('.print-title h2');
+ title.style.cssText=`text-align:center;font-family:${font('main')};font-size:${size('main')};line-height:${line('main')};margin:0 0 12px;`;
+ const info=clone.querySelector('.student-info');
+ info.style.cssText=`font-family:${font('main')};font-size:${size('main')};line-height:${line('main')};margin-bottom:18px;`;
+ info.innerHTML=[...info.querySelectorAll('span')].map(e=>e.textContent).join('　　');
+ clone.querySelectorAll('.group-heading').forEach(e=>e.style.cssText+=`font-family:${font('group')};font-size:${size('group')};line-height:${line('group')};`);
+ clone.querySelectorAll('.qhead,.answer').forEach(e=>e.style.cssText+=`font-family:${font('question')};font-size:${size('question')};line-height:${line('question')};`);
+ clone.querySelectorAll('.answer').forEach(e=>e.style.cssText+=`min-height:${cs.getPropertyValue('--writing-space').trim()||'68px'};margin-top:12px;`);
+ clone.querySelectorAll('.answer-line').forEach(e=>{e.textContent='____________________________';e.style.cssText='border-bottom:1px solid #999;';});
+ // Google 文件對 SVG 的貼上支援不一致，先轉換為 PNG 圖片。
+ const svgs=[...clone.querySelectorAll('svg')];
+ for(const svg of svgs){
+  try{
+   const xml=new XMLSerializer().serializeToString(svg);
+   const blob=new Blob([xml],{type:'image/svg+xml;charset=utf-8'});
+   const url=URL.createObjectURL(blob);
+   const img=new Image();
+   try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});
+    const vb=svg.viewBox.baseVal,w=vb.width||780,h=vb.height||112;
+    const canvas=document.createElement('canvas');canvas.width=w*2;canvas.height=h*2;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    const output=document.createElement('img');output.src=canvas.toDataURL('image/png');output.width=Math.min(w,650);output.style.cssText='display:block;max-width:100%;height:auto;margin:8px 0;';svg.replaceWith(output);
+   }finally{URL.revokeObjectURL(url)}
+  }catch(e){/* 保留原始 SVG 作為備援 */}
+ }
+ return '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"></head><body style="font-family:Microsoft JhengHei,sans-serif">'+clone.innerHTML+'</body></html>';
+}
+function saveGoogleDocsFallback(html){
+ const blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='北成國小概數數學學習單_匯入Google文件.html';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),15000);
+}
+document.getElementById('exportGoogleDocs').addEventListener('click',async()=>{
+ const btn=document.getElementById('exportGoogleDocs');btn.disabled=true;btn.textContent='準備 Google 文件內容中…';
+ // 先同步開啟分頁，避免瀏覽器在非同步處理後阻擋彈出視窗。
+ const tab=window.open('https://docs.google.com/document/u/0/create','_blank');
+ try{
+  const html=await googleDocsHtml();
+  const plain=document.querySelector('.sheet').innerText.replace(/教師解答[\s\S]*$/,'');
+  if(navigator.clipboard&&window.ClipboardItem&&window.isSecureContext){
+   await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
+   alert('已將學習單（包含數線圖片）複製為富文字！請切換到新開啟的 Google 文件，按 Ctrl+V 貼上。字型與分頁可在 Google 文件中繼續調整。');
+  }else{
+   saveGoogleDocsFallback(html);
+   alert('瀏覽器無法使用富文字剪貼簿，已下載 HTML 學習單。請將檔案上傳 Google 雲端硬碟，再用 Google 文件開啟。');
+  }
+ }catch(e){
+  try{const html=await googleDocsHtml();saveGoogleDocsFallback(html)}catch(_){}
+  alert('無法自動複製內容，已嘗試下載備用 HTML。請上傳至 Google 雲端硬碟後，以 Google 文件開啟。錯誤：'+e.message);
+ }finally{btn.disabled=false;btn.textContent='匯出成 Google 文件';}
+ if(!tab)alert('新分頁可能被阻擋，請自行開啟 docs.google.com/document/u/0/create。');
+});
+</script></body></html>
